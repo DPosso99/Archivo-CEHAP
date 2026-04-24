@@ -1,0 +1,23 @@
+# Environments
+.env
+venv_wsl/
+env/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+*.log
+media/
+db.sqlite3
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Excel data files (temporary)
+*.xlsx
+*.xls

@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="mb-0">{{ foto.titulo }}</h2>
+        <p class="text-muted mb-0">Código: <strong>{{ foto.codigo }}</strong> | Colección: {{ foto.coleccion|default:"Sin colección" }} | Estado: <span class="badge bg-{% if foto.estado == 'Activo' %}success{% elif foto.estado == 'Archivado' %}secondary{% else %}warning{% endif %}">{{ foto.estado }}</span></p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{% url 'fotografia_lista' %}" class="btn btn-outline-secondary me-2">Volver al Catálogo</a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'fotografia_editar' foto.pk %}" class="btn btn-primary">Editar Ficha</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Columna izquierda: Imágenes (Carrusel Bootstrap) -->
+    <div class="col-lg-5">
+        <div id="imageCarousel" class="carousel slide carousel-fade mb-4 shadow-sm rounded" data-bs-ride="carousel">
+            <div class="carousel-inner rounded">
+                {% if foto.archivo_imagen %}
+                <div class="carousel-item active">
+                    <img src="{{ foto.archivo_imagen.url }}" class="d-block w-100" alt="Principal">
+                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+                        <h5>Imagen Principal</h5>
+                    </div>
+                </div>
+                {% else %}
+                <div class="carousel-item active">
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                        <span class="text-muted">Sin imagen principal</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Ficha Resumen -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light"><strong>Anotaciones Rápidas</strong></div>
+            <div class="card-body text-muted small">
+                {{ foto.anotaciones|default:"Sin anotaciones." }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Columna derecha: Acordeón con las 4 categorías -->
+    <div class="col-lg-7">
+        <div class="accordion shadow-sm" id="accordionFicha">
+            
+            <!-- A: Imagen -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingImagen">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseImagen" aria-expanded="true" aria-controls="collapseImagen">
+                        A. Imagen
+                    </button>
+                </h2>
+                <div id="collapseImagen" class="accordion-collapse collapse show" aria-labelledby="headingImagen" data-bs-parent="#accordionFicha">
+                    <div class="accordion-body">
+                        <p><strong>Idioma original:</strong> {{ foto.idioma_original }}</p>
+                        <p><strong>Función de la imagen:</strong><br>{{ foto.funcion_imagen|linebreaks }}</p>
+                        <p><strong>Explicación de la función:</strong><br>{{ foto.explicacion_funcion|linebreaks }}</p>
+                        <hr>
+                        <h6>Consideraciones del usuario</h6>
+                        <ul>
+                            <li>Acuerdo contexto: {{ foto.acuerdo_contexto|default:"N/A" }}%</li>
+                            <li>Adapta lenguaje: {{ foto.adapta_lenguaje|default:"N/A" }}%</li>
+                            <li>Respeta esquemas culturales: {{ foto.respeta_esquemas_culturales|default:"N/A" }}%</li>
+                            <li>Rigor científico: {{ foto.rigor_cientifico|default:"N/A" }}%</li>
+                            <li>Simplicidad: {{ foto.simplicidad_imagen|default:"N/A" }}%</li>
+                            <li>Legibilidad: {{ foto.legibilidad|default:"N/A" }}%</li>
+                            <li>Elementos distracción: {{ foto.elementos_distraccion|default:"N/A" }}%</li>
+                        </ul>
+                        <hr>
+                        <h6>Clasificación Académica</h6>
+                        <p><strong>Disciplina:</strong> {{ foto.disciplina|default:"N/A" }}</p>
+                        <p><strong>Subdisciplina:</strong> {{ foto.subdisciplina|default:"N/A" }}</p>
+                        <p><strong>Conceptos (Palabras Clave):</strong> {{ foto.conceptos_imagen|default:"N/A" }}</p>
+                        <p><strong>Relación documental:</strong> {{ foto.relacion_documental|default:"N/A" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- B: Descripción Técnica -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingTecnico">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTecnico" aria-expanded="false" aria-controls="collapseTecnico">
+                        B. Descripción Técnica y Origen
+                    </button>
+                </h2>
+                <div id="collapseTecnico" class="accordion-collapse collapse" aria-labelledby="headingTecnico" data-bs-parent="#accordionFicha">
+                    <div class="accordion-body">
+                        <p><strong>Descripción general:</strong><br>{{ foto.descripcion_general|linebreaks }}</p>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Dimensiones Físicas</h6>
+                                <ul>
+                                    <li>Ancho: {{ foto.ancho_fisico_px|default:"N/A" }} px</li>
+                                    <li>Alto: {{ foto.alto_fisico_px|default:"N/A" }} px</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Dimensiones Digitales</h6>
+                                <ul>
+                                    <li>Resolución: {{ foto.resolucion_horizontal|default:"-" }} x {{ foto.resolucion_vertical|default:"-" }} {{ foto.unidad_resolucion }}</li>
+                                    <li>Píxeles: {{ foto.ancho_pixeles|default:"-" }}x{{ foto.alto_pixeles|default:"-" }}</li>
+                                    <li>Profundidad: {{ foto.profundidad_bits|default:"-" }} bits</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Formatos y Color</h6>
+                                <ul>
+                                    <li>Original: {{ foto.formato_original|default:"N/A" }}</li>
+                                    <li>Actual: {{ foto.formato_actual|default:"N/A" }}</li>
+                                    <li>Modelo Color: {{ foto.modelo_color|default:"N/A" }}</li>
+                                    <li>Características: {{ foto.caracteristicas|default:"N/A" }}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Autoría y Publicación</h6>
+                                <ul>
+                                    <li>Autor: {{ foto.autor|default:"N/A" }}</li>
+                                    <li>Entidad: {{ foto.entidad_responsable|default:"N/A" }}</li>
+                                    <li>Fecha prod.: {{ foto.fecha_produccion|default:"N/A" }}</li>
+                                    <li>Lugar prod.: {{ foto.lugar_produccion|default:"N/A" }}</li>
+                                    <li>Fecha pub.: {{ foto.fecha_publicacion|default:"N/A" }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- C: Perceptual -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingPerceptual">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePerceptual" aria-expanded="false" aria-controls="collapsePerceptual">
+                        C. Descripción Perceptual
+                    </button>
+                </h2>
+                <div id="collapsePerceptual" class="accordion-collapse collapse" aria-labelledby="headingPerceptual" data-bs-parent="#accordionFicha">
+                    <div class="accordion-body">
+                        <p><strong>Tipo de imagen:</strong> {{ foto.tipo_imagen|default:"N/A" }}</p>
+                        <p><strong>Contexto fondo:</strong> {{ foto.contexto_fondo|default:"N/A" }}</p>
+                        <p><strong>Contexto figura:</strong> {{ foto.contexto_figura|default:"N/A" }}</p>
+                        <p><strong>Elementos visuales:</strong> {{ foto.elementos_visuales_importantes|default:"N/A" }}</p>
+                        <p><strong>Percepción sin descripción:</strong> {{ foto.percepcion_sin_descripcion|default:"N/A" }}</p>
+                        <p><strong>Percepción con descripción:</strong> {{ foto.percepcion_con_descripcion|default:"N/A" }}</p>
+                        <p><strong>Objetivo de la imagen:</strong> {{ foto.objetivo_imagen|default:"N/A" }}</p>
+                        <hr>
+                        <p><strong>Relaciones:</strong> {{ foto.relaciones|join:", "|default:"N/A" }}</p>
+                        <p><strong>Uso de imagen:</strong> {{ foto.uso_imagen|join:", "|default:"N/A" }}</p>
+                        <p><strong>% Distorsión:</strong> {{ foto.porcentaje_distorsion|default:"N/A" }}</p>
+                        <p><strong>% Pixelación:</strong> {{ foto.porcentaje_pixelacion|default:"N/A" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- D: Ubicación -->
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingUbicacion">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUbicacion" aria-expanded="false" aria-controls="collapseUbicacion">
+                        D. Ubicación
+                    </button>
+                </h2>
+                <div id="collapseUbicacion" class="accordion-collapse collapse" aria-labelledby="headingUbicacion" data-bs-parent="#accordionFicha">
+                    <div class="accordion-body">
+                        <p><strong>Ubicación web:</strong> {% if foto.ubicacion_web %}<a href="{{ foto.ubicacion_web }}" target="_blank">{{ foto.ubicacion_web }}</a>{% else %}N/A{% endif %}</p>
+                        <p><strong>Ubicación archivo:</strong> {{ foto.ubicacion_archivo|default:"N/A" }}</p>
+                        <p><strong>Descripción imagen propia:</strong> {{ foto.descripcion_imagen_propia|default:"N/A" }}</p>
+                        
+                        {% if foto.imagen_mapa or foto.imagen_propia %}
+                        <hr>
+                        <h6>Imágenes de Ubicación</h6>
+                        <div class="row g-3 mb-3">
+                            {% if foto.imagen_mapa %}
+                            <div class="col-md-6 text-center">
+                                <p class="mb-1 small fw-bold">Imagen de Mapa</p>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-bs-img="{{ foto.imagen_mapa.url }}" data-bs-title="Imagen de Mapa">
+                                    <img src="{{ foto.imagen_mapa.url }}" class="img-fluid img-thumbnail shadow-sm border-0" alt="Mapa" style="cursor: zoom-in; max-height: 200px; object-fit: contain;">
+                                </a>
+                            </div>
+                            {% endif %}
+                            
+                            {% if foto.imagen_propia %}
+                            <div class="col-md-6 text-center">
+                                <p class="mb-1 small fw-bold">Imagen Propia</p>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-bs-img="{{ foto.imagen_propia.url }}" data-bs-title="Imagen Propia">
+                                    <img src="{{ foto.imagen_propia.url }}" class="img-fluid img-thumbnail shadow-sm border-0" alt="Propia" style="cursor: zoom-in; max-height: 200px; object-fit: contain;">
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <hr>
+                        <h6>Registro y Auditoría</h6>
+                        <p><strong>Registrado por:</strong> {{ foto.registrado_por.username|default:"Desconocido" }}</p>
+                        <p><strong>Fecha de registro:</strong> {{ foto.fecha_registro|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Última actualización de la ficha:</strong> {{ foto.fecha_actualizacion|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal para ver imágenes ampliadas -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Visor de Imagen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body text-center p-3 bg-light">
+                <img src="" id="modalImage" class="img-fluid rounded shadow-sm" alt="Imagen ampliada" style="max-height: 80vh; object-fit: contain;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var imageModal = document.getElementById('imageModal')
+    if(imageModal) {
+        imageModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget
+            var imgSrc = button.getAttribute('data-bs-img')
+            var imgTitle = button.getAttribute('data-bs-title')
+            
+            var modalTitle = imageModal.querySelector('.modal-title')
+            var modalImage = imageModal.querySelector('#modalImage')
+            
+            modalTitle.textContent = imgTitle
+            modalImage.src = imgSrc
+        })
+    }
+})
+</script>
+{% endblock %}
