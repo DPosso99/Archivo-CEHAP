@@ -207,24 +207,30 @@ class FotografiaCreateView(LoginRequiredMixin, CreateView):
     def _get_categoria_tree():
         from apps.colecciones.models import Categoria, Album
         tree = {}
+        albumes_info = {}
         for cat in Categoria.objects.filter(categoria_padre__isnull=True):
             sub_data = []
             for s in cat.subcategorias.all():
-                sub_albums = [{"pk": str(a.pk), "nombre": a.nombre}
-                              for a in s.albumes.filter(activo=True)]
+                sub_albums = []
+                for a in s.albumes.filter(activo=True):
+                    sub_albums.append({"pk": str(a.pk), "nombre": a.nombre, "desc": a.descripcion or ""})
+                    albumes_info[str(a.pk)] = a.descripcion or ""
                 sub_data.append({
                     "pk": str(s.pk),
                     "nombre": str(s),
                     "albums": sub_albums,
                 })
-            cat_albums = [{"pk": str(a.pk), "nombre": a.nombre}
-                          for a in cat.albumes.filter(activo=True)]
+            cat_albums = []
+            for a in cat.albumes.filter(activo=True):
+                cat_albums.append({"pk": str(a.pk), "nombre": a.nombre, "desc": a.descripcion or ""})
+                albumes_info[str(a.pk)] = a.descripcion or ""
             tree[str(cat.pk)] = {
                 "nombre": cat.nombre,
                 "subs": sub_data,
                 "albums": cat_albums,
             }
-        return json.dumps(tree)
+        result = json.dumps({"tree": tree, "albumes_info": albumes_info})
+        return result
 
 
 class FotografiaUpdateView(LoginRequiredMixin, UpdateView):

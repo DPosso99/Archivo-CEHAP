@@ -1,0 +1,1062 @@
+[
+{
+  "model": "colecciones.categoria",
+  "pk": 1,
+  "fields": {
+    "nombre": "ADMINISTRACIÓN PÚBLICA",
+    "descripcion": null,
+    "categoria_padre": null,
+    "orden": 0,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 2,
+  "fields": {
+    "nombre": "ARQUITECTURA Y CONSTRUCCIÓN",
+    "descripcion": null,
+    "categoria_padre": null,
+    "orden": 1,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 3,
+  "fields": {
+    "nombre": "ASENTAMIENTOS",
+    "descripcion": null,
+    "categoria_padre": null,
+    "orden": 2,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 4,
+  "fields": {
+    "nombre": "CIUDAD",
+    "descripcion": null,
+    "categoria_padre": null,
+    "orden": 3,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 5,
+  "fields": {
+    "nombre": "INFRAESTRUCTURA",
+    "descripcion": null,
+    "categoria_padre": null,
+    "orden": 4,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 6,
+  "fields": {
+    "nombre": "MEDIO AMBIENTE",
+    "descripcion": null,
+    "categoria_padre": null,
+    "orden": 5,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 7,
+  "fields": {
+    "nombre": "PLANIFICACIÓN",
+    "descripcion": null,
+    "categoria_padre": null,
+    "orden": 6,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 8,
+  "fields": {
+    "nombre": "SOCIEDAD Y DESARROLLO",
+    "descripcion": null,
+    "categoria_padre": null,
+    "orden": 7,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 9,
+  "fields": {
+    "nombre": "VIVIENDA",
+    "descripcion": null,
+    "categoria_padre": null,
+    "orden": 8,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 10,
+  "fields": {
+    "nombre": "Desarrollo Local",
+    "descripcion": null,
+    "categoria_padre": 1,
+    "orden": 0,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 11,
+  "fields": {
+    "nombre": "Gestión",
+    "descripcion": null,
+    "categoria_padre": 1,
+    "orden": 1,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 12,
+  "fields": {
+    "nombre": "Autoconstrucción",
+    "descripcion": null,
+    "categoria_padre": 2,
+    "orden": 0,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 13,
+  "fields": {
+    "nombre": "Patrimonio",
+    "descripcion": null,
+    "categoria_padre": 2,
+    "orden": 1,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 14,
+  "fields": {
+    "nombre": "Técnicas de Construcción",
+    "descripcion": null,
+    "categoria_padre": 2,
+    "orden": 2,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 15,
+  "fields": {
+    "nombre": "Barrios Informales",
+    "descripcion": null,
+    "categoria_padre": 3,
+    "orden": 0,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 16,
+  "fields": {
+    "nombre": "Mejoramiento",
+    "descripcion": null,
+    "categoria_padre": 3,
+    "orden": 1,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 17,
+  "fields": {
+    "nombre": "Ruralidad",
+    "descripcion": null,
+    "categoria_padre": 3,
+    "orden": 2,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 18,
+  "fields": {
+    "nombre": "Urbanizaciones",
+    "descripcion": null,
+    "categoria_padre": 3,
+    "orden": 3,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 19,
+  "fields": {
+    "nombre": "Centros de Ciudad",
+    "descripcion": null,
+    "categoria_padre": 4,
+    "orden": 0,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 20,
+  "fields": {
+    "nombre": "Desarrollo Urbano",
+    "descripcion": null,
+    "categoria_padre": 4,
+    "orden": 1,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 21,
+  "fields": {
+    "nombre": "Historia Urbana",
+    "descripcion": null,
+    "categoria_padre": 4,
+    "orden": 2,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 22,
+  "fields": {
+    "nombre": "Equipamiento Comunitario",
+    "descripcion": null,
+    "categoria_padre": 5,
+    "orden": 0,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 23,
+  "fields": {
+    "nombre": "Servicios Públicos",
+    "descripcion": null,
+    "categoria_padre": 5,
+    "orden": 1,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 24,
+  "fields": {
+    "nombre": "Transporte y Sistema Vial",
+    "descripcion": null,
+    "categoria_padre": 5,
+    "orden": 2,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 25,
+  "fields": {
+    "nombre": "Contaminación",
+    "descripcion": null,
+    "categoria_padre": 6,
+    "orden": 0,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 26,
+  "fields": {
+    "nombre": "Desastres",
+    "descripcion": null,
+    "categoria_padre": 6,
+    "orden": 1,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 27,
+  "fields": {
+    "nombre": "Ecología Urbana",
+    "descripcion": null,
+    "categoria_padre": 6,
+    "orden": 2,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 28,
+  "fields": {
+    "nombre": "Recursos Naturales",
+    "descripcion": null,
+    "categoria_padre": 6,
+    "orden": 3,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 29,
+  "fields": {
+    "nombre": "Espacio Público",
+    "descripcion": null,
+    "categoria_padre": 7,
+    "orden": 0,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 30,
+  "fields": {
+    "nombre": "Ordenamiento Territorial",
+    "descripcion": null,
+    "categoria_padre": 7,
+    "orden": 1,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 31,
+  "fields": {
+    "nombre": "Condiciones Sociales",
+    "descripcion": null,
+    "categoria_padre": 8,
+    "orden": 0,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 32,
+  "fields": {
+    "nombre": "Cultura",
+    "descripcion": null,
+    "categoria_padre": 8,
+    "orden": 1,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 33,
+  "fields": {
+    "nombre": "Economía Informal",
+    "descripcion": null,
+    "categoria_padre": 8,
+    "orden": 2,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 34,
+  "fields": {
+    "nombre": "Participación",
+    "descripcion": null,
+    "categoria_padre": 8,
+    "orden": 3,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 35,
+  "fields": {
+    "nombre": "Violencia y Desplazamiento",
+    "descripcion": null,
+    "categoria_padre": 8,
+    "orden": 4,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 36,
+  "fields": {
+    "nombre": "Habitabilidad",
+    "descripcion": null,
+    "categoria_padre": 9,
+    "orden": 0,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 37,
+  "fields": {
+    "nombre": "Mercado de la Vivienda",
+    "descripcion": null,
+    "categoria_padre": 9,
+    "orden": 1,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.categoria",
+  "pk": 38,
+  "fields": {
+    "nombre": "Programas de Vivienda",
+    "descripcion": null,
+    "categoria_padre": 9,
+    "orden": 2,
+    "activa": true
+  }
+},
+{
+  "model": "colecciones.album",
+  "pk": 2,
+  "fields": {
+    "nombre": "nuevo",
+    "descripcion": null,
+    "categoria": 25,
+    "creado_por": 1,
+    "fecha_creacion": "2026-05-02T23:09:37.368Z",
+    "vistas": 0,
+    "activo": true
+  }
+},
+{
+  "model": "colecciones.album",
+  "pk": 3,
+  "fields": {
+    "nombre": "CRAI IV",
+    "descripcion": "aqui hay fotosawdewad awdawd  wdeaiuwdnas  abdaiwndakljwnd  ahuwidnaowidaw awuidnawoidawjdioahwjdioaw awiodbnawioudnawoidnawdioaw awdioanwdoiawndoiawndo awiodnaoiwndoaw",
+    "categoria": 10,
+    "creado_por": 1,
+    "fecha_creacion": "2026-05-07T02:28:52.470Z",
+    "vistas": 0,
+    "activo": true
+  }
+},
+{
+  "model": "colecciones.album",
+  "pk": 4,
+  "fields": {
+    "nombre": "Barrios Cali",
+    "descripcion": null,
+    "categoria": 15,
+    "creado_por": 1,
+    "fecha_creacion": "2026-05-07T02:31:22.340Z",
+    "vistas": 0,
+    "activo": true
+  }
+},
+{
+  "model": "colecciones.album",
+  "pk": 5,
+  "fields": {
+    "nombre": "Medellín",
+    "descripcion": null,
+    "categoria": 20,
+    "creado_por": 1,
+    "fecha_creacion": "2026-05-07T02:32:29.048Z",
+    "vistas": 0,
+    "activo": true
+  }
+},
+{
+  "model": "colecciones.album",
+  "pk": 6,
+  "fields": {
+    "nombre": "Ocho de marzo",
+    "descripcion": null,
+    "categoria": 15,
+    "creado_por": 1,
+    "fecha_creacion": "2026-05-07T02:54:09.316Z",
+    "vistas": 0,
+    "activo": true
+  }
+},
+{
+  "model": "colecciones.album",
+  "pk": 7,
+  "fields": {
+    "nombre": "Calidad Espacial",
+    "descripcion": null,
+    "categoria": 15,
+    "creado_por": 1,
+    "fecha_creacion": "2026-05-07T23:38:03.894Z",
+    "vistas": 0,
+    "activo": true
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 6,
+  "fields": {
+    "titulo": "Panoramica de la ciudad de Quito Ecuador",
+    "codigo": "N0026",
+    "album": 3,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-07T02:28:52.481Z",
+    "fecha_actualizacion": "2026-05-07T02:28:52.481Z",
+    "registrado_por": 1,
+    "vistas": 41,
+    "archivo_imagen": "fotos/principal/N0026_uY7ED57.jpg",
+    "descripcion_imagen": null,
+    "autor": null,
+    "fecha_produccion": null,
+    "ancho_pixeles": null,
+    "alto_pixeles": null,
+    "formato_archivo": null,
+    "palabras_clave": null,
+    "fecha_subida_original": null,
+    "url_fuente": null,
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": null,
+    "latitud": null,
+    "longitud": null,
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 7,
+  "fields": {
+    "titulo": "Panoramcia de la ciudad de Lima Peru",
+    "codigo": "N0027",
+    "album": 3,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-07T02:30:04.224Z",
+    "fecha_actualizacion": "2026-05-07T02:30:04.224Z",
+    "registrado_por": 1,
+    "vistas": 34,
+    "archivo_imagen": "fotos/principal/normal_N0027.jpg",
+    "descripcion_imagen": null,
+    "autor": null,
+    "fecha_produccion": null,
+    "ancho_pixeles": null,
+    "alto_pixeles": null,
+    "formato_archivo": null,
+    "palabras_clave": null,
+    "fecha_subida_original": null,
+    "url_fuente": null,
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": null,
+    "latitud": null,
+    "longitud": null,
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 8,
+  "fields": {
+    "titulo": "Fachadas, barrios de Cali",
+    "codigo": "D1058.jpg",
+    "album": 4,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-07T02:31:22.344Z",
+    "fecha_actualizacion": "2026-05-07T02:31:22.344Z",
+    "registrado_por": 1,
+    "vistas": 3,
+    "archivo_imagen": "fotos/principal/normal_D201058.jpg",
+    "descripcion_imagen": null,
+    "autor": null,
+    "fecha_produccion": null,
+    "ancho_pixeles": null,
+    "alto_pixeles": null,
+    "formato_archivo": null,
+    "palabras_clave": null,
+    "fecha_subida_original": null,
+    "url_fuente": null,
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": null,
+    "latitud": null,
+    "longitud": null,
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 9,
+  "fields": {
+    "titulo": "Mapa de barrios de Medellin 1997",
+    "codigo": "mapa01.jpg",
+    "album": 5,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-07T02:32:29.051Z",
+    "fecha_actualizacion": "2026-05-07T02:32:29.051Z",
+    "registrado_por": 1,
+    "vistas": 8,
+    "archivo_imagen": "fotos/principal/normal_mapa01.jpg",
+    "descripcion_imagen": null,
+    "autor": null,
+    "fecha_produccion": null,
+    "ancho_pixeles": null,
+    "alto_pixeles": null,
+    "formato_archivo": null,
+    "palabras_clave": null,
+    "fecha_subida_original": null,
+    "url_fuente": null,
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": null,
+    "latitud": null,
+    "longitud": null,
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 10,
+  "fields": {
+    "titulo": "Mapa de distribución de los barrios que conforman el area urbana del Municipio de Medellín segun estrato socioeconómico, 1995",
+    "codigo": "6_2_Medellin1995.jpg",
+    "album": 5,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-07T02:38:01.651Z",
+    "fecha_actualizacion": "2026-05-07T02:38:01.651Z",
+    "registrado_por": 1,
+    "vistas": 5,
+    "archivo_imagen": "fotos/principal/normal_6_2_Medellin1995.jpg",
+    "descripcion_imagen": null,
+    "autor": "Municipio de Medellín",
+    "fecha_produccion": null,
+    "ancho_pixeles": null,
+    "alto_pixeles": null,
+    "formato_archivo": null,
+    "palabras_clave": null,
+    "fecha_subida_original": null,
+    "url_fuente": null,
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": null,
+    "latitud": null,
+    "longitud": null,
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 11,
+  "fields": {
+    "titulo": "Mapa de los corregimientos de Medellin",
+    "codigo": "mapaCorregimientosMed.gif",
+    "album": 5,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-07T02:42:46.908Z",
+    "fecha_actualizacion": "2026-05-08T01:12:25.333Z",
+    "registrado_por": 1,
+    "vistas": 30,
+    "archivo_imagen": "fotos/principal/normal_mapaCorregimientosMed.gif",
+    "descripcion_imagen": "",
+    "autor": "Alcaldia de Medellin",
+    "fecha_produccion": "2007",
+    "ancho_pixeles": null,
+    "alto_pixeles": null,
+    "formato_archivo": null,
+    "palabras_clave": "",
+    "fecha_subida_original": null,
+    "url_fuente": null,
+    "ubicacion_web": "http://localhost:8000/mapa/",
+    "ubicacion_archivo": "",
+    "mapa_url": null,
+    "latitud": null,
+    "longitud": null,
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 12,
+  "fields": {
+    "titulo": "Viviendas construidas en laderas",
+    "codigo": "D4144.jpg",
+    "album": 6,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-07T02:54:09.321Z",
+    "fecha_actualizacion": "2026-05-08T01:11:14.884Z",
+    "registrado_por": 1,
+    "vistas": 10,
+    "archivo_imagen": "fotos/principal/normal_D4144.jpg",
+    "descripcion_imagen": "",
+    "autor": "CEHAP",
+    "fecha_produccion": "1987",
+    "ancho_pixeles": null,
+    "alto_pixeles": null,
+    "formato_archivo": null,
+    "palabras_clave": "",
+    "fecha_subida_original": null,
+    "url_fuente": "https://arquitectura.medellin.unal.edu.co/escuelas/habitat/galeria/albums/userpics/10005/normal_D4144.jpg",
+    "ubicacion_web": null,
+    "ubicacion_archivo": "Archivo, estante 3",
+    "mapa_url": "https://maps.app.goo.gl/BAuYxVJptMs5LpwbA",
+    "latitud": "6.3011250",
+    "longitud": "-75.5474400",
+    "imagen_mapa": "",
+    "imagen_propia": "fotos/extras/globe-glass-on-grass-with-sunshine-environment-concept-free-photo_QL4L3zI.jpg",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 13,
+  "fields": {
+    "titulo": "Prueba 2",
+    "codigo": "12345",
+    "album": 5,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-07T15:05:34.665Z",
+    "fecha_actualizacion": "2026-05-07T15:23:01.414Z",
+    "registrado_por": 1,
+    "vistas": 76,
+    "archivo_imagen": "fotos/principal/N0003.jpg",
+    "descripcion_imagen": null,
+    "autor": "CEHAP",
+    "fecha_produccion": "1987",
+    "ancho_pixeles": null,
+    "alto_pixeles": null,
+    "formato_archivo": null,
+    "palabras_clave": null,
+    "fecha_subida_original": null,
+    "url_fuente": "https://arquitectura.medellin.unal.edu.co/escuelas/habitat/galeria/albums/userpics/10002/N0003.jpg",
+    "ubicacion_web": "https://www.google.com/maps/@6.258612,-75.5626034,15z?entry=ttu&g_ep=EgoyMDI2MDUwMi4wIKXMDSoASAFQAw%3D%3D",
+    "ubicacion_archivo": "",
+    "mapa_url": null,
+    "latitud": null,
+    "longitud": null,
+    "imagen_mapa": "fotos/mapas/website-capture.jpeg",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 14,
+  "fields": {
+    "titulo": "Puente sobre quebrada canalizada, barrio El Playon",
+    "codigo": "36119elplayon.jpg",
+    "album": 7,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-07T23:38:03.900Z",
+    "fecha_actualizacion": "2026-05-08T01:10:46.285Z",
+    "registrado_por": 1,
+    "vistas": 126,
+    "archivo_imagen": "fotos/principal/36119elplayon.jpg",
+    "descripcion_imagen": "un puente en Chapultec",
+    "autor": "CEHAP - PEVAL",
+    "fecha_produccion": "1985",
+    "ancho_pixeles": 1070,
+    "alto_pixeles": 720,
+    "formato_archivo": "JPEG",
+    "palabras_clave": "Puente, barrio",
+    "fecha_subida_original": null,
+    "url_fuente": "https://arquitectura.medellin.unal.edu.co/escuelas/habitat/galeria/albums/Cehap/Calidad%20espacial/36119elplayon.jpg",
+    "ubicacion_web": null,
+    "ubicacion_archivo": "Archivo, estante 2",
+    "mapa_url": "https://maps.app.goo.gl/Zdhn19wnKmQBJW4XA",
+    "latitud": "6.2578650",
+    "longitud": "-75.5605860",
+    "imagen_mapa": "fotos/mapas/website-capture_K7euery.jpeg",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 15,
+  "fields": {
+    "titulo": "La calle como espacio publico, barrio El Playon",
+    "codigo": "36121elplayon.jpg",
+    "album": 7,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-08T02:51:52.828Z",
+    "fecha_actualizacion": "2026-05-08T02:51:52.828Z",
+    "registrado_por": 1,
+    "vistas": 119,
+    "archivo_imagen": "fotos/principal/normal_36121elplayon.jpg",
+    "descripcion_imagen": "Niños jugando",
+    "autor": "CEHAP - PEVAL",
+    "fecha_produccion": "1985",
+    "ancho_pixeles": 1068,
+    "alto_pixeles": 700,
+    "formato_archivo": "JPEG",
+    "palabras_clave": "Barrios, niños",
+    "fecha_subida_original": null,
+    "url_fuente": "https://arquitectura.medellin.unal.edu.co/escuelas/habitat/galeria/albums/Cehap/Calidad%20espacial/normal_36121elplayon.jpg",
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": "https://maps.app.goo.gl/7KXtbnapz4h87xkU9",
+    "latitud": "6.2662690",
+    "longitud": "-75.5541920",
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 16,
+  "fields": {
+    "titulo": "Vista desde el barrio Doce de Octubre del trazado del Barrio Popular",
+    "codigo": "3784calidadespacial.jpg",
+    "album": 7,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-09T03:40:41.907Z",
+    "fecha_actualizacion": "2026-05-09T03:41:23.581Z",
+    "registrado_por": 1,
+    "vistas": 52,
+    "archivo_imagen": "fotos/principal/normal_3784calidadespacial.jpg",
+    "descripcion_imagen": "Vista de la ciudad",
+    "autor": "CEHAP - PEVAL",
+    "fecha_produccion": "1985",
+    "ancho_pixeles": 1087,
+    "alto_pixeles": 704,
+    "formato_archivo": "JPEG",
+    "palabras_clave": "barrio, popular",
+    "fecha_subida_original": null,
+    "url_fuente": "https://arquitectura.medellin.unal.edu.co/escuelas/habitat/galeria/albums/userpics/10007/normal_3784calidadespacial.jpg",
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": "https://maps.app.goo.gl/a8BvcFQaERh17kbA7",
+    "latitud": "6.2851590",
+    "longitud": "-75.5420950",
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 17,
+  "fields": {
+    "titulo": "Fachada vivienda de dos pisos en bloque",
+    "codigo": "3816calidadespacial.jpg",
+    "album": 7,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-09T05:34:29.184Z",
+    "fecha_actualizacion": "2026-05-09T05:35:14.973Z",
+    "registrado_por": 1,
+    "vistas": 11,
+    "archivo_imagen": "fotos/principal/normal_3816calidadespacial.jpg",
+    "descripcion_imagen": "fachadas",
+    "autor": "CEHAP - PEVAL",
+    "fecha_produccion": "1985",
+    "ancho_pixeles": 727,
+    "alto_pixeles": 1088,
+    "formato_archivo": "JPEG",
+    "palabras_clave": "bario, casa",
+    "fecha_subida_original": null,
+    "url_fuente": "https://arquitectura.medellin.unal.edu.co/escuelas/habitat/galeria/albums/Cehap/Calidad%20espacial/normal_3816calidadespacial.jpg",
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": "https://maps.app.goo.gl/eYTAt2PmUUUWypGj7",
+    "latitud": "6.2700700",
+    "longitud": "-75.5800292",
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 18,
+  "fields": {
+    "titulo": "Hombres trabajando en una construccion en Quito Ecuador",
+    "codigo": "N0025.jpg",
+    "album": 3,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-09T05:55:20.015Z",
+    "fecha_actualizacion": "2026-05-09T05:56:10.077Z",
+    "registrado_por": 1,
+    "vistas": 23,
+    "archivo_imagen": "fotos/principal/normal_N0025.jpg",
+    "descripcion_imagen": "un señor trabajando",
+    "autor": "CEHAP",
+    "fecha_produccion": "2001",
+    "ancho_pixeles": 492,
+    "alto_pixeles": 322,
+    "formato_archivo": null,
+    "palabras_clave": "Quito, Construccion",
+    "fecha_subida_original": null,
+    "url_fuente": "https://arquitectura.medellin.unal.edu.co/escuelas/habitat/galeria/albums/userpics/10002/normal_N0025.jpg",
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": "https://maps.app.goo.gl/V2dK1WzgnL46TWto8",
+    "latitud": "-1.9518420",
+    "longitud": "-78.8637010",
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 19,
+  "fields": {
+    "titulo": "Calle en perspectiva de Lima - Peru",
+    "codigo": "N0004.jpg",
+    "album": 3,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-09T06:13:52.700Z",
+    "fecha_actualizacion": "2026-05-09T06:23:23.608Z",
+    "registrado_por": 1,
+    "vistas": 20,
+    "archivo_imagen": "fotos/principal/normal_N0004.jpg",
+    "descripcion_imagen": "Calles de Lima",
+    "autor": "Cehap-Forhum",
+    "fecha_produccion": "2001",
+    "ancho_pixeles": 324,
+    "alto_pixeles": 485,
+    "formato_archivo": "JPEG",
+    "palabras_clave": "CALLE / LIMA",
+    "fecha_subida_original": "Oct 31, 2005",
+    "url_fuente": "https://arquitectura.medellin.unal.edu.co/escuelas/habitat/galeria/albums/userpics/10002/normal_N0004.jpg",
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": "https://maps.app.goo.gl/SKGGBUVgBrMBA2Bw7",
+    "latitud": "-11.3358830",
+    "longitud": "-73.7422720",
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 20,
+  "fields": {
+    "titulo": "Centro de la ciudad de Lima Peru",
+    "codigo": "N0005.jpg",
+    "album": 3,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-09T06:32:33.375Z",
+    "fecha_actualizacion": "2026-05-09T06:33:24.035Z",
+    "registrado_por": 1,
+    "vistas": 33,
+    "archivo_imagen": "fotos/principal/normal_N0005.jpg",
+    "descripcion_imagen": "",
+    "autor": null,
+    "fecha_produccion": null,
+    "ancho_pixeles": 324,
+    "alto_pixeles": 487,
+    "formato_archivo": "JPEG",
+    "palabras_clave": "CENTRO, DE, LIMA, ARQUITECTURA",
+    "fecha_subida_original": "Oct 31, 2005",
+    "url_fuente": "https://arquitectura.medellin.unal.edu.co/escuelas/habitat/galeria/albums/userpics/10002/normal_N0005.jpg",
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": "https://maps.app.goo.gl/HzHHVrWYhKqL7fzz9",
+    "latitud": "-11.5350930",
+    "longitud": "-70.6751350",
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 21,
+  "fields": {
+    "titulo": "Parque en Lima - Peru",
+    "codigo": "N0007.jpg",
+    "album": 3,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-09T06:40:38.393Z",
+    "fecha_actualizacion": "2026-05-09T06:42:58.023Z",
+    "registrado_por": 1,
+    "vistas": 25,
+    "archivo_imagen": "fotos/principal/normal_N0007.jpg",
+    "descripcion_imagen": "Un jardin",
+    "autor": "Cehap",
+    "fecha_produccion": "2001",
+    "ancho_pixeles": 499,
+    "alto_pixeles": 320,
+    "formato_archivo": "JPEG",
+    "palabras_clave": "PARQUES, LIMA",
+    "fecha_subida_original": "Oct 31, 2005",
+    "url_fuente": "https://arquitectura.medellin.unal.edu.co/escuelas/habitat/galeria/albums/userpics/10002/normal_N0007.jpg",
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": "https://maps.app.goo.gl/XbHDMLMTpifu2XVC7",
+    "latitud": "-15.0409840",
+    "longitud": "-70.9338090",
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.fotografia",
+  "pk": 22,
+  "fields": {
+    "titulo": "Paisaje de la ciudad de Lima Peru",
+    "codigo": "N0011.jpg",
+    "album": 3,
+    "estado": "Activo",
+    "fecha_registro": "2026-05-09T06:45:17.416Z",
+    "fecha_actualizacion": "2026-05-09T06:45:17.416Z",
+    "registrado_por": 1,
+    "vistas": 25,
+    "archivo_imagen": "fotos/principal/normal_N0011.jpg",
+    "descripcion_imagen": "",
+    "autor": "Cehap",
+    "fecha_produccion": "2001",
+    "ancho_pixeles": 493,
+    "alto_pixeles": 319,
+    "formato_archivo": "JPEG",
+    "palabras_clave": "LIMA",
+    "fecha_subida_original": "Oct 31, 2005",
+    "url_fuente": "https://arquitectura.medellin.unal.edu.co/escuelas/habitat/galeria/albums/userpics/10002/normal_N0011.jpg",
+    "ubicacion_web": null,
+    "ubicacion_archivo": "",
+    "mapa_url": null,
+    "latitud": null,
+    "longitud": null,
+    "imagen_mapa": "",
+    "imagen_propia": "",
+    "descripcion_imagen_propia": ""
+  }
+},
+{
+  "model": "fotografias.comentario",
+  "pk": 2,
+  "fields": {
+    "fotografia": 14,
+    "nombre_usuario": "Juan",
+    "texto": "hola",
+    "fecha": "2026-05-09T04:15:53.115Z",
+    "ip_usuario": "127.0.0.1"
+  }
+},
+{
+  "model": "fotografias.calificacion",
+  "pk": 3,
+  "fields": {
+    "fotografia": 14,
+    "estrellas": 5,
+    "ip_usuario": "127.0.0.1"
+  }
+}
+]

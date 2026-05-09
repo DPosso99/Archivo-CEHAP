@@ -20,4 +20,9 @@ Thumbs.db
 
 # Excel data files (temporary)
 *.xlsx
-*.xls
+*.xlsplan.sh
+run_dj*.sh
+!run_dj_final.sh
+docker-compose.yml
+run_wsl_setup.sh
+setup_db.sh

@@ -38,7 +38,7 @@ class FotografiaForm(forms.ModelForm):
         max_length=500,
         required=False,
         widget=forms.Textarea(attrs={"rows": 2}),
-        label="Descripción del álbum (opcional)",
+        label="Descripción del álbum",
         help_text="Se guarda en el álbum seleccionado o en el nuevo que se cree."
     )
     pegar_metadatos = forms.CharField(

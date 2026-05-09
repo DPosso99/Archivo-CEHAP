@@ -174,30 +174,40 @@
             var alb = document.getElementById('id_album');
             var sc = document.getElementById('id_subcategoria_select');
             var mc = document.getElementById('id_categoria_select');
-            var tree = {};
-            try { tree = JSON.parse('{{ categoria_tree|default:"{}"|safe }}'); } catch(e) {}
+            var descField = document.getElementById('id_nuevo_album_descripcion');
             // First, try to find the album in the current dropdown
             if (alb) {
                 for (var i = 0; i < alb.options.length; i++) {
                     if (alb.options[i].text.toLowerCase().indexOf(albumHint.toLowerCase()) >= 0) {
                         alb.value = alb.options[i].value;
+                        // Fill description if exists
+                        var albPk = alb.options[i].value;
+                        if (albPk && albumesInfo[albPk] && albumesInfo[albPk]) {
+                            if (descField) descField.value = albumesInfo[albPk];
+                        }
                         return;
                     }
                 }
             }
             // Not found in current dropdown — search categoriaTree
-            for (var catId in tree) {
-                var cat = tree[catId];
+            for (var catId in categoriaTree) {
+                var cat = categoriaTree[catId];
                 // Check direct albums
                 if (cat.albums) {
                     for (var ai = 0; ai < cat.albums.length; ai++) {
                         if (cat.albums[ai].nombre.toLowerCase().indexOf(albumHint.toLowerCase()) >= 0) {
-                            // Select this category and album
                             if (mc) { mc.value = catId; mc.dispatchEvent(new Event('change')); }
-                            setTimeout(function(aid, aidx) {
+                            var albPk = cat.albums[ai].pk;
+                            var albDesc = cat.albums[ai].desc || '';
+                            setTimeout(function(pk, desc) {
                                 var a = document.getElementById('id_album');
-                                if (a && a.options[aidx + 1]) a.value = a.options[aidx + 1].value;
-                            }, 100, cat.albums[ai].pk, ai);
+                                if (a) {
+                                    for (var j = 0; j < a.options.length; j++) {
+                                        if (a.options[j].value == pk) { a.value = pk; break; }
+                                    }
+                                }
+                                if (desc) { var d = document.getElementById('id_nuevo_album_descripcion'); if (d && !d.value) d.value = desc; }
+                            }, 100, albPk, albDesc);
                             return;
                         }
                     }
@@ -209,16 +219,22 @@
                         if (sub.albums) {
                             for (var sai = 0; sai < sub.albums.length; sai++) {
                                 if (sub.albums[sai].nombre.toLowerCase().indexOf(albumHint.toLowerCase()) >= 0) {
-                                    // Select category, then subcategory, then album
                                     if (mc) { mc.value = catId; mc.dispatchEvent(new Event('change')); }
+                                    var albPk2 = sub.albums[sai].pk;
+                                    var albDesc2 = sub.albums[sai].desc || '';
                                     setTimeout(function(subId) {
                                         var s = document.getElementById('id_subcategoria_select');
                                         if (s) { s.value = subId; s.dispatchEvent(new Event('change')); }
                                     }, 100, sub.pk);
-                                    setTimeout(function(saiIdx) {
+                                    setTimeout(function(pk, desc) {
                                         var a = document.getElementById('id_album');
-                                        if (a && a.options[saiIdx + 1]) a.value = a.options[saiIdx + 1].value;
-                                    }, 200, sai);
+                                        if (a) {
+                                            for (var j = 0; j < a.options.length; j++) {
+                                                if (a.options[j].value == pk) { a.value = pk; break; }
+                                            }
+                                        }
+                                        if (desc) { var d = document.getElementById('id_nuevo_album_descripcion'); if (d && !d.value) d.value = desc; }
+                                    }, 200, albPk2, albDesc2);
                                     return;
                                 }
                             }
@@ -232,7 +248,12 @@
         const subcatSelect = document.getElementById('id_subcategoria_select');
         const albumSelect = document.getElementById('id_album');
         let categoriaTree = {};
-        try { categoriaTree = JSON.parse('{{ categoria_tree|default:"{}"|safe }}'); } catch(e) {}
+        let albumesInfo = {};
+        try {
+            var raw = JSON.parse('{{ categoria_tree|default:"{}"|safe }}');
+            categoriaTree = raw.tree || {};
+            albumesInfo = raw.albumes_info || {};
+        } catch(e) {}
 
         if (catSelect && subcatSelect) {
             const emptySubcat = subcatSelect.querySelector('option[value=""]');

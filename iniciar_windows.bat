@@ -51,14 +51,25 @@ echo.
 
 :: Run migrations
 echo Preparando base de datos...
-if exist "db.sqlite3" del /q "db.sqlite3"
 python manage.py migrate --noinput
 if %errorlevel% neq 0 (
-    echo [ERROR] Fallaron las migraciones. Revisa los errores arriba.
+    echo [ERROR] Fallaron las migraciones. Borra db.sqlite3 manualmente y vuelve a intentar.
     pause
     exit /b 1
 )
 echo [OK] Base de datos lista.
+echo.
+
+:: Load test data if database is empty (first run)
+python manage.py shell -c "from apps.colecciones.models import Categoria; exit(0) if Categoria.objects.exists() else exit(1)"
+if %errorlevel% neq 0 (
+    if exist "seed_data.json" (
+        echo Cargando datos de prueba...
+        python manage.py loaddata seed_data.json
+        echo [OK] Datos de prueba cargados.
+    )
+)
+echo.
 echo.
 
 :: Create admin user if needed
