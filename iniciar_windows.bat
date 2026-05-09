@@ -51,7 +51,13 @@ echo.
 
 :: Run migrations
 echo Preparando base de datos...
+if exist "db.sqlite3" del /q "db.sqlite3"
 python manage.py migrate --noinput
+if %errorlevel% neq 0 (
+    echo [ERROR] Fallaron las migraciones. Revisa los errores arriba.
+    pause
+    exit /b 1
+)
 echo [OK] Base de datos lista.
 echo.
 
