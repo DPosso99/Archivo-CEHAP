@@ -71,4 +71,230 @@
 {% block extra_js %}
 <!-- Cargar JS para previsualizar imágenes y validación en tabs -->
 <script src="{% static 'js/preview_imagenes.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlInput = document.getElementById('id_url_imagen');
+        const previewPrincipal = document.getElementById('preview_principal');
+        if (urlInput && previewPrincipal) {
+            urlInput.addEventListener('input', function(e) {
+                if (e.target.value) {
+                    previewPrincipal.src = e.target.value;
+                    previewPrincipal.style.display = 'block';
+                }
+            });
+        }
+
+        // Metadata parser — auto-fill fields from pasted text
+        const metaTextarea = document.getElementById('id_pegar_metadatos');
+        if (metaTextarea) {
+            metaTextarea.addEventListener('input', function() {
+                const text = this.value;
+                const fields = {
+                    // English patterns
+                    'Filename:\\s*(.+)': { target: 'id_codigo', transform: function(v) {
+                        var ext = v.split('.').pop().toUpperCase();
+                        var fmtMap = {'JPG':'JPEG','JPEG':'JPEG','PNG':'PNG','GIF':'GIF','BMP':'BMP','TIFF':'TIFF','TIF':'TIFF','WEBP':'WebP','SVG':'SVG','RAW':'RAW','PDF':'PDF'};
+                        var fmt = document.getElementById('id_formato_archivo');
+                        if (fmt && fmtMap[ext]) { fmt.value = fmtMap[ext]; }
+                        return v;
+                    }},
+                    'Album name:\\s*(.+)': { target: 'album_hint', transform: v => v },
+                    'Keywords:\\s*(.+)': { target: 'id_palabras_clave', transform: function(v) { return v.replace(/\s*\/\s*/g, ', '); } },
+                    'Date added:\\s*(.+)': { target: 'id_fecha_subida_original', transform: v => v },
+                    'Dimensions:\\s*(\\d+)\\s*x\\s*(\\d+)': { target: 'dimensions', transform: null },
+                    // Spanish patterns
+                    'Nombre de archivo:\\s*(.+)': { target: 'id_codigo', transform: function(v) {
+                        var ext = v.split('.').pop().toUpperCase();
+                        var fmtMap = {'JPG':'JPEG','JPEG':'JPEG','PNG':'PNG','GIF':'GIF','BMP':'BMP','TIFF':'TIFF','TIF':'TIFF','WEBP':'WebP','SVG':'SVG','RAW':'RAW','PDF':'PDF'};
+                        var fmt = document.getElementById('id_formato_archivo');
+                        if (fmt && fmtMap[ext]) { fmt.value = fmtMap[ext]; }
+                        return v;
+                    }},
+                    'Nombre del álbum:\\s*(.+)': { target: 'album_hint', transform: v => v },
+                    'Palabras clave:\\s*(.+)': { target: 'id_palabras_clave', transform: function(v) { return v.replace(/\s*\/\s*/g, ', '); } },
+                    'Fecha de subida:\\s*(.+)': { target: 'id_fecha_subida_original', transform: v => v },
+                    'Dimensiones:\\s*(\\d+)\\s*x\\s*(\\d+)': { target: 'dimensions', transform: null },
+                };
+
+                for (var pattern in fields) {
+                    var re = new RegExp(pattern, 'im');
+                    var match = text.match(re);
+                    if (match) {
+                        var f = fields[pattern];
+                        if (f.target === 'dimensions') {
+                            var w = document.getElementById('id_ancho_pixeles');
+                            var h = document.getElementById('id_alto_pixeles');
+                            if (w && match[1]) w.value = match[1];
+                            if (h && match[2]) h.value = match[2];
+                        } else if (f.target === 'album_hint') {
+                            // Album name: "dpalencia / CRAI IV" → only "CRAI IV" is the album
+                            var albumVal = match[1].trim();
+                            var albumHint = albumVal.split('/').map(function(p) { return p.trim(); }).pop();
+                            if (albumHint) selectAlbumWithCategory(albumHint);
+                        } else if (f.target && f.transform) {
+                            var el = document.getElementById(f.target);
+                            if (el) el.value = f.transform(match[1].trim());
+                        }
+                    }
+                }
+
+                // Parse unlabeled lines (title + author year) at beginning or end
+                var lines = text.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 0; });
+                var metaStart = lines.findIndex(function(l) { return /^(File information|Información)/i.test(l); });
+                var metaEnd = lines.findIndex(function(l, i) { return i > metaStart && /^(Favorites|Favoritos)/i.test(l); });
+                if (metaStart > 0) {
+                    // Lines before metadata block: title (line 0), author year (line 1)
+                    if (lines[0]) document.getElementById('id_titulo').value = lines[0];
+                    if (lines[1] && metaStart > 1) {
+                        var ay = lines[1];
+                        var ayMatch = ay.match(/^(.+?)\s+(\d{4})$/);
+                        if (ayMatch) {
+                            document.getElementById('id_autor').value = ayMatch[1];
+                            document.getElementById('id_fecha_produccion').value = ayMatch[2];
+                        }
+                    }
+                }
+                // Also check after the metadata block
+                if (metaEnd >= 0 && metaEnd + 1 < lines.length) {
+                    var afterLines = lines.slice(metaEnd + 1);
+                    if (afterLines[0] && !document.getElementById('id_titulo').value) document.getElementById('id_titulo').value = afterLines[0];
+                    if (afterLines[1]) {
+                        var ay2 = afterLines[1].match(/^(.+?)\s+(\d{4})$/);
+                        if (ay2) {
+                            if (!document.getElementById('id_autor').value) document.getElementById('id_autor').value = ay2[1];
+                            if (!document.getElementById('id_fecha_produccion').value) document.getElementById('id_fecha_produccion').value = ay2[2];
+                        }
+                    }
+                }
+            });
+        }
+
+        // Helper: search categoriaTree to auto-select category + subcategory + album
+        function selectAlbumWithCategory(albumHint) {
+            var alb = document.getElementById('id_album');
+            var sc = document.getElementById('id_subcategoria_select');
+            var mc = document.getElementById('id_categoria_select');
+            var tree = {};
+            try { tree = JSON.parse('{{ categoria_tree|default:"{}"|safe }}'); } catch(e) {}
+            // First, try to find the album in the current dropdown
+            if (alb) {
+                for (var i = 0; i < alb.options.length; i++) {
+                    if (alb.options[i].text.toLowerCase().indexOf(albumHint.toLowerCase()) >= 0) {
+                        alb.value = alb.options[i].value;
+                        return;
+                    }
+                }
+            }
+            // Not found in current dropdown — search categoriaTree
+            for (var catId in tree) {
+                var cat = tree[catId];
+                // Check direct albums
+                if (cat.albums) {
+                    for (var ai = 0; ai < cat.albums.length; ai++) {
+                        if (cat.albums[ai].nombre.toLowerCase().indexOf(albumHint.toLowerCase()) >= 0) {
+                            // Select this category and album
+                            if (mc) { mc.value = catId; mc.dispatchEvent(new Event('change')); }
+                            setTimeout(function(aid, aidx) {
+                                var a = document.getElementById('id_album');
+                                if (a && a.options[aidx + 1]) a.value = a.options[aidx + 1].value;
+                            }, 100, cat.albums[ai].pk, ai);
+                            return;
+                        }
+                    }
+                }
+                // Check subcategories
+                if (cat.subs) {
+                    for (var si = 0; si < cat.subs.length; si++) {
+                        var sub = cat.subs[si];
+                        if (sub.albums) {
+                            for (var sai = 0; sai < sub.albums.length; sai++) {
+                                if (sub.albums[sai].nombre.toLowerCase().indexOf(albumHint.toLowerCase()) >= 0) {
+                                    // Select category, then subcategory, then album
+                                    if (mc) { mc.value = catId; mc.dispatchEvent(new Event('change')); }
+                                    setTimeout(function(subId) {
+                                        var s = document.getElementById('id_subcategoria_select');
+                                        if (s) { s.value = subId; s.dispatchEvent(new Event('change')); }
+                                    }, 100, sub.pk);
+                                    setTimeout(function(saiIdx) {
+                                        var a = document.getElementById('id_album');
+                                        if (a && a.options[saiIdx + 1]) a.value = a.options[saiIdx + 1].value;
+                                    }, 200, sai);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        const catSelect = document.getElementById('id_categoria_select');
+        const subcatSelect = document.getElementById('id_subcategoria_select');
+        const albumSelect = document.getElementById('id_album');
+        let categoriaTree = {};
+        try { categoriaTree = JSON.parse('{{ categoria_tree|default:"{}"|safe }}'); } catch(e) {}
+
+        if (catSelect && subcatSelect) {
+            const emptySubcat = subcatSelect.querySelector('option[value=""]');
+            const emptySubcatHTML = emptySubcat ? emptySubcat.outerHTML : '<option value="">---------</option>';
+
+            var emptyAlbumHTML = '<option value="">---------</option>';
+            if (albumSelect) {
+                var albEmpty = albumSelect.querySelector('option[value=""]');
+                if (albEmpty) emptyAlbumHTML = albEmpty.outerHTML;
+            }
+
+            function filterAlbums() {
+                if (!albumSelect) return;
+                const catId = catSelect ? catSelect.value : '';
+                const subId = subcatSelect ? subcatSelect.value : '';
+                const currentVal = albumSelect.value;
+                albumSelect.innerHTML = emptyAlbumHTML;
+
+                let albums = [];
+                // Subcategoría tiene prioridad
+                if (subId && categoriaTree[catId]) {
+                    var subs = categoriaTree[catId].subs;
+                    for (var i = 0; i < subs.length; i++) {
+                        if (subs[i].pk === subId) {
+                            albums = subs[i].albums || [];
+                            break;
+                        }
+                    }
+                } else if (catId && categoriaTree[catId]) {
+                    albums = categoriaTree[catId].albums || [];
+                }
+
+                albums.forEach(function(alb) {
+                    var opt = document.createElement('option');
+                    opt.value = alb.pk;
+                    opt.textContent = alb.nombre;
+                    if (alb.pk === currentVal) opt.selected = true;
+                    albumSelect.appendChild(opt);
+                });
+            }
+
+            function filterSubcategories() {
+                const catId = catSelect.value;
+                const currentVal = subcatSelect.value;
+                subcatSelect.innerHTML = emptySubcatHTML;
+
+                if (catId && categoriaTree[catId]) {
+                    categoriaTree[catId].subs.forEach(function(sub) {
+                        var opt = document.createElement('option');
+                        opt.value = sub.pk;
+                        opt.textContent = sub.nombre;
+                        if (sub.pk === currentVal) opt.selected = true;
+                        subcatSelect.appendChild(opt);
+                    });
+                }
+                filterAlbums();
+            }
+
+            catSelect.addEventListener('change', filterSubcategories);
+            subcatSelect.addEventListener('change', filterAlbums);
+            filterSubcategories();
+        }
+    });
+</script>
 {% endblock %}

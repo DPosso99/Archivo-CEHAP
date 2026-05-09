@@ -1,248 +1,90 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 from apps.core.models import RecursoDocumental
+
+FORMATO_CHOICES = [
+    ("JPEG", "JPEG"),
+    ("PNG", "PNG"),
+    ("TIFF", "TIFF"),
+    ("BMP", "BMP"),
+    ("GIF", "GIF"),
+    ("RAW", "RAW"),
+    ("WebP", "WebP"),
+    ("SVG", "SVG"),
+    ("PDF", "PDF"),
+    ("Otro", "Otro"),
+]
 
 
 class Fotografia(RecursoDocumental):
-    # ==========================================
-    # CATEGORÍA A: IMAGEN
-    # ==========================================
-    # (titulo, idioma_original y codigo (ID) ya están en RecursoDocumental base)
-    
+    # Archivo de imagen
     archivo_imagen = models.ImageField(
         upload_to="fotos/principal/", verbose_name="Archivo de imagen"
     )
-    # Función
-    funcion_imagen = models.TextField(verbose_name="Función de la imagen")
-    explicacion_funcion = models.TextField(
-        null=True, blank=True, verbose_name="Explicación de la función"
+
+    # Descripción
+    descripcion_imagen = models.TextField(
+        null=True, blank=True, verbose_name="Descripción de la imagen"
     )
 
-    # Consideraciones del usuario y Aplicación imagen
-    PCT_CHOICES = [
-        ("0-30", "0-30"),
-        ("30-60", "30-60"),
-        ("60-90", "60-90"),
-        ("100", "100"),
-    ]
-    acuerdo_contexto = models.CharField(
-        max_length=10, choices=PCT_CHOICES, null=True, blank=True, verbose_name="Acuerdo al contexto (%)"
-    )
-    adapta_lenguaje = models.CharField(
-        max_length=10, choices=PCT_CHOICES, null=True, blank=True, verbose_name="Adapta el lenguaje (%)"
-    )
-    respeta_esquemas_culturales = models.CharField(
-        max_length=10, choices=PCT_CHOICES, null=True, blank=True, verbose_name="Respeta esquemas culturales (%)"
-    )
-    rigor_cientifico = models.CharField(
-        max_length=10, choices=PCT_CHOICES, null=True, blank=True, verbose_name="Rigor científico (%)"
-    )
-    simplicidad_imagen = models.CharField(
-        max_length=10, choices=PCT_CHOICES, null=True, blank=True, verbose_name="Simplicidad (%)"
-    )
-    legibilidad = models.CharField(
-        max_length=10, choices=PCT_CHOICES, null=True, blank=True, verbose_name="Legibilidad (%)"
-    )
-    elementos_distraccion = models.CharField(
-        max_length=10, choices=PCT_CHOICES, null=True, blank=True, verbose_name="Elementos de distracción (%)"
-    )
-
-    # Clasificación académica
-    disciplina = models.CharField(
-        max_length=50, null=True, blank=True, db_index=True, verbose_name="Disciplina"
-    )
-    subdisciplina = models.CharField(
-        max_length=150, null=True, blank=True, verbose_name="Subdisciplina"
-    )
-    conceptos_imagen = models.TextField(
-        null=True, blank=True, verbose_name="Concepto(s) imagen"
-    )
-    relacion_documental = models.TextField(
-        null=True, blank=True, verbose_name="Relación documental"
-    )
-
-
-    # ==========================================
-    # CATEGORÍA B: DESCRIPCIÓN TÉCNICA Y ORIGEN
-    # ==========================================
-    descripcion_general = models.TextField(verbose_name="Descripción")
-    
-    # Formato
-    formato_original = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="Formato original"
-    )
-    formato_actual = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="Formato actual"
-    )
-    
-    # Autoría y derechos
+    # Autor y fecha
     autor = models.CharField(
-        max_length=255, null=True, blank=True, verbose_name="Autor de la imagen"
+        max_length=255, null=True, blank=True, verbose_name="Autor"
     )
-    entidad_responsable = models.CharField(
-        max_length=255, null=True, blank=True, verbose_name="Entidad responsable de la imagen"
-    )
-    derechos_propiedad_intelectual = models.TextField(
-        null=True, blank=True, verbose_name="Derechos de propiedad intelectual"
-    )
-    condiciones_uso = models.TextField(
-        null=True, blank=True, verbose_name="Condiciones de uso"
-    )
-
-    # Dimensiones físicas
-    ancho_fisico_px = models.IntegerField(null=True, blank=True, verbose_name="Ancho físico (px)")
-    alto_fisico_px = models.IntegerField(null=True, blank=True, verbose_name="Alto físico (px)")
-
-    # Dimensiones digitales
-    ancho_pixeles = models.IntegerField(null=True, blank=True, verbose_name="Ancho digital (px)")
-    alto_pixeles = models.IntegerField(null=True, blank=True, verbose_name="Alto digital (px)")
-    resolucion_horizontal = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Resolución horizontal (ppp)"
-    )
-    resolucion_vertical = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True, blank=True, verbose_name="Resolución vertical (ppp)"
-    )
-    profundidad_bits = models.IntegerField(
-        null=True, blank=True, verbose_name="Profundidad bits"
-    )
-    unidad_resolucion = models.CharField(
-        max_length=50, null=True, blank=True, verbose_name="Unidad de resolución"
-    )
-
-    # Color
-    MODELO_COLOR_CHOICES = [
-        ("RGB", "RGB"),
-        ("HLS", "HLS"),
-        ("HBS", "HBS"),
-        ("CMYK", "CMYK"),
-    ]
-    modelo_color = models.CharField(
-        max_length=20, choices=MODELO_COLOR_CHOICES, null=True, blank=True, verbose_name="Modelo de color"
-    )
-
-    # Producción y publicación
     fecha_produccion = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="Fecha de producción"
-    )
-    lugar_produccion = models.CharField(
-        max_length=255, null=True, blank=True, verbose_name="Lugar de producción"
-    )
-    publicacion_imagen = models.TextField(
-        null=True, blank=True, verbose_name="Publicación de la imagen"
-    )
-    fecha_publicacion = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="Fecha de publicación"
-    )
-    lugar_publicacion = models.CharField(
-        max_length=255, null=True, blank=True, verbose_name="Lugar de publicación"
+        max_length=100, null=True, blank=True, verbose_name="Fecha"
     )
 
-    # Versiones anteriores de la imagen
-    primera_version_imagen = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="Primera versión"
+    # Dimensiones en píxeles
+    ancho_pixeles = models.IntegerField(
+        null=True, blank=True, verbose_name="Ancho (px)"
     )
-    ultima_modificacion_imagen = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="Última modificación"
-    )
-
-    # Características
-    CARACTERISTICAS_CHOICES = [
-        ("Color", "Color"),
-        ("Blanco y negro", "Blanco y negro"),
-        ("Sepia", "Sepia"),
-        ("Alteración color", "Alteración color"),
-    ]
-    caracteristicas = models.CharField(
-        max_length=50, choices=CARACTERISTICAS_CHOICES, null=True, blank=True, verbose_name="Características"
+    alto_pixeles = models.IntegerField(
+        null=True, blank=True, verbose_name="Alto (px)"
     )
 
-    # Textos finales cat B
-    adaptacion_formato = models.TextField(
-        null=True, blank=True, verbose_name="Adaptación de formato"
-    )
-    posibilidad_adaptacion = models.TextField(
-        null=True, blank=True, verbose_name="Posibilidad de adaptación"
-    )
-    anotaciones = models.TextField(null=True, blank=True, verbose_name="Anotaciones sobre la imagen")
-
-
-    # ==========================================
-    # CATEGORÍA C: DESCRIPCIÓN PERCEPTUAL
-    # ==========================================
-    TIPO_IMAGEN_CHOICES = [
-        ("Manual", "Manual"),
-        ("Técnica", "Técnica"),
-        ("Formal", "Formal"),
-        ("Material", "Material"),
-    ]
-    tipo_imagen = models.CharField(
-        max_length=50, choices=TIPO_IMAGEN_CHOICES, null=True, blank=True, verbose_name="Tipo de imagen"
+    # Formato del archivo
+    formato_archivo = models.CharField(
+        max_length=10, choices=FORMATO_CHOICES,
+        null=True, blank=True, verbose_name="Formato del archivo"
     )
 
-    # Contexto imagen
-    contexto_fondo = models.TextField(null=True, blank=True, verbose_name="Fondo")
-    contexto_figura = models.TextField(null=True, blank=True, verbose_name="Figura")
-    elementos_visuales_importantes = models.TextField(
-        null=True, blank=True, verbose_name="Elementos visuales más importantes"
-    )
-    percepcion_sin_descripcion = models.TextField(
-        null=True, blank=True, verbose_name="Percepción sin descripción"
-    )
-    percepcion_con_descripcion = models.TextField(
-        null=True, blank=True, verbose_name="Percepción con descripción"
-    )
-    objetivo_imagen = models.TextField(
-        null=True, blank=True, verbose_name="Objetivo de la imagen"
+    # Palabras clave (separadas por coma)
+    palabras_clave = models.TextField(
+        null=True, blank=True, verbose_name="Palabras clave"
     )
 
-    # Relaciones (Multi-select via ArrayField de Postgres)
-    RELACIONES_CHOICES = [
-        ("Estéticas", "Estéticas"),
-        ("Representativas", "Representativas"),
-        ("Transformación", "Transformación"),
-        ("Organización", "Organización"),
-        ("Interpretación", "Interpretación"),
-    ]
-    relaciones = ArrayField(
-        models.CharField(max_length=50, choices=RELACIONES_CHOICES),
-        null=True, blank=True, verbose_name="Relaciones"
+    # Fecha de subida original
+    fecha_subida_original = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="Fecha de subida original"
     )
 
-    # Imagen de una imagen
-    CALIDAD_CHOICES = [("Bajo", "Bajo"), ("Medio", "Medio"), ("Alto", "Alto")]
-    porcentaje_distorsion = models.CharField(
-        max_length=10, choices=CALIDAD_CHOICES, null=True, blank=True, verbose_name="% Distorsión"
-    )
-    porcentaje_pixelacion = models.CharField(
-        max_length=10, choices=CALIDAD_CHOICES, null=True, blank=True, verbose_name="% Pixelación"
+    # URL de origen de la imagen (auto-llenado)
+    url_fuente = models.URLField(
+        max_length=1000, null=True, blank=True, verbose_name="URL de origen de la imagen"
     )
 
-    # Uso imagen (Multi-select)
-    USO_CHOICES = [
-        ("Pedagógico", "Pedagógico"),
-        ("Apoyo visual", "Apoyo visual"),
-        ("Promoción", "Promoción"),
-    ]
-    uso_imagen = ArrayField(
-        models.CharField(max_length=50, choices=USO_CHOICES),
-        null=True, blank=True, verbose_name="Uso imagen"
-    )
-
-
-    # ==========================================
-    # CATEGORÍA D: UBICACIÓN
-    # ==========================================
+    # Ubicación
     ubicacion_web = models.URLField(
         max_length=500, null=True, blank=True, verbose_name="Ubicación Web"
     )
     ubicacion_archivo = models.TextField(
-        null=True, blank=True, verbose_name="Ubicación Archivo"
+        null=True, blank=True, verbose_name="Ubicación física de la fotografía"
+    )
+    # Mapa
+    mapa_url = models.URLField(
+        max_length=1000, null=True, blank=True, verbose_name="URL de Google Maps"
+    )
+    latitud = models.DecimalField(
+        max_digits=10, decimal_places=7, null=True, blank=True, verbose_name="Latitud"
+    )
+    longitud = models.DecimalField(
+        max_digits=10, decimal_places=7, null=True, blank=True, verbose_name="Longitud"
     )
     imagen_mapa = models.ImageField(
-        upload_to="fotos/mapas/", null=True, blank=True, verbose_name="Imagen de mapa desde arriba"
+        upload_to="fotos/mapas/", null=True, blank=True, verbose_name="Imagen de mapa"
     )
     imagen_propia = models.ImageField(
-        upload_to="fotos/extras/", null=True, blank=True, verbose_name="Imagen propia"
+        upload_to="fotos/extras/", null=True, blank=True, verbose_name="Imagen del lugar"
     )
     descripcion_imagen_propia = models.TextField(
         null=True, blank=True, verbose_name="Descripción de imagen propia"
@@ -255,3 +97,23 @@ class Fotografia(RecursoDocumental):
 
     def __str__(self):
         return f"{self.codigo} - {self.titulo}"
+
+
+class Comentario(models.Model):
+    fotografia = models.ForeignKey(Fotografia, on_delete=models.CASCADE, related_name="comentarios")
+    nombre_usuario = models.CharField(max_length=100, null=True, blank=True, verbose_name="Nombre (opcional)")
+    texto = models.TextField(verbose_name="Comentario")
+    fecha = models.DateTimeField(auto_now_add=True)
+    ip_usuario = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-fecha"]
+
+
+class Calificacion(models.Model):
+    fotografia = models.ForeignKey(Fotografia, on_delete=models.CASCADE, related_name="calificaciones")
+    estrellas = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])
+    ip_usuario = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ("fotografia", "ip_usuario")

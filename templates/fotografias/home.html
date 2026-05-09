@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% block title %}Inicio - Galería CEHAP{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #homeMap { width: 100%; height: 460px; border-radius: 12px; z-index: 0; }
+    .home-map-section { margin-bottom: 2rem; }
+    .leaflet-popup-content { margin: 0; min-width: 260px; }
+    .leaflet-popup-content-wrapper { border-radius: 12px; padding: 0; overflow: hidden; }
+    .leaflet-container a.leaflet-popup-close-button { top: 8px; right: 8px; z-index: 10; color: #fff; font-size: 20px; background: rgba(0,0,0,.4); border-radius: 50%; width: 24px; height: 24px; line-height: 24px; }
+    .info-card { font-family: 'Inter', system-ui, sans-serif; }
+    .info-card img { width: 100%; height: 140px; object-fit: cover; display: block; }
+    .info-card .body { padding: 12px 14px; }
+    .info-card .body h6 { font-size: 0.9rem; font-weight: 700; color: #1a1a1a; margin: 0 0 3px; line-height: 1.3; }
+    .info-card .body .meta { font-size: 0.75rem; color: #666; margin-bottom: 4px; }
+    .info-card .body .desc { font-size: 0.78rem; color: #444; line-height: 1.4; margin-bottom: 8px; }
+    .info-card .body a { font-size: 0.76rem; font-weight: 600; color: #2563eb; text-decoration: none; }
+    .info-card .no-img { height: 100px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 1.8rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-12 text-start mb-4">
+        <h4 class="mb-2 fw-bold text-dark lh-base">Galería de Imágenes Escuela del Hábitat - CEHAP<br>Facultad de Arquitectura - Universidad Nacional de Colombia - Sede Medellín</h4>
+        <p class="text-secondary">Fotografías e imágenes producto de estudios, investigaciones y trabajo de campo de la Escuela del Hábitat CEHAP.</p>
+    </div>
+</div>
+
+<!-- Buscador Principal -->
+<div class="row justify-content-center mb-5">
+    <div class="col-md-8">
+        <div class="card card-modern border-0 shadow-sm bg-white">
+            <div class="card-body p-4">
+                <form method="get" action="{% url 'fotografia_lista' %}" class="row gx-3 gy-2 align-items-center">
+                    <div class="col-md-10">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-secondary"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control form-control-modern border-start-0 ps-0 shadow-none" id="q" name="q" placeholder="Buscar fotografías por título, código o palabra clave...">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-dark w-100 btn-modern shadow-none">Buscar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.section-title { background-color: #f8f9fa; border-left: 4px solid #8cc63f; padding: 0.5rem 1rem; border-radius: 0 8px 8px 0; font-weight: 600; font-size: 1.1rem; color: #495057; margin-bottom: 1.5rem; }
+.img-thumb-container { height: 220px; overflow: hidden; border-radius: .375rem .375rem 0 0; }
+.img-thumb { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+.photo-card:hover .img-thumb { transform: scale(1.05); }
+</style>
+
+<!-- Aleatorias -->
+<h4 class="section-title"><i class="bi bi-shuffle me-2 text-secondary"></i> Imágenes Aleatorias</h4>
+<div class="row">
+    {% for foto in random_fotos %}
+    <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card h-100 shadow-sm border-0 photo-card">
+            <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-decoration-none">
+                <div class="img-thumb-container">
+                    {% if foto.archivo_imagen %}<img src="{{ foto.archivo_imagen.url }}" class="img-thumb">{% else %}<div class="d-flex align-items-center justify-content-center h-100"><i class="bi bi-image fs-1 text-muted opacity-25"></i></div>{% endif %}
+                </div>
+            </a>
+            <div class="card-body p-3 text-center">
+                <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-dark text-decoration-none fw-medium d-block text-truncate mb-1" title="{{ foto.titulo }}">{{ foto.titulo }}</a>
+                <small class="text-muted d-block">{{ foto.vistas }} vistas</small>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12"><p class="text-muted">No hay imágenes disponibles.</p></div>
+    {% endfor %}
+</div>
+
+<!-- Últimas subidas -->
+<h4 id="ultimas-subidas" class="section-title mt-2"><i class="bi bi-clock-history me-2 text-secondary"></i> Últimas Subidas</h4>
+<div class="row">
+    {% for foto in latest_fotos %}
+    <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card h-100 shadow-sm border-0 photo-card">
+            <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-decoration-none">
+                <div class="img-thumb-container">
+                    {% if foto.archivo_imagen %}<img src="{{ foto.archivo_imagen.url }}" class="img-thumb">{% else %}<div class="d-flex align-items-center justify-content-center h-100"><i class="bi bi-image fs-1 text-muted opacity-25"></i></div>{% endif %}
+                </div>
+            </a>
+            <div class="card-body p-3 text-center">
+                <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-dark text-decoration-none fw-medium d-block text-truncate mb-1" title="{{ foto.titulo }}">{{ foto.titulo }}</a>
+                <small class="text-muted d-block">{{ foto.fecha_registro|date:"d M Y" }}</small>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12"><p class="text-muted">No hay imágenes recientes.</p></div>
+    {% endfor %}
+</div>
+
+<!-- Más vistas -->
+<h4 id="mas-vistas" class="section-title mt-2"><i class="bi bi-eye me-2 text-secondary"></i> Más Vistas</h4>
+<div class="row">
+    {% for foto in most_viewed %}
+    <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card h-100 shadow-sm border-0 photo-card">
+            <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-decoration-none">
+                <div class="img-thumb-container">
+                    {% if foto.archivo_imagen %}<img src="{{ foto.archivo_imagen.url }}" class="img-thumb">{% else %}<div class="d-flex align-items-center justify-content-center h-100"><i class="bi bi-image fs-1 text-muted opacity-25"></i></div>{% endif %}
+                </div>
+            </a>
+            <div class="card-body p-3 text-center">
+                <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-dark text-decoration-none fw-medium d-block text-truncate mb-1" title="{{ foto.titulo }}">{{ foto.titulo }}</a>
+                <small class="text-muted d-block">{{ foto.vistas }} vistas</small>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12"><p class="text-muted">Aún no hay visualizaciones registradas.</p></div>
+    {% endfor %}
+</div>
+
+<!-- Mejor Calificadas -->
+<h4 id="mejor-calificadas" class="section-title mt-2"><i class="bi bi-star-fill me-2 text-warning"></i> Mejor Calificadas</h4>
+<div class="row">
+    {% for foto in top_rated %}
+    <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card h-100 shadow-sm border-0 photo-card">
+            <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-decoration-none">
+                <div class="img-thumb-container">
+                    {% if foto.archivo_imagen %}<img src="{{ foto.archivo_imagen.url }}" class="img-thumb">{% else %}<div class="d-flex align-items-center justify-content-center h-100"><i class="bi bi-image fs-1 text-muted opacity-25"></i></div>{% endif %}
+                </div>
+            </a>
+            <div class="card-body p-3 text-center">
+                <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-dark text-decoration-none fw-medium d-block text-truncate mb-1" title="{{ foto.titulo }}">{{ foto.titulo }}</a>
+                <small class="text-warning d-block"><i class="bi bi-star-fill"></i> {{ foto.avg_rating|floatformat:1 }} / 5.0</small>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12"><p class="text-muted mb-5">Aún no hay calificaciones.</p></div>
+    {% endfor %}
+</div>
+
+<!-- Mapa fotográfico -->
+{% if mapa_fotos_json and mapa_fotos_json != '[]' %}
+<h4 class="section-title mt-4"><i class="bi bi-geo-alt-fill me-2 text-danger"></i> Mapa Fotográfico</h4>
+<div class="home-map-section">
+    <div id="homeMap"></div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+{% if mapa_fotos_json and mapa_fotos_json != '[]' %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function() {
+    var fotos = {{ mapa_fotos_json|safe }};
+    var mapEl = document.getElementById('homeMap');
+    if (!mapEl || !fotos.length) return;
+
+    var map = L.map('homeMap', { scrollWheelZoom: true }).setView([4.5709, -74.2973], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var bounds = [];
+    fotos.forEach(function(f) {
+        var img = f.img
+            ? '<img src="' + f.img + '" alt="' + f.titulo + '" loading="lazy">'
+            : '<div class="no-img"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>';
+
+        var meta = [f.autor, f.fecha].filter(Boolean).join(' \u00b7 ');
+        var desc = f.desc ? '<div class="desc">' + f.desc + (f.desc.length >= 150 ? '...' : '') + '</div>' : '';
+
+        var popup = L.popup({ maxWidth: 280, className: 'info-popup' }).setContent(
+            '<div class="info-card">' + img + '<div class="body"><h6>' + f.titulo + '</h6>' +
+            (meta ? '<div class="meta">' + meta + '</div>' : '') + desc +
+            '<a href="' + f.url + '">Ver ficha completa \u2192</a></div></div>'
+        );
+
+        L.marker([f.lat, f.lng], {
+            icon: L.divIcon({
+                className: 'map-marker-icon',
+                html: '<svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#2563eb" stroke="#fff" stroke-width="2.5"/><circle cx="16" cy="16" r="4" fill="#fff"/></svg>',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16],
+                popupAnchor: [0, -16],
+            })
+        }).addTo(map).bindPopup(popup).on('mouseover', function() { this.openPopup(); });
+
+        bounds.push([f.lat, f.lng]);
+    });
+
+    if (bounds.length > 1) map.fitBounds(bounds, { padding: [30, 30] });
+    else if (bounds.length === 1) map.setView(bounds[0], 16);
+})();
+</script>
+{% endif %}
+{% endblock %}

@@ -1,246 +1,480 @@
 {% extends 'base.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>#detailMap{width:100%;height:300px;border-radius:8px;z-index:0}</style>
+{% endblock %}
+
 {% block content %}
-<div class="row mb-4 align-items-center">
+
+<div class="row mb-4">
     <div class="col-md-8">
-        <h2 class="mb-0">{{ foto.titulo }}</h2>
-        <p class="text-muted mb-0">Código: <strong>{{ foto.codigo }}</strong> | Colección: {{ foto.coleccion|default:"Sin colección" }} | Estado: <span class="badge bg-{% if foto.estado == 'Activo' %}success{% elif foto.estado == 'Archivado' %}secondary{% else %}warning{% endif %}">{{ foto.estado }}</span></p>
+        <h2 class="mb-1 fw-bold">{{ foto.titulo }}</h2>
+        <p class="text-muted mb-0 small">
+            Código: <strong>{{ foto.codigo }}</strong> &rsaquo;
+            {% if breadcrumb %}
+                {% for tipo, obj in breadcrumb %}
+                    {% if tipo == 'cat' or tipo == 'sub' %}
+                        <a href="{% url 'categoria_lista' %}" class="text-decoration-none text-muted">{{ obj.nombre }}</a> &rsaquo;
+                    {% elif tipo == 'album' %}
+                        <strong>{{ obj.nombre }}</strong>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                Sin álbum
+            {% endif %}
+            &nbsp;|&nbsp; <span class="badge bg-{% if foto.estado == 'Activo' %}success{% elif foto.estado == 'Archivado' %}secondary{% else %}warning{% endif %}">{{ foto.estado }}</span>
+        </p>
     </div>
-    <div class="col-md-4 text-end">
-        <a href="{% url 'fotografia_lista' %}" class="btn btn-outline-secondary me-2">Volver al Catálogo</a>
+    <div class="col-md-4 text-md-end mt-2 mt-md-0 d-flex justify-content-md-end gap-2 flex-wrap align-items-start">
+        <a href="{% url 'fotografia_lista' %}" class="btn btn-outline-secondary btn-sm">Volver</a>
+        {% if foto.archivo_imagen %}
+        <a href="{{ foto.archivo_imagen.url }}" download class="btn btn-outline-primary btn-sm"><i class="bi bi-download me-1"></i>Descargar</a>
+        {% endif %}
         {% if user.is_authenticated %}
-        <a href="{% url 'fotografia_editar' foto.pk %}" class="btn btn-primary">Editar Ficha</a>
+        <a href="{% url 'fotografia_editar' foto.pk %}" class="btn btn-primary btn-sm">Editar</a>
         {% endif %}
     </div>
 </div>
 
+<!-- HERO Carrusel -->
+<div class="gallery mb-4">
+    <div class="gallery-main">
+        <div class="gallery-slides" id="gallerySlides">
+            {% for f in album_fotos %}
+            <div class="gallery-slide{% if f.pk == foto.pk %} active{% endif %}" data-index="{{ forloop.counter0 }}">
+                {% if f.archivo_imagen %}
+                <img src="{{ f.archivo_imagen.url }}" alt="{{ f.titulo }}" class="gallery-img" onclick="openLightbox({{ forloop.counter0 }})">
+                {% else %}
+                <div class="gallery-placeholder"><span>Sin imagen</span></div>
+                {% endif %}
+                <div class="gallery-caption">
+                    <span class="gallery-title">{{ f.titulo }}{% if f.pk != foto.pk %} <a href="{% url 'fotografia_detalle' f.pk %}" class="gallery-link" title="Ver ficha"><i class="bi bi-box-arrow-up-right"></i></a>{% endif %}</span>
+                    {% if f.autor %}<span class="gallery-meta">{{ f.autor }}{% if f.fecha_produccion %} &middot; {{ f.fecha_produccion }}{% endif %}</span>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button class="gallery-arrow gallery-prev" id="galleryPrev" aria-label="Anterior"><i class="bi bi-chevron-left"></i></button>
+        <button class="gallery-arrow gallery-next" id="galleryNext" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></button>
+
+        <div class="gallery-counter" id="galleryCounter">{% for f in album_fotos %}{% if f.pk == foto.pk %}{{ forloop.counter }}{% endif %}{% endfor %} / {{ album_fotos|length }}</div>
+    </div>
+
+    {% if album_fotos %}
+    <div class="filmstrip" id="filmstrip">
+        <button class="fs-arrow fs-prev" onclick="fsScroll(-1)" aria-label="Anterior"><i class="bi bi-chevron-left"></i></button>
+        <div class="fs-track" id="fsTrack">
+            {% for f in album_fotos %}
+            <div class="fs-frame{% if f.pk == foto.pk %} active{% endif %}" data-index="{{ forloop.counter0 }}" onclick="goToSlide({{ forloop.counter0 }})">
+                {% if f.archivo_imagen %}<img src="{{ f.archivo_imagen.url }}" alt="{{ f.titulo }}" loading="lazy">{% else %}<div class="fs-frame-ph"><i class="bi bi-image"></i></div>{% endif %}
+                <span class="fs-num">{{ forloop.counter }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <button class="fs-arrow fs-next" onclick="fsScroll(1)" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Metadata + Rating + Comments -->
 <div class="row g-4">
-    <!-- Columna izquierda: Imágenes (Carrusel Bootstrap) -->
-    <div class="col-lg-5">
-        <div id="imageCarousel" class="carousel slide carousel-fade mb-4 shadow-sm rounded" data-bs-ride="carousel">
-            <div class="carousel-inner rounded">
-                {% if foto.archivo_imagen %}
-                <div class="carousel-item active">
-                    <img src="{{ foto.archivo_imagen.url }}" class="d-block w-100" alt="Principal">
-                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
-                        <h5>Imagen Principal</h5>
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-bottom"><strong><i class="bi bi-info-circle me-2"></i>Ficha de la imagen</strong></div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        {% if foto.autor %}<p class="mb-2"><strong>Autor:</strong> {{ foto.autor }}</p>{% endif %}
+                        {% if foto.fecha_produccion %}<p class="mb-2"><strong>Fecha:</strong> {{ foto.fecha_produccion }}</p>{% endif %}
+                        <p class="mb-2"><strong>Subida a la plataforma:</strong> {{ foto.fecha_registro|date:"d/m/Y" }}</p>
+                        {% if foto.fecha_subida_original %}<p class="mb-2"><strong>Fecha original:</strong> {{ foto.fecha_subida_original }}</p>{% endif %}
+                        {% if foto.descripcion_imagen %}<p class="mb-2"><strong>Descripción:</strong><br>{{ foto.descripcion_imagen|linebreaks }}</p>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {% if foto.ancho_pixeles or foto.alto_pixeles %}
+                        <p class="mb-2"><strong>Dimensiones:</strong> {{ foto.ancho_pixeles|default:"?" }} x {{ foto.alto_pixeles|default:"?" }} px</p>
+                        {% endif %}
+                        {% if foto.formato_archivo %}<p class="mb-2"><strong>Formato:</strong> {{ foto.formato_archivo }}</p>{% endif %}
+                        {% if file_size %}<p class="mb-2"><strong>Peso:</strong> {{ file_size }}</p>{% endif %}
+                        {% if foto.url_fuente %}<p class="mb-2"><strong>URL de origen:</strong> <a href="{{ foto.url_fuente }}" target="_blank" class="text-break small">{{ foto.url_fuente|truncatechars:50 }}</a></p>{% endif %}
                     </div>
                 </div>
-                {% else %}
-                <div class="carousel-item active">
-                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
-                        <span class="text-muted">Sin imagen principal</span>
-                    </div>
+
+                {% if foto.palabras_clave %}
+                <hr>
+                <p class="mb-2"><strong>Palabras clave:</strong></p>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for kw in keywords %}
+                        <a href="{% url 'fotografia_lista' %}?q={{ kw|urlencode }}" class="badge bg-light text-primary border text-decoration-none py-2 px-3">{{ kw }}</a>
+                    {% endfor %}
                 </div>
                 {% endif %}
+
+                {% if foto.latitud and foto.longitud %}
+                <hr>
+                <p class="mb-2"><strong>Ubicación en mapa:</strong></p>
+                <div id="detailMap"></div>
+                {% endif %}
+
+                {% if foto.ubicacion_archivo or foto.ubicacion_web or foto.imagen_propia %}
+                <hr>
+                {% if foto.ubicacion_archivo %}<p class="mb-2"><strong>Ubicación Física de la Fotografía:</strong> {{ foto.ubicacion_archivo }}</p>{% endif %}
+                {% if foto.ubicacion_web %}<p class="mb-2"><strong>Ubicación Web:</strong> <a href="{{ foto.ubicacion_web }}" target="_blank" class="text-break small">{{ foto.ubicacion_web|truncatechars:60 }}</a></p>{% endif %}
+                {% if foto.imagen_propia %}<p class="mb-2"><strong>Imagen propia de la ubicación:</strong></p><img src="{{ foto.imagen_propia.url }}" class="img-fluid rounded mt-1" style="max-height: 200px;" alt="Imagen de la ubicación">{% endif %}
+                {% endif %}
+
+                {% if foto.imagen_mapa %}<hr><p class="mb-2"><strong>Imagen de mapa:</strong></p><img src="{{ foto.imagen_mapa.url }}" class="img-fluid rounded mt-1" style="max-height: 200px;" alt="Mapa">{% endif %}
             </div>
         </div>
 
-        <!-- Ficha Resumen -->
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-light"><strong>Anotaciones Rápidas</strong></div>
-            <div class="card-body text-muted small">
-                {{ foto.anotaciones|default:"Sin anotaciones." }}
+        <!-- Comentarios -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom"><strong><i class="bi bi-chat-dots me-2"></i>Comentarios ({{ comentarios.count }})</strong></div>
+            <div class="card-body bg-light">
+                <div class="mb-4" style="max-height: 300px; overflow-y: auto;">
+                    {% for c in comentarios %}
+                    <div class="d-flex mb-3">
+                        <div class="me-3"><div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;"><i class="bi bi-person-fill"></i></div></div>
+                        <div class="bg-white p-3 rounded shadow-sm flex-grow-1">
+                            <p class="mb-1 small text-muted"><strong>{{ c.nombre_usuario|default:"Anónimo" }}</strong> &middot; {{ c.fecha|date:"d/m/Y H:i" }}</p>
+                            <p class="mb-0">{{ c.texto|linebreaksbr }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small text-center my-3">No hay comentarios aún.</p>
+                    {% endfor %}
+                </div>
+                <form method="POST" action="{% url 'fotografia_detalle' foto.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-2"><input type="text" class="form-control border-0 shadow-sm" name="nombre_usuario" placeholder="Tu nombre (opcional)"></div>
+                    <div class="mb-3"><textarea class="form-control border-0 shadow-sm" name="comentario" rows="3" placeholder="Escribe un comentario..." required></textarea></div>
+                    <div class="text-end"><button type="submit" class="btn btn-primary"><i class="bi bi-send me-1"></i>Publicar</button></div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Columna derecha: Acordeón con las 4 categorías -->
-    <div class="col-lg-7">
-        <div class="accordion shadow-sm" id="accordionFicha">
-            
-            <!-- A: Imagen -->
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingImagen">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseImagen" aria-expanded="true" aria-controls="collapseImagen">
-                        A. Imagen
-                    </button>
-                </h2>
-                <div id="collapseImagen" class="accordion-collapse collapse show" aria-labelledby="headingImagen" data-bs-parent="#accordionFicha">
-                    <div class="accordion-body">
-                        <p><strong>Idioma original:</strong> {{ foto.idioma_original }}</p>
-                        <p><strong>Función de la imagen:</strong><br>{{ foto.funcion_imagen|linebreaks }}</p>
-                        <p><strong>Explicación de la función:</strong><br>{{ foto.explicacion_funcion|linebreaks }}</p>
-                        <hr>
-                        <h6>Consideraciones del usuario</h6>
-                        <ul>
-                            <li>Acuerdo contexto: {{ foto.acuerdo_contexto|default:"N/A" }}%</li>
-                            <li>Adapta lenguaje: {{ foto.adapta_lenguaje|default:"N/A" }}%</li>
-                            <li>Respeta esquemas culturales: {{ foto.respeta_esquemas_culturales|default:"N/A" }}%</li>
-                            <li>Rigor científico: {{ foto.rigor_cientifico|default:"N/A" }}%</li>
-                            <li>Simplicidad: {{ foto.simplicidad_imagen|default:"N/A" }}%</li>
-                            <li>Legibilidad: {{ foto.legibilidad|default:"N/A" }}%</li>
-                            <li>Elementos distracción: {{ foto.elementos_distraccion|default:"N/A" }}%</li>
-                        </ul>
-                        <hr>
-                        <h6>Clasificación Académica</h6>
-                        <p><strong>Disciplina:</strong> {{ foto.disciplina|default:"N/A" }}</p>
-                        <p><strong>Subdisciplina:</strong> {{ foto.subdisciplina|default:"N/A" }}</p>
-                        <p><strong>Conceptos (Palabras Clave):</strong> {{ foto.conceptos_imagen|default:"N/A" }}</p>
-                        <p><strong>Relación documental:</strong> {{ foto.relacion_documental|default:"N/A" }}</p>
-                    </div>
-                </div>
+    <div class="col-lg-5">
+        <div class="card mb-4 shadow-sm border-0">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                <strong><i class="bi bi-star-fill text-warning me-2"></i>Calificación</strong>
+                <span class="badge bg-primary rounded-pill">{{ promedio_calificacion }} / 5.0 ({{ total_calificaciones }})</span>
             </div>
-
-            <!-- B: Descripción Técnica -->
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingTecnico">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTecnico" aria-expanded="false" aria-controls="collapseTecnico">
-                        B. Descripción Técnica y Origen
-                    </button>
-                </h2>
-                <div id="collapseTecnico" class="accordion-collapse collapse" aria-labelledby="headingTecnico" data-bs-parent="#accordionFicha">
-                    <div class="accordion-body">
-                        <p><strong>Descripción general:</strong><br>{{ foto.descripcion_general|linebreaks }}</p>
-                        <hr>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6>Dimensiones Físicas</h6>
-                                <ul>
-                                    <li>Ancho: {{ foto.ancho_fisico_px|default:"N/A" }} px</li>
-                                    <li>Alto: {{ foto.alto_fisico_px|default:"N/A" }} px</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6>Dimensiones Digitales</h6>
-                                <ul>
-                                    <li>Resolución: {{ foto.resolucion_horizontal|default:"-" }} x {{ foto.resolucion_vertical|default:"-" }} {{ foto.unidad_resolucion }}</li>
-                                    <li>Píxeles: {{ foto.ancho_pixeles|default:"-" }}x{{ foto.alto_pixeles|default:"-" }}</li>
-                                    <li>Profundidad: {{ foto.profundidad_bits|default:"-" }} bits</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6>Formatos y Color</h6>
-                                <ul>
-                                    <li>Original: {{ foto.formato_original|default:"N/A" }}</li>
-                                    <li>Actual: {{ foto.formato_actual|default:"N/A" }}</li>
-                                    <li>Modelo Color: {{ foto.modelo_color|default:"N/A" }}</li>
-                                    <li>Características: {{ foto.caracteristicas|default:"N/A" }}</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6>Autoría y Publicación</h6>
-                                <ul>
-                                    <li>Autor: {{ foto.autor|default:"N/A" }}</li>
-                                    <li>Entidad: {{ foto.entidad_responsable|default:"N/A" }}</li>
-                                    <li>Fecha prod.: {{ foto.fecha_produccion|default:"N/A" }}</li>
-                                    <li>Lugar prod.: {{ foto.lugar_produccion|default:"N/A" }}</li>
-                                    <li>Fecha pub.: {{ foto.fecha_publicacion|default:"N/A" }}</li>
-                                </ul>
-                            </div>
-                        </div>
+            <div class="card-body text-center">
+                <p class="small text-muted mb-2">Tu calificación:</p>
+                <form method="POST" action="{% url 'fotografia_detalle' foto.pk %}">
+                    {% csrf_token %}
+                    <div class="rating-stars mb-3">
+                        {% for i in "54321" %}
+                        <input type="radio" name="estrellas" id="star{{ i }}" value="{{ i }}" {% if mi_calificacion|stringformat:"s" == i %}checked{% endif %} onchange="this.form.submit()">
+                        <label for="star{{ i }}" title="{{ i }} estrellas"><i class="bi bi-star-fill fs-4"></i></label>
+                        {% endfor %}
                     </div>
-                </div>
+                </form>
             </div>
-
-            <!-- C: Perceptual -->
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingPerceptual">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePerceptual" aria-expanded="false" aria-controls="collapsePerceptual">
-                        C. Descripción Perceptual
-                    </button>
-                </h2>
-                <div id="collapsePerceptual" class="accordion-collapse collapse" aria-labelledby="headingPerceptual" data-bs-parent="#accordionFicha">
-                    <div class="accordion-body">
-                        <p><strong>Tipo de imagen:</strong> {{ foto.tipo_imagen|default:"N/A" }}</p>
-                        <p><strong>Contexto fondo:</strong> {{ foto.contexto_fondo|default:"N/A" }}</p>
-                        <p><strong>Contexto figura:</strong> {{ foto.contexto_figura|default:"N/A" }}</p>
-                        <p><strong>Elementos visuales:</strong> {{ foto.elementos_visuales_importantes|default:"N/A" }}</p>
-                        <p><strong>Percepción sin descripción:</strong> {{ foto.percepcion_sin_descripcion|default:"N/A" }}</p>
-                        <p><strong>Percepción con descripción:</strong> {{ foto.percepcion_con_descripcion|default:"N/A" }}</p>
-                        <p><strong>Objetivo de la imagen:</strong> {{ foto.objetivo_imagen|default:"N/A" }}</p>
-                        <hr>
-                        <p><strong>Relaciones:</strong> {{ foto.relaciones|join:", "|default:"N/A" }}</p>
-                        <p><strong>Uso de imagen:</strong> {{ foto.uso_imagen|join:", "|default:"N/A" }}</p>
-                        <p><strong>% Distorsión:</strong> {{ foto.porcentaje_distorsion|default:"N/A" }}</p>
-                        <p><strong>% Pixelación:</strong> {{ foto.porcentaje_pixelacion|default:"N/A" }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- D: Ubicación -->
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingUbicacion">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUbicacion" aria-expanded="false" aria-controls="collapseUbicacion">
-                        D. Ubicación
-                    </button>
-                </h2>
-                <div id="collapseUbicacion" class="accordion-collapse collapse" aria-labelledby="headingUbicacion" data-bs-parent="#accordionFicha">
-                    <div class="accordion-body">
-                        <p><strong>Ubicación web:</strong> {% if foto.ubicacion_web %}<a href="{{ foto.ubicacion_web }}" target="_blank">{{ foto.ubicacion_web }}</a>{% else %}N/A{% endif %}</p>
-                        <p><strong>Ubicación archivo:</strong> {{ foto.ubicacion_archivo|default:"N/A" }}</p>
-                        <p><strong>Descripción imagen propia:</strong> {{ foto.descripcion_imagen_propia|default:"N/A" }}</p>
-                        
-                        {% if foto.imagen_mapa or foto.imagen_propia %}
-                        <hr>
-                        <h6>Imágenes de Ubicación</h6>
-                        <div class="row g-3 mb-3">
-                            {% if foto.imagen_mapa %}
-                            <div class="col-md-6 text-center">
-                                <p class="mb-1 small fw-bold">Imagen de Mapa</p>
-                                <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-bs-img="{{ foto.imagen_mapa.url }}" data-bs-title="Imagen de Mapa">
-                                    <img src="{{ foto.imagen_mapa.url }}" class="img-fluid img-thumbnail shadow-sm border-0" alt="Mapa" style="cursor: zoom-in; max-height: 200px; object-fit: contain;">
-                                </a>
-                            </div>
-                            {% endif %}
-                            
-                            {% if foto.imagen_propia %}
-                            <div class="col-md-6 text-center">
-                                <p class="mb-1 small fw-bold">Imagen Propia</p>
-                                <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" data-bs-img="{{ foto.imagen_propia.url }}" data-bs-title="Imagen Propia">
-                                    <img src="{{ foto.imagen_propia.url }}" class="img-fluid img-thumbnail shadow-sm border-0" alt="Propia" style="cursor: zoom-in; max-height: 200px; object-fit: contain;">
-                                </a>
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-
-                        <hr>
-                        <h6>Registro y Auditoría</h6>
-                        <p><strong>Registrado por:</strong> {{ foto.registrado_por.username|default:"Desconocido" }}</p>
-                        <p><strong>Fecha de registro:</strong> {{ foto.fecha_registro|date:"d/m/Y H:i" }}</p>
-                        <p><strong>Última actualización de la ficha:</strong> {{ foto.fecha_actualizacion|date:"d/m/Y H:i" }}</p>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 </div>
 
-<!-- Modal para ver imágenes ampliadas -->
-<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="imageModalLabel">Visor de Imagen</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body text-center p-3 bg-light">
-                <img src="" id="modalImage" class="img-fluid rounded shadow-sm" alt="Imagen ampliada" style="max-height: 80vh; object-fit: contain;">
-            </div>
-        </div>
+<!-- LIGHTBOX -->
+<div id="lightbox" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.96);z-index:9999;perspective:1400px;">
+    <button onclick="lbClose()" style="position:absolute;top:18px;right:24px;background:none;border:none;color:#fff;font-size:2.5rem;cursor:pointer;z-index:10;line-height:1;">&times;</button>
+    <span id="lbCounter" style="position:absolute;top:20px;left:24px;color:rgba(255,255,255,.8);font-size:.85rem;z-index:10;"></span>
+
+    <div style="position:absolute;bottom:80px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;z-index:10;background:rgba(0,0,0,.55);border-radius:10px;padding:6px 14px;">
+        <button onclick="lbPrev()" title="Anterior" style="background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;padding:0 4px;"><i class="bi bi-skip-backward-fill"></i></button>
+        <button id="lbPlayPause" onclick="lbTogglePlay()" title="Pausar" style="background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;padding:0 4px;"><i class="bi bi-pause-fill"></i></button>
+        <button onclick="lbNext()" title="Siguiente" style="background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;padding:0 4px;"><i class="bi bi-skip-forward-fill"></i></button>
+        <span style="color:rgba(255,255,255,.3);margin:0 4px;">|</span>
+        <button onclick="lbZoomOut()" title="Reducir" style="background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;padding:0 2px;">−</button>
+        <span id="lbZoomLabel" style="color:#fff;font-size:.8rem;min-width:38px;text-align:center;">100%</span>
+        <button onclick="lbZoomIn()" title="Aumentar" style="background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;padding:0 2px;">+</button>
+        <button onclick="lbZoomReset()" title="Ajustar" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:.75rem;cursor:pointer;padding:0 2px;">↺</button>
     </div>
+
+    <div id="lbPrevZone" style="position:absolute;top:0;left:0;width:15%;height:100%;cursor:pointer;z-index:5;" onclick="lbPrev()"></div>
+    <div id="lbNextZone" style="position:absolute;top:0;right:0;width:15%;height:100%;cursor:pointer;z-index:5;" onclick="lbNext()"></div>
+
+    <!-- 3D carrusel -->
+    <div id="lb3D" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,0,.2,1);"></div>
+    <!-- Flat zoom mode -->
+    <div id="lbFlat" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;overflow:hidden;">
+        <img id="lbFlatImg" src="" style="max-width:92%;max-height:82vh;object-fit:contain;" alt="">
+    </div>
+
+    <div id="lightboxCaption" style="position:absolute;bottom:120px;color:#ccc;text-align:center;font-size:.9rem;z-index:5;left:0;right:0;pointer-events:none;"></div>
 </div>
+    <div id="lightboxCaption" style="color:#ccc;margin-top:16px;text-align:center;font-size:0.95rem;"></div>
+</div>
+
+<style>
+.rating-stars{display:inline-flex;flex-direction:row-reverse}
+.rating-stars input{display:none}
+.rating-stars label{cursor:pointer;color:#ddd;padding:0 .1rem;transition:color .2s}
+.rating-stars input:checked~label,.rating-stars label:hover,.rating-stars label:hover~label{color:#ffc107}
+
+/* --- Gallery --- */
+.gallery{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04)}
+.gallery-main{position:relative;background:#0f0f0f;display:flex;align-items:center;justify-content:center;height:65vh;min-height:340px;max-height:75vh}
+.gallery-slides{position:relative;width:100%;height:100%}
+.gallery-slide{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .35s ease;pointer-events:none}
+.gallery-slide.active{opacity:1;pointer-events:auto;position:relative}
+.gallery-img{width:70%;height:70%;object-fit:contain;cursor:zoom-in;display:block}
+.gallery-placeholder{display:flex;align-items:center;justify-content:center;color:#666;height:100%;font-size:1.1rem}
+.gallery-caption{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.82));padding:2.5rem 1.5rem 1rem;color:#fff;pointer-events:none;display:flex;flex-direction:column}
+.gallery-title{font-weight:600;font-size:.95rem}
+.gallery-meta{font-size:.78rem;opacity:.8;margin-top:2px}
+.gallery-link{color:rgba(255,255,255,.5);text-decoration:none;pointer-events:auto;font-size:.75rem}
+.gallery-link:hover{color:#fff}
+.gallery-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);backdrop-filter:blur(4px);border:none;color:#fff;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;z-index:5;font-size:1.2rem}
+.gallery-arrow:hover{background:rgba(255,255,255,.3)}
+.gallery-prev{left:12px}
+.gallery-next{right:12px}
+.gallery-counter{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);color:#fff;font-size:.78rem;padding:4px 10px;border-radius:20px;z-index:5}
+.filmstrip{position:relative;background:#000;margin-top:6px;display:flex;align-items:center;overflow:hidden;padding:14px 52px}
+.filmstrip::before,.filmstrip::after{content:'';position:absolute;left:0;right:0;height:12px;z-index:2;background-image:repeating-linear-gradient(90deg,#fff 0px,#fff 1px,#000 8px,#0c0c0c 11px,#393434 11px,#fff 24px);background-size:24px 12px;background-repeat:repeat-x}
+.filmstrip::before{top:0;border-top:4px solid #000}
+.filmstrip::after{bottom:0;border-bottom:4px solid #000}
+.fs-arrow{position:absolute;top:50%;transform:translateY(-50%);background:#1a1a1a;border:1px solid #333;color:#999;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;transition:all .2s;font-size:1rem}
+.fs-arrow:hover{background:#333;color:#fff;border-color:#555}
+.fs-prev{left:8px}.fs-next{right:8px}
+.fs-track{display:flex;gap:0;overflow-x:auto;scroll-behavior:smooth;padding:2px 0;scrollbar-width:none}
+.fs-track::-webkit-scrollbar{display:none}
+.fs-frame{flex-shrink:0;width:145px;height:95px;overflow:hidden;cursor:pointer;border:3px solid #333;transition:all .25s ease;position:relative;opacity:.45;background:#1a1a1a;margin:0 8px}
+.fs-frame:hover{opacity:.75;border-color:#666;transform:translateY(-2px)}
+.fs-frame.active{opacity:1;border-color:#60a5fa;box-shadow:0 0 0 2px rgba(96,165,250,.2),0 4px 20px rgba(0,0,0,.4)}
+.fs-frame img{width:100%;height:100%;object-fit:cover;display:block}
+.fs-frame-ph{width:100%;height:100%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;color:#444;font-size:1.5rem}
+.fs-num{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.8);color:#fff;font-size:.6rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+.fs-frame.active .fs-num{background:#2563eb}
+</style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    var imageModal = document.getElementById('imageModal')
-    if(imageModal) {
-        imageModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget
-            var imgSrc = button.getAttribute('data-bs-img')
-            var imgTitle = button.getAttribute('data-bs-title')
-            
-            var modalTitle = imageModal.querySelector('.modal-title')
-            var modalImage = imageModal.querySelector('#modalImage')
-            
-            modalTitle.textContent = imgTitle
-            modalImage.src = imgSrc
-        })
+var galleryData = [
+    {% for f in album_fotos %}
+    {% if f.archivo_imagen %}
+    {src:"{{ f.archivo_imagen.url }}", title:"{{ f.titulo|escapejs }}", author:"{{ f.autor|default:""|escapejs }}", year:"{{ f.fecha_produccion|default:""|escapejs }}", url:"{% url 'fotografia_detalle' f.pk %}"},
+    {% endif %}
+    {% endfor %}
+];
+var lbIdx = 0, lbZoom = 100, lbPlaying = false, lbTimer;
+
+function openLightbox(idx) {
+    lbIdx = idx;
+    document.getElementById('lightbox').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    lbZoom = 100;
+    lbPlaying = true;
+    updateLightbox();
+    resetZoom();
+    document.getElementById('lbPlayPause').innerHTML = '<i class="bi bi-pause-fill"></i>';
+    clearInterval(lbTimer);
+    lbTimer = setInterval(lbNext, 7000);
+}
+
+function updateLightbox() {
+    var d = galleryData[lbIdx];
+    if (!d) return;
+    document.getElementById('lbCounter').textContent = (lbIdx + 1) + ' / ' + galleryData.length;
+    var cap = d.title || '';
+    if (d.author) cap += ' \u2014 ' + d.author;
+    if (d.year) cap += ' (' + d.year + ')';
+    document.getElementById('lightboxCaption').textContent = cap;
+
+    if (lbZoom <= 100) {
+        document.getElementById('lb3D').style.display = 'flex';
+        document.getElementById('lbFlat').style.display = 'none';
+        rotate3D();
+    } else {
+        // Zoom mode: flat image
+        buildFlat();
     }
-})
+}
+
+var lb3DAngle = 0;
+function rotate3D() {
+    var n = galleryData.length;
+    var degPer = 360 / n;
+    lb3DAngle = -degPer * lbIdx;
+    document.getElementById('lb3D').style.transform = 'rotateY(' + lb3DAngle + 'deg)';
+}
+
+function build3DCarousel() {
+    var el = document.getElementById('lb3D');
+    el.innerHTML = '';
+    var n = galleryData.length;
+    if (n === 0) return;
+    var degPer = 360 / n;
+    var imgW = Math.min(window.innerWidth * 0.50, 550);
+    var radius = Math.max(350, (imgW / 2) / Math.tan((degPer / 2) * Math.PI / 180) * 1.15);
+
+    for (var i = 0; i < n; i++) {
+        var d = galleryData[i];
+        var angle = degPer * i;
+        var img = document.createElement('img');
+        img.src = d.src;
+        img.style.cssText =
+            'display:block;position:absolute;left:50%;top:50%;' +
+            'width:auto;max-width:' + imgW + 'px;max-height:60vh;height:auto;' +
+            'object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.6);' +
+            'transform:translate(-50%,-50%) rotateY(' + angle + 'deg) translateZ(' + radius + 'px);' +
+            'backface-visibility:hidden;-webkit-backface-visibility:hidden;';
+        el.appendChild(img);
+    }
+}
+
+function buildFlat() {
+    document.getElementById('lb3D').style.display = 'none';
+    var flat = document.getElementById('lbFlat');
+    flat.style.display = 'flex';
+    flat.style.alignItems = 'center';
+    flat.style.justifyContent = 'center';
+    var img = document.getElementById('lbFlatImg');
+    var d = galleryData[lbIdx];
+    if (!d) return;
+    img.src = d.src;
+    setZoomStyles(lbZoom);
+}
+
+function setZoomStyles(level) {
+    var img = document.getElementById('lbFlatImg');
+    var flat = document.getElementById('lbFlat');
+    var lbl = document.getElementById('lbZoomLabel');
+    if (!img) return;
+    if (level > 100) {
+        img.style.maxWidth = 'none';
+        img.style.maxHeight = 'none';
+        img.style.width = (img.naturalWidth * level / 100) + 'px';
+        img.style.height = 'auto';
+        img.style.cursor = 'grab';
+        img.style.userSelect = 'none';
+        flat.style.overflow = 'auto';
+        flat.style.cursor = 'grab';
+    } else {
+        img.style.maxWidth = '92%';
+        img.style.maxHeight = '82vh';
+        img.style.width = '';
+        img.style.height = '';
+        img.style.cursor = 'default';
+        img.style.userSelect = '';
+        flat.style.overflow = 'hidden';
+        flat.style.cursor = 'default';
+    }
+    if (lbl) lbl.textContent = level + '%';
+}
+
+function openLightbox(idx) {
+    lbIdx = idx;
+    lbZoom = 100;
+    lbPlaying = false;
+    document.getElementById('lightbox').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    document.getElementById('lbPlayPause').innerHTML = '<i class="bi bi-play-fill"></i>';
+    document.getElementById('lbZoomLabel').textContent = '100%';
+    build3DCarousel();
+    updateLightbox();
+    clearInterval(lbTimer);
+}
+
+function lbNext() { lbIdx = (lbIdx + 1) % galleryData.length; updateLightbox(); if (lbZoom > 100) { buildFlat(); } }
+function lbPrev() { lbIdx = (lbIdx - 1 + galleryData.length) % galleryData.length; updateLightbox(); if (lbZoom > 100) { buildFlat(); } }
+
+function lbTogglePlay() {
+    lbPlaying = !lbPlaying;
+    var btn = document.getElementById('lbPlayPause');
+    if (lbPlaying) {
+        btn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+        lbTimer = setInterval(lbNext, 7000);
+    } else {
+        btn.innerHTML = '<i class="bi bi-play-fill"></i>';
+        clearInterval(lbTimer);
+    }
+}
+
+function lbClose() {
+    document.getElementById('lightbox').style.display = 'none';
+    document.getElementById('lb3D').innerHTML = '';
+    document.getElementById('lbFlatImg').src = '';
+    document.body.style.overflow = '';
+    clearInterval(lbTimer);
+    lbZoom = 100;
+}
+
+function lbZoomIn()  { lbZoom = Math.min(lbZoom + 25, 400); if (lbZoom > 100) buildFlat(); else updateLightbox(); setZoomStyles(lbZoom); }
+function lbZoomOut() { lbZoom = Math.max(lbZoom - 25, 25); if (lbZoom <= 100) updateLightbox(); setZoomStyles(lbZoom); }
+function lbZoomReset(){ lbZoom = 100; updateLightbox(); setZoomStyles(100); }
+
+function resetZoom(){ setZoomStyles(lbZoom); }
+
+// Keyboard nav
+document.addEventListener('keydown', function(e) {
+    if (document.getElementById('lightbox').style.display !== 'flex') return;
+    if (e.key === 'ArrowRight') lbNext();
+    if (e.key === 'ArrowLeft') lbPrev();
+    if (e.key === 'Escape') lbClose();
+});
+
+document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target.id === 'lightbox' || e.target.id === 'lb3D') lbClose();
+});
+var currentSlide = {% for f in album_fotos %}{% if f.pk == foto.pk %}{{ forloop.counter0 }}{% endif %}{% endfor %};
+var totalSlides = {{ album_fotos|length }};
+var galleryUrls = [
+    {% for f in album_fotos %}{% if f.archivo_imagen %}"{% url 'fotografia_detalle' f.pk %}",{% endif %}{% endfor %}
+];
+
+function goToSlide(idx) {
+    if (totalSlides <= 1) return;
+    idx = ((idx % totalSlides) + totalSlides) % totalSlides;
+    window.location.href = galleryUrls[idx];
+}
+
+function nextSlide() { goToSlide(currentSlide + 1); }
+function prevSlide() { goToSlide(currentSlide - 1); }
+
+function fsScroll(dir) {
+    var track = document.getElementById('fsTrack');
+    if (!track) return;
+    track.scrollBy({ left: dir * 200, behavior: 'smooth' });
+}
+
+(function initGallery() {
+    var nextBtn = document.getElementById('galleryNext');
+    var prevBtn = document.getElementById('galleryPrev');
+    if (nextBtn) nextBtn.addEventListener('click', function() { nextSlide(); });
+    if (prevBtn) prevBtn.addEventListener('click', function() { prevSlide(); });
+
+    var thumbs = document.querySelectorAll('.gallery-thumb');
+    thumbs.forEach(function(t) {
+        t.addEventListener('click', function() { goToSlide(parseInt(this.dataset.index)); });
+    });
+})();
 </script>
+{% endblock %}
+
+{% block extra_js %}
+{% if foto.latitud and foto.longitud %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function() {
+    var lat = {{ foto.latitud|stringformat:'f' }};
+    var lng = {{ foto.longitud|stringformat:'f' }};
+    var map = L.map('detailMap', { scrollWheelZoom: false, dragging: true, zoomControl: true }).setView([lat, lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+    L.marker([lat, lng], {
+        icon: L.divIcon({
+            className: 'map-marker-icon',
+            html: '<svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#dc2626" stroke="#fff" stroke-width="2.5"/><circle cx="16" cy="16" r="4" fill="#fff"/></svg>',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+        })
+    }).addTo(map).bindPopup('{{ foto.titulo|escapejs }}').openPopup();
+})();
+</script>
+{% endif %}
 {% endblock %}

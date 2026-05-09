@@ -1,83 +1,28 @@
 from django.contrib import admin
-from .models import Fotografia
+from .models import Fotografia, Comentario, Calificacion
 
 
 @admin.register(Fotografia)
 class FotografiaAdmin(admin.ModelAdmin):
-    list_display = ("codigo", "titulo", "coleccion", "estado", "fecha_registro")
-    list_filter = ("estado", "coleccion", "disciplina")
-    search_fields = ("codigo", "titulo", "descripcion_general")
+    list_display = ("codigo", "titulo", "album", "estado", "fecha_registro")
+    list_filter = ("estado", "album", "formato_archivo")
+    search_fields = ("codigo", "titulo", "palabras_clave")
     readonly_fields = ("fecha_registro", "fecha_actualizacion")
 
     fieldsets = (
         (
-            "Imagen (Identificación y Evaluación)",
+            "Imagen",
             {
                 "fields": (
                     ("titulo", "codigo"),
-                    ("idioma_original", "coleccion"),
+                    ("album", "estado"),
                     "archivo_imagen",
-                    "funcion_imagen",
-                    "explicacion_funcion",
-                    (
-                        "acuerdo_contexto",
-                        "adapta_lenguaje",
-                        "respeta_esquemas_culturales",
-                        "rigor_cientifico",
-                    ),
-                    (
-                        "simplicidad_imagen",
-                        "legibilidad",
-                        "elementos_distraccion",
-                    ),
-                    ("disciplina", "subdisciplina"),
-                    "conceptos_imagen",
-                    "relacion_documental",
-                )
-            },
-        ),
-        (
-            "Descripción técnica y origen",
-            {
-                "fields": (
-                    "descripcion_general",
-                    ("formato_original", "formato_actual"),
-                    ("autor", "entidad_responsable"),
-                    "derechos_propiedad_intelectual",
-                    "condiciones_uso",
-                    ("ancho_fisico_px", "alto_fisico_px"),
+                    ("autor", "fecha_produccion"),
+                    "descripcion_imagen",
                     ("ancho_pixeles", "alto_pixeles"),
-                    (
-                        "resolucion_horizontal",
-                        "resolucion_vertical",
-                        "unidad_resolucion",
-                    ),
-                    ("profundidad_bits", "modelo_color"),
-                    ("fecha_produccion", "lugar_produccion"),
-                    "publicacion_imagen",
-                    ("fecha_publicacion", "lugar_publicacion"),
-                    ("primera_version_imagen", "ultima_modificacion_imagen"),
-                    "caracteristicas",
-                    "adaptacion_formato",
-                    "posibilidad_adaptacion",
-                    "anotaciones",
-                )
-            },
-        ),
-        (
-            "Descripción perceptual",
-            {
-                "fields": (
-                    "tipo_imagen",
-                    "contexto_fondo",
-                    "contexto_figura",
-                    "elementos_visuales_importantes",
-                    "percepcion_sin_descripcion",
-                    "percepcion_con_descripcion",
-                    "objetivo_imagen",
-                    "relaciones",
-                    ("porcentaje_distorsion", "porcentaje_pixelacion"),
-                    "uso_imagen",
+                    "formato_archivo",
+                    "palabras_clave",
+                    "url_fuente",
                 )
             },
         ),
@@ -97,7 +42,6 @@ class FotografiaAdmin(admin.ModelAdmin):
             "Estado y Auditoría",
             {
                 "fields": (
-                    "estado",
                     ("registrado_por", "fecha_registro", "fecha_actualizacion"),
                 )
             },
@@ -108,3 +52,14 @@ class FotografiaAdmin(admin.ModelAdmin):
         if not obj.pk:
             obj.registrado_por = request.user
         super().save_model(request, obj, form, change)
+
+
+@admin.register(Comentario)
+class ComentarioAdmin(admin.ModelAdmin):
+    list_display = ("fotografia", "nombre_usuario", "fecha")
+    search_fields = ("texto", "nombre_usuario")
+
+
+@admin.register(Calificacion)
+class CalificacionAdmin(admin.ModelAdmin):
+    list_display = ("fotografia", "estrellas", "ip_usuario")

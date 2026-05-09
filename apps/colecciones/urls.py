@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import ColeccionListView
+from .views import CategoriaListView, AlbumDeleteView
 
 urlpatterns = [
-    path("", ColeccionListView.as_view(), name="coleccion_lista"),
+    path("", CategoriaListView.as_view(), name="categoria_lista"),
+    path("album/<int:pk>/eliminar/", AlbumDeleteView.as_view(), name="album_eliminar"),
 ]

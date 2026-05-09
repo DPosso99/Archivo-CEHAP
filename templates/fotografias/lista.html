@@ -1,20 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="row align-items-center mb-4">
-    <div class="col-md-6">
-        <h2 class="mb-0 fw-bold text-dark">Catálogo de Fotografías</h2>
-        <p class="text-secondary small mt-1 mb-0">Explora el archivo fotográfico documental.</p>
+    <div class="col-md-9">
+        <h4 class="mb-2 fw-bold text-dark lh-base">Galería de Imágenes Escuela del Hábitat - CEHAP<br>Facultad de Arquitectura - Universidad Nacional de Colombia - Sede Medellín</h4>
+        <p class="text-secondary mb-0">Fotografías e imágenes producto de estudios, investigaciones y trabajo de campo de la Escuela del Hábitat CEHAP.</p>
     </div>
-    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+    <div class="col-md-3 text-md-end mt-3 mt-md-0">
         {% if user.is_authenticated %}
-        <a href="{% url 'fotografia_crear' %}" class="btn btn-primary-modern btn-modern">
-            <i class="bi bi-plus-lg"></i> Nueva Ficha
+        <a href="{% url 'fotografia_crear' %}" class="btn btn-success btn-modern shadow-sm">
+            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Subir Archivo
         </a>
         {% endif %}
     </div>
 </div>
 
-<div class="card card-modern mb-4 border-0">
+<div class="card card-modern mb-4 border-0 shadow-sm bg-white">
     <div class="card-body p-4">
         <form method="get" class="row gx-3 gy-2 align-items-center">
             <div class="col-md-9">
@@ -23,8 +23,8 @@
                         <i class="bi bi-search"></i>
                     </span>
                     <input type="text" class="form-control form-control-modern border-start-0 ps-0 shadow-none" id="q" name="q" placeholder="Buscar por título, código o palabra clave..." value="{{ request.GET.q }}">
-                    {% if request.GET.coleccion %}
-                    <input type="hidden" name="coleccion" value="{{ request.GET.coleccion }}">
+                    {% if request.GET.album %}
+                    <input type="hidden" name="album" value="{{ request.GET.album }}">
                     {% endif %}
                 </div>
             </div>
@@ -59,14 +59,29 @@
                 <h6 class="card-title text-dark mb-1 lh-sm">
                     <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-decoration-none text-dark stretched-link">{{ foto.titulo|truncatechars:50 }}</a>
                 </h6>
-                <p class="text-secondary small mb-2">#{{ foto.codigo }}</p>
+                <p class="text-secondary small mb-2">{% if foto.fecha_produccion %}{{ foto.fecha_produccion }}{% else %}#{{ foto.codigo }}{% endif %}</p>
                 <div class="mt-auto pt-2 border-top">
                     <div class="d-flex justify-content-between align-items-center">
-                        <span class="badge bg-light text-secondary border">{{ foto.coleccion|default:"Sin colección" }}</span>
+                        <span class="badge bg-light text-secondary border text-start" style="white-space:normal">
+                            {% if foto.album and foto.album.categoria %}
+                                {% if foto.album.categoria.categoria_padre %}
+                                    {{ foto.album.categoria.categoria_padre.nombre }} &rsaquo; {{ foto.album.categoria.nombre }}
+                                {% else %}
+                                    {{ foto.album.categoria.nombre }}
+                                {% endif %}
+                                {% if foto.album.nombre %} &rsaquo; {{ foto.album.nombre }}{% endif %}
+                            {% else %}
+                                Sin colección
+                            {% endif %}
+                        </span>
                         {% if user.is_authenticated %}
-                        <a href="{% url 'fotografia_editar' foto.pk %}" class="btn btn-sm btn-link text-primary p-0 position-relative z-1" title="Editar ficha">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
+                        <div class="d-flex gap-1 position-relative z-1">
+                            <a href="{% url 'fotografia_editar' foto.pk %}" class="btn btn-sm btn-link text-primary p-0" title="Editar ficha"><i class="bi bi-pencil-square"></i></a>
+                            <form method="post" action="{% url 'fotografia_eliminar' foto.pk %}" onsubmit="return confirm('¿Eliminar esta imagen?');" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Eliminar"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -97,15 +112,15 @@
 <nav aria-label="Navegación de páginas">
     <ul class="pagination justify-content-center mt-4 border-0">
         {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link border-0 text-secondary bg-transparent shadow-none" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.coleccion %}&coleccion={{ request.GET.coleccion }}{% endif %}">&laquo;</a></li>
-        <li class="page-item"><a class="page-link border-0 text-dark bg-transparent shadow-none fw-medium" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.coleccion %}&coleccion={{ request.GET.coleccion }}{% endif %}">Anterior</a></li>
+        <li class="page-item"><a class="page-link border-0 text-secondary bg-transparent shadow-none" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.album %}&album={{ request.GET.album }}{% endif %}">&laquo;</a></li>
+        <li class="page-item"><a class="page-link border-0 text-dark bg-transparent shadow-none fw-medium" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.album %}&album={{ request.GET.album }}{% endif %}">Anterior</a></li>
         {% endif %}
         
         <li class="page-item disabled"><span class="page-link border-0 bg-transparent text-secondary shadow-none">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
         
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link border-0 text-dark bg-transparent shadow-none fw-medium" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.coleccion %}&coleccion={{ request.GET.coleccion }}{% endif %}">Siguiente</a></li>
-        <li class="page-item"><a class="page-link border-0 text-secondary bg-transparent shadow-none" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.coleccion %}&coleccion={{ request.GET.coleccion }}{% endif %}">&raquo;</a></li>
+        <li class="page-item"><a class="page-link border-0 text-dark bg-transparent shadow-none fw-medium" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.album %}&album={{ request.GET.album }}{% endif %}">Siguiente</a></li>
+        <li class="page-item"><a class="page-link border-0 text-secondary bg-transparent shadow-none" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.album %}&album={{ request.GET.album }}{% endif %}">&raquo;</a></li>
         {% endif %}
     </ul>
 </nav>
