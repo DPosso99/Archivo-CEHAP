@@ -32,6 +32,9 @@ if not exist "venv\" (
 :: Activate venv
 call venv\Scripts\activate.bat
 
+:: Use SQLite for Windows (no PostgreSQL needed)
+set DJANGO_SETTINGS_MODULE=config.settings.local_windows
+
 :: Install requirements
 echo Instalando dependencias...
 pip install -r requirements.txt --quiet
@@ -47,6 +50,11 @@ echo.
 :: Create admin user if needed
 python manage.py shell -c "from django.contrib.auth.models import User; u=User.objects.filter(username='admin').first(); exit(0) if u else User.objects.create_superuser('admin','admin@localhost','admin')"
 echo [OK] Usuario listo (admin / admin).
+echo.
+
+:: Collect static files
+python manage.py collectstatic --noinput
+echo [OK] Archivos estaticos listos.
 echo.
 
 :: Start server and open browser
