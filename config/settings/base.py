@@ -92,5 +92,5 @@ LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "fotografia_lista"
 LOGOUT_REDIRECT_URL = "login"
 
-NVIDIA_API_KEY = config("NVIDIA_API_KEY", default="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")
+NVIDIA_API_KEY = config("NVIDIA_API_KEY", default="")
 DEEPSEEK_MODEL = "deepseek-ai/deepseek-v4-pro"

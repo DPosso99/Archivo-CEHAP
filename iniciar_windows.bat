@@ -20,6 +20,14 @@ if %errorlevel% neq 0 (
 echo [OK] Python detectado.
 echo.
 
+:: Copy .env.example if .env doesn't exist
+if not exist ".env" (
+    echo Creando archivo .env desde .env.example...
+    copy .env.example .env >nul
+    echo [OK] .env creado. Editalo si necesitas cambiar las claves.
+)
+echo.
+
 :: Setup virtual environment if not exists
 if not exist "venv\" (
     echo Creando entorno virtual...
