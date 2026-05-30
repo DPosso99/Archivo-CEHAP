@@ -150,7 +150,8 @@
                         var ayMatch = ay.match(/^(.+?)\s+(\d{4})$/);
                         if (ayMatch) {
                             document.getElementById('id_autor').value = ayMatch[1];
-                            document.getElementById('id_fecha_produccion').value = ayMatch[2];
+                            var fp = document.getElementById('id_fecha_produccion');
+                            if (fp) fp.value = ayMatch[2];
                         }
                     }
                 }
@@ -162,7 +163,8 @@
                         var ay2 = afterLines[1].match(/^(.+?)\s+(\d{4})$/);
                         if (ay2) {
                             if (!document.getElementById('id_autor').value) document.getElementById('id_autor').value = ay2[1];
-                            if (!document.getElementById('id_fecha_produccion').value) document.getElementById('id_fecha_produccion').value = ay2[2];
+                            var fp2 = document.getElementById('id_fecha_produccion');
+                            if (fp2 && !fp2.value) fp2.value = ay2[2];
                         }
                     }
                 }

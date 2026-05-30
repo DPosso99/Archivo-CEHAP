@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class RecursoDocumental(models.Model):
     titulo = models.CharField(max_length=255, verbose_name="Título")
     codigo = models.CharField(
@@ -8,7 +9,7 @@ class RecursoDocumental(models.Model):
     )
     album = models.ForeignKey(
         "colecciones.Album",
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
         verbose_name="Álbum",
@@ -22,7 +23,8 @@ class RecursoDocumental(models.Model):
         ],
         default="Activo",
         verbose_name="Estado",
-        null=True, blank=True
+        null=True,
+        blank=True,
     )
     fecha_registro = models.DateTimeField(
         auto_now_add=True, verbose_name="Fecha de registro"

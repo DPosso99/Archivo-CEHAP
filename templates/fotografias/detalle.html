@@ -7,33 +7,29 @@
 
 {% block content %}
 
-<div class="row mb-4">
+<div class="row mb-4 align-items-start">
     <div class="col-md-8">
-        <h2 class="mb-1 fw-bold">{{ foto.titulo }}</h2>
-        <p class="text-muted mb-0 small">
-            Código: <strong>{{ foto.codigo }}</strong> &rsaquo;
+        <h1 style="font-family:'Caudex',Georgia,serif;font-weight:700;font-size:clamp(1.3rem,2.5vw,1.8rem);color:#0f172a;line-height:1.25;margin-bottom:6px;">{{ foto.titulo }}</h1>
+        <p class="mb-0" style="font-size:.85rem;color:#64748b;">
             {% if breadcrumb %}
-                {% for tipo, obj in breadcrumb %}
-                    {% if tipo == 'cat' or tipo == 'sub' %}
-                        <a href="{% url 'categoria_lista' %}" class="text-decoration-none text-muted">{{ obj.nombre }}</a> &rsaquo;
+                {% for tipo, obj, parent_pk in breadcrumb %}
+                    {% if tipo == 'cat' %}
+                        <a href="{% url 'categoria_lista' %}#cat-{{ obj.pk }}" style="color:#64748b;text-decoration:none;">{{ obj.nombre }}</a> &rsaquo;
+                    {% elif tipo == 'sub' %}
+                        <a href="{% url 'categoria_lista' %}#cat-{{ parent_pk }}-sub-{{ obj.pk }}" style="color:#64748b;text-decoration:none;">{{ obj.nombre }}</a> &rsaquo;
                     {% elif tipo == 'album' %}
-                        <strong>{{ obj.nombre }}</strong>
+                        <strong style="color:#334155;">{{ obj.nombre }}</strong>
                     {% endif %}
                 {% endfor %}
-            {% else %}
-                Sin álbum
-            {% endif %}
-            &nbsp;|&nbsp; <span class="badge bg-{% if foto.estado == 'Activo' %}success{% elif foto.estado == 'Archivado' %}secondary{% else %}warning{% endif %}">{{ foto.estado }}</span>
+            {% else %}Sin álbum{% endif %}
+            &nbsp;·&nbsp; <span style="background:#f1f5f9;color:#475569;padding:2px 10px;border-radius:12px;font-size:.78rem;font-weight:500;">{{ foto.estado }}</span>
+            {% if foto.codigo %}&nbsp;·&nbsp; <span style="color:#94a3b8;">{{ foto.codigo }}</span>{% endif %}
         </p>
     </div>
     <div class="col-md-4 text-md-end mt-2 mt-md-0 d-flex justify-content-md-end gap-2 flex-wrap align-items-start">
-        <a href="{% url 'fotografia_lista' %}" class="btn btn-outline-secondary btn-sm">Volver</a>
-        {% if foto.archivo_imagen %}
-        <a href="{{ foto.archivo_imagen.url }}" download class="btn btn-outline-primary btn-sm"><i class="bi bi-download me-1"></i>Descargar</a>
-        {% endif %}
-        {% if user.is_authenticated %}
-        <a href="{% url 'fotografia_editar' foto.pk %}" class="btn btn-primary btn-sm">Editar</a>
-        {% endif %}
+        <a href="{% url 'fotografia_lista' %}" class="btn-ghost text-decoration-none">Volver</a>
+        {% if foto.archivo_imagen %}<a href="{{ foto.archivo_imagen.url }}" download class="btn-ghost text-decoration-none"><i class="bi bi-download me-1"></i>Descargar</a>{% endif %}
+        {% if user.is_authenticated %}<a href="{% url 'fotografia_editar' foto.pk %}" class="btn-accent text-decoration-none">Editar</a>{% endif %}
     </div>
 </div>
 
@@ -84,23 +80,19 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom"><strong><i class="bi bi-info-circle me-2"></i>Ficha de la imagen</strong></div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        {% if foto.autor %}<p class="mb-2"><strong>Autor:</strong> {{ foto.autor }}</p>{% endif %}
-                        {% if foto.fecha_produccion %}<p class="mb-2"><strong>Fecha:</strong> {{ foto.fecha_produccion }}</p>{% endif %}
-                        <p class="mb-2"><strong>Subida a la plataforma:</strong> {{ foto.fecha_registro|date:"d/m/Y" }}</p>
-                        {% if foto.fecha_subida_original %}<p class="mb-2"><strong>Fecha original:</strong> {{ foto.fecha_subida_original }}</p>{% endif %}
-                        {% if foto.descripcion_imagen %}<p class="mb-2"><strong>Descripción:</strong><br>{{ foto.descripcion_imagen|linebreaks }}</p>{% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        {% if foto.ancho_pixeles or foto.alto_pixeles %}
-                        <p class="mb-2"><strong>Dimensiones:</strong> {{ foto.ancho_pixeles|default:"?" }} x {{ foto.alto_pixeles|default:"?" }} px</p>
-                        {% endif %}
-                        {% if foto.formato_archivo %}<p class="mb-2"><strong>Formato:</strong> {{ foto.formato_archivo }}</p>{% endif %}
-                        {% if file_size %}<p class="mb-2"><strong>Peso:</strong> {{ file_size }}</p>{% endif %}
-                        {% if foto.url_fuente %}<p class="mb-2"><strong>URL de origen:</strong> <a href="{{ foto.url_fuente }}" target="_blank" class="text-break small">{{ foto.url_fuente|truncatechars:50 }}</a></p>{% endif %}
-                    </div>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    {% if foto.autor %}<span class="meta-pill" data-bs-toggle="tooltip" data-bs-title="Autor"><i class="bi bi-person"></i> {{ foto.autor }}</span>{% endif %}
+                    {% if foto.fecha_produccion %}<span class="meta-pill" data-bs-toggle="tooltip" data-bs-title="Fecha de captura"><i class="bi bi-calendar3"></i> {{ foto.fecha_produccion }}</span>{% endif %}
+                    <span class="meta-pill" data-bs-toggle="tooltip" data-bs-title="Fecha de subida a la plataforma"><i class="bi bi-cloud-upload"></i> {{ foto.fecha_registro|date:"d/m/Y" }}</span>
+                    {% if foto.fecha_subida_original %}<span class="meta-pill" data-bs-toggle="tooltip" data-bs-title="Fecha de subida original"><i class="bi bi-clock-history"></i> {{ foto.fecha_subida_original }}</span>{% endif %}
                 </div>
+                {% if foto.descripcion_imagen %}<p class="mb-3" style="font-size:.88rem;color:#475569;line-height:1.5;">{{ foto.descripcion_imagen|linebreaks }}</p>{% endif %}
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    {% if foto.ancho_pixeles or foto.alto_pixeles %}<span class="meta-pill meta-pill-alt" data-bs-toggle="tooltip" data-bs-title="Dimensiones en píxeles"><i class="bi bi-arrows-angle-expand"></i> {{ foto.ancho_pixeles|default:"?" }} × {{ foto.alto_pixeles|default:"?" }} px</span>{% endif %}
+                    {% if foto.formato_archivo %}<span class="meta-pill meta-pill-alt" data-bs-toggle="tooltip" data-bs-title="Formato del archivo">{{ foto.formato_archivo }}</span>{% endif %}
+                    {% if file_size %}<span class="meta-pill meta-pill-alt" data-bs-toggle="tooltip" data-bs-title="Peso en disco"><i class="bi bi-hdd"></i> {{ file_size }}</span>{% endif %}
+                </div>
+                {% if foto.url_fuente %}<p class="mb-0"><a href="{{ foto.url_fuente }}" target="_blank" class="text-break small" style="color:#64748b;">{{ foto.url_fuente|truncatechars:60 }}</a></p>{% endif %}
 
                 {% if foto.palabras_clave %}
                 <hr>
@@ -201,7 +193,18 @@
     <div id="lb3D" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,0,.2,1);"></div>
     <!-- Flat zoom mode -->
     <div id="lbFlat" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;overflow:hidden;">
-        <img id="lbFlatImg" src="" style="max-width:92%;max-height:82vh;object-fit:contain;" alt="">
+        <img id="lbFlatImg" src="" style="max-width:92%;max-height:82vh;object-fit:contain;" alt="" onload="capImageSize(this);" onerror="capImageSize(this);">
+<script>
+function capImageSize(img) {
+    if (!img || !img.naturalWidth) return;
+    var maxPx = Math.min(window.innerWidth * .92, img.naturalWidth);
+    img.style.maxWidth = maxPx + 'px';
+    // Also cap 3D images
+    document.querySelectorAll('#lb3D img').forEach(function(i) {
+        if (i.naturalWidth && i.naturalWidth < 550) i.style.maxWidth = Math.min(550, i.naturalWidth) + 'px';
+    });
+}
+</script>
     </div>
 
     <div id="lightboxCaption" style="position:absolute;bottom:120px;color:#ccc;text-align:center;font-size:.9rem;z-index:5;left:0;right:0;pointer-events:none;"></div>
@@ -214,6 +217,9 @@
 .rating-stars input{display:none}
 .rating-stars label{cursor:pointer;color:#ddd;padding:0 .1rem;transition:color .2s}
 .rating-stars input:checked~label,.rating-stars label:hover,.rating-stars label:hover~label{color:#ffc107}
+.meta-pill{display:inline-flex;align-items:center;gap:5px;background:#f1f5f9;color:#475569;padding:4px 12px;border-radius:20px;font-size:.78rem;font-weight:500;border:1px solid #e2e8f0;}
+.meta-pill i{color:#94a3b8;font-size:.85rem;}
+.meta-pill-alt{background:#fff;border:1px solid #e2e8f0;color:#64748b;}
 
 /* --- Gallery --- */
 .gallery{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04)}
@@ -307,8 +313,8 @@ function build3DCarousel() {
     var n = galleryData.length;
     if (n === 0) return;
     var degPer = 360 / n;
-    var imgW = Math.min(window.innerWidth * 0.50, 550);
-    var radius = Math.max(350, (imgW / 2) / Math.tan((degPer / 2) * Math.PI / 180) * 1.15);
+    var imgW = Math.min(window.innerWidth * 0.23, 330);
+    var radius = Math.max(350, (imgW / 2) / Math.tan((degPer / 2) * Math.PI / 180) * 1.6);
 
     for (var i = 0; i < n; i++) {
         var d = galleryData[i];
@@ -321,6 +327,21 @@ function build3DCarousel() {
             'object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.6);' +
             'transform:translate(-50%,-50%) rotateY(' + angle + 'deg) translateZ(' + radius + 'px);' +
             'backface-visibility:hidden;-webkit-backface-visibility:hidden;';
+        // Adaptive sizing: small images stay small, large images get more space
+        (function(imgEl, maxW) {
+            imgEl.addEventListener('load', function() {
+                var nw = this.naturalWidth;
+                if (nw > 0) {
+                    if (nw < 600) this.style.maxWidth = nw + 'px';
+                    else this.style.maxWidth = Math.min(Math.max(maxW, nw * 0.25), 600) + 'px';
+                }
+            });
+            if (imgEl.complete && imgEl.naturalWidth > 0) {
+                var nw2 = imgEl.naturalWidth;
+                if (nw2 < 600) imgEl.style.maxWidth = nw2 + 'px';
+                else imgEl.style.maxWidth = Math.min(Math.max(maxW, nw2 * 0.25), 600) + 'px';
+            }
+        })(img, imgW);
         el.appendChild(img);
     }
 }
@@ -335,6 +356,9 @@ function buildFlat() {
     var d = galleryData[lbIdx];
     if (!d) return;
     img.src = d.src;
+    // Cap small images to natural size
+    if (img.complete && img.naturalWidth < 600) img.style.maxWidth = Math.min(window.innerWidth * .92, img.naturalWidth) + 'px';
+    panX = 0; panY = 0;
     setZoomStyles(lbZoom);
 }
 
@@ -344,19 +368,15 @@ function setZoomStyles(level) {
     var lbl = document.getElementById('lbZoomLabel');
     if (!img) return;
     if (level > 100) {
-        img.style.maxWidth = 'none';
-        img.style.maxHeight = 'none';
-        img.style.width = (img.naturalWidth * level / 100) + 'px';
-        img.style.height = 'auto';
+        img.style.transform = 'scale(' + (level / 100) + ')';
+        img.style.transformOrigin = 'center center';
         img.style.cursor = 'grab';
         img.style.userSelect = 'none';
-        flat.style.overflow = 'auto';
+        flat.style.overflow = 'visible';
         flat.style.cursor = 'grab';
     } else {
-        img.style.maxWidth = '92%';
-        img.style.maxHeight = '82vh';
-        img.style.width = '';
-        img.style.height = '';
+        img.style.transform = 'scale(1)';
+        img.style.transformOrigin = 'center center';
         img.style.cursor = 'default';
         img.style.userSelect = '';
         flat.style.overflow = 'hidden';
@@ -368,6 +388,7 @@ function setZoomStyles(level) {
 function openLightbox(idx) {
     lbIdx = idx;
     lbZoom = 100;
+    panX = 0; panY = 0;
     lbPlaying = false;
     document.getElementById('lightbox').style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -404,16 +425,48 @@ function lbClose() {
 
 function lbZoomIn()  { lbZoom = Math.min(lbZoom + 25, 400); if (lbZoom > 100) buildFlat(); else updateLightbox(); setZoomStyles(lbZoom); }
 function lbZoomOut() { lbZoom = Math.max(lbZoom - 25, 25); if (lbZoom <= 100) updateLightbox(); setZoomStyles(lbZoom); }
-function lbZoomReset(){ lbZoom = 100; updateLightbox(); setZoomStyles(100); }
+function lbZoomReset(){ lbZoom = 100; panX = 0; panY = 0; updateLightbox(); setZoomStyles(100); }
 
 function resetZoom(){ setZoomStyles(lbZoom); }
 
+// Drag to pan when zoomed
+var isDragging = false, dragStartX, dragStartY, panX = 0, panY = 0;
+var lbFlatImgEl = document.getElementById('lbFlatImg');
+if (lbFlatImgEl) {
+    lbFlatImgEl.addEventListener('mousedown', function(e) {
+        if (lbZoom <= 100) return;
+        isDragging = true;
+        dragStartX = e.clientX; dragStartY = e.clientY;
+        this.style.cursor = 'grabbing';
+        e.preventDefault();
+    });
+}
+document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    var dx = e.clientX - dragStartX;
+    var dy = e.clientY - dragStartY;
+    dragStartX = e.clientX; dragStartY = e.clientY;
+    panX += dx; panY += dy;
+    var img = document.getElementById('lbFlatImg');
+    if (img) img.style.transform = 'scale(' + (lbZoom / 100) + ') translate(' + panX + 'px,' + panY + 'px)';
+});
+document.addEventListener('mouseup', function() {
+    if (!isDragging) return;
+    isDragging = false;
+    var img = document.getElementById('lbFlatImg');
+    if (img) img.style.cursor = lbZoom > 100 ? 'grab' : 'default';
+});
+
 // Keyboard nav
 document.addEventListener('keydown', function(e) {
-    if (document.getElementById('lightbox').style.display !== 'flex') return;
+    var lb = document.getElementById('lightbox');
+    if (!lb || lb.style.display === 'none') return;
+    if (e.key === 'Escape') {
+        if (lbZoom > 100) { lbZoomReset(); return; }
+        lbClose();
+    }
     if (e.key === 'ArrowRight') lbNext();
     if (e.key === 'ArrowLeft') lbPrev();
-    if (e.key === 'Escape') lbClose();
 });
 
 document.getElementById('lightbox').addEventListener('click', function(e) {
@@ -455,6 +508,10 @@ function fsScroll(dir) {
 {% endblock %}
 
 {% block extra_js %}
+<script>
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+tooltipTriggerList.forEach(function(el) { new bootstrap.Tooltip(el); });
+</script>
 {% if foto.latitud and foto.longitud %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>

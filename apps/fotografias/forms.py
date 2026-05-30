@@ -17,17 +17,17 @@ class FotografiaForm(forms.ModelForm):
     url_imagen = forms.URLField(
         required=False,
         label="Cargar Imagen desde URL *",
-        help_text="Al menos uno (archivo o URL) es obligatorio."
+        help_text="Al menos uno (archivo o URL) es obligatorio.",
     )
     categoria_select = forms.ModelChoiceField(
         queryset=Categoria.objects.filter(categoria_padre__isnull=True),
-        required=True,
-        label="Categoría Principal"
+        required=False,
+        label="Categoría Principal",
     )
     subcategoria_select = forms.ModelChoiceField(
         queryset=Categoria.objects.filter(categoria_padre__isnull=False),
         required=False,
-        label="Subcategoría"
+        label="Subcategoría",
     )
     nuevo_album_nombre = forms.CharField(
         max_length=255,
@@ -39,17 +39,28 @@ class FotografiaForm(forms.ModelForm):
         required=False,
         widget=forms.Textarea(attrs={"rows": 2}),
         label="Descripción del álbum",
-        help_text="Se guarda en el álbum seleccionado o en el nuevo que se cree."
+    )
+    nueva_categoria_nombre = forms.CharField(
+        max_length=255,
+        required=False,
+        label="O Crear Nueva Categoría",
+    )
+    nueva_subcategoria_nombre = forms.CharField(
+        max_length=255,
+        required=False,
+        label="O Crear Nueva Subcategoría",
     )
     pegar_metadatos = forms.CharField(
         required=False,
-        widget=forms.Textarea(attrs={
-            "rows": 6,
-            "placeholder": "Pega aquí los metadatos de la imagen (en inglés o español)...",
-            "id": "id_pegar_metadatos",
-        }),
+        widget=forms.Textarea(
+            attrs={
+                "rows": 6,
+                "placeholder": "Pega aquí los metadatos de la imagen (en inglés o español)...",
+                "id": "id_pegar_metadatos",
+            }
+        ),
         label="Pegar metadatos (auto-llenado)",
-        help_text="Pega el bloque de información de la imagen y los campos se llenarán automáticamente."
+        help_text="Pega el bloque de información de la imagen y los campos se llenarán automáticamente.",
     )
 
     class Meta:
@@ -70,25 +81,37 @@ class FotografiaForm(forms.ModelForm):
         # Friendly labels
         self.fields["titulo"].label = "Nombre de fotografía"
         self.fields["codigo"].label = "Nombre de archivo"
+        self.fields["codigo"].required = False
         self.fields["archivo_imagen"].required = False
         self.fields["archivo_imagen"].label = "Archivo de imagen *"
-        self.fields["archivo_imagen"].help_text = "Al menos uno (archivo o URL) es obligatorio."
+        self.fields[
+            "archivo_imagen"
+        ].help_text = "Al menos uno (archivo o URL) es obligatorio."
         self.fields["autor"].label = "Autor"
-        self.fields["fecha_produccion"].label = "Fecha"
-        self.fields["fecha_produccion"].widget = forms.TextInput(attrs={"placeholder": "Ej: 2007 o 15/05/2007"})
-        self.fields["fecha_produccion"].help_text = "Año solo o fecha completa (día/mes/año)."
+        self.fields["fecha_produccion"].label = "Fecha de captura"
+        self.fields["fecha_produccion"].widget = forms.TextInput(
+            attrs={"placeholder": "Ej: 2007 o 15/05/2007"}
+        )
         self.fields["fecha_subida_original"].label = "Fecha de subida original"
-        self.fields["fecha_subida_original"].widget = forms.TextInput(attrs={"placeholder": "Ej: Oct 31, 2005"})
+        self.fields["fecha_subida_original"].widget = forms.TextInput(
+            attrs={"placeholder": "Ej: Oct 31, 2005"}
+        )
         self.fields["ancho_pixeles"].label = "Ancho (px)"
         self.fields["alto_pixeles"].label = "Alto (px)"
         self.fields["formato_archivo"].label = "Formato del archivo"
         self.fields["palabras_clave"].label = "Palabras clave"
-        self.fields["palabras_clave"].help_text = "Separadas por coma. Al hacer clic se buscará en el sistema."
+        self.fields[
+            "palabras_clave"
+        ].help_text = "Separadas por coma. Al hacer clic se buscará en el sistema."
         self.fields["ubicacion_archivo"].label = "Ubicación Física de la Fotografía"
-        self.fields["ubicacion_archivo"].widget = forms.TextInput(attrs={"placeholder": "Ej: Archivo Central, Estante 3"})
+        self.fields["ubicacion_archivo"].widget = forms.TextInput(
+            attrs={"placeholder": "Ej: Archivo Central, Estante 3"}
+        )
         self.fields["imagen_propia"].label = "Imagen propia de la ubicación"
         self.fields["mapa_url"].label = "URL de Google Maps"
-        self.fields["mapa_url"].help_text = "Pega el enlace de Google Maps y se extraerán las coordenadas automáticamente."
+        self.fields[
+            "mapa_url"
+        ].help_text = "Pega el enlace de Google Maps y se extraerán las coordenadas automáticamente."
 
         # Show file size when editing
         if self.instance and self.instance.pk and self.instance.archivo_imagen:
@@ -100,7 +123,9 @@ class FotografiaForm(forms.ModelForm):
                     size_str = f"{size / 1024:.1f} KB"
                 else:
                     size_str = f"{size / (1024 * 1024):.1f} MB"
-                self.fields["archivo_imagen"].help_text += f" | Tamaño actual: {size_str}"
+                self.fields[
+                    "archivo_imagen"
+                ].help_text += f" | Tamaño actual: {size_str}"
             except Exception:
                 pass
 
@@ -108,13 +133,17 @@ class FotografiaForm(forms.ModelForm):
             album_cat = self.instance.album.categoria
             if album_cat:
                 if album_cat.categoria_padre:
-                    self.fields['categoria_select'].initial = album_cat.categoria_padre.pk
-                    self.fields['subcategoria_select'].initial = album_cat.pk
+                    self.fields[
+                        "categoria_select"
+                    ].initial = album_cat.categoria_padre.pk
+                    self.fields["subcategoria_select"].initial = album_cat.pk
                 else:
-                    self.fields['categoria_select'].initial = album_cat.pk
+                    self.fields["categoria_select"].initial = album_cat.pk
             # Pre-fill existing album description
             if self.instance.album.descripcion:
-                self.fields['nuevo_album_descripcion'].initial = self.instance.album.descripcion
+                self.fields[
+                    "nuevo_album_descripcion"
+                ].initial = self.instance.album.descripcion
 
         self.helper = FormHelper()
         self.helper.form_tag = True
@@ -132,7 +161,11 @@ class FotografiaForm(forms.ModelForm):
                     HTML("<p><strong>Clasificación en Galería</strong></p>"),
                     Row(
                         Column("categoria_select", css_class="col-md-6"),
+                        Column("nueva_categoria_nombre", css_class="col-md-6"),
+                    ),
+                    Row(
                         Column("subcategoria_select", css_class="col-md-6"),
+                        Column("nueva_subcategoria_nombre", css_class="col-md-6"),
                     ),
                     Row(
                         Column("album", css_class="col-md-6"),
@@ -142,7 +175,9 @@ class FotografiaForm(forms.ModelForm):
                     "estado",
                     "archivo_imagen",
                     "url_imagen",
-                    HTML('<img id="preview_principal" class="img-fluid mt-2 mb-4" style="max-height: 300px; display: none;" />'),
+                    HTML(
+                        '<img id="preview_principal" class="img-fluid mt-2 mb-4" style="max-height: 300px; display: none;" />'
+                    ),
                     Row(
                         Column("autor", css_class="col-md-6"),
                         Column("fecha_produccion", css_class="col-md-6"),
@@ -168,20 +203,23 @@ class FotografiaForm(forms.ModelForm):
                     css_id="tab-ubicacion",
                 ),
             ),
-            Submit("submit", "Guardar Ficha", css_class="btn btn-success mt-4 w-100"),
+            Submit(
+                "submit",
+                "Guardar Ficha",
+                css_class="btn btn-primary mt-4 w-100 fw-semibold",
+            ),
         )
 
     def clean(self):
         cleaned_data = super().clean()
-        album = cleaned_data.get("album")
-        nuevo_album_nombre = cleaned_data.get("nuevo_album_nombre")
         archivo_imagen = cleaned_data.get("archivo_imagen")
         url_imagen = cleaned_data.get("url_imagen")
 
-        if not album and not nuevo_album_nombre:
-            self.add_error("album", "Debe seleccionar un álbum existente o crear uno nuevo.")
         if not archivo_imagen and not url_imagen:
-            self.add_error("archivo_imagen", "Debe subir un archivo de imagen o proporcionar una URL válida.")
+            self.add_error(
+                "archivo_imagen",
+                "Debe subir un archivo de imagen o proporcionar una URL válida.",
+            )
         return cleaned_data
 
     def save(self, commit=True):
@@ -195,10 +233,12 @@ class FotografiaForm(forms.ModelForm):
                 response = requests.get(url_imagen, stream=True, timeout=15)
                 if response.status_code == 200 and response.content:
                     parsed_url = urlparse(url_imagen)
-                    filename = parsed_url.path.split('/')[-1]
-                    if not filename or '.' not in filename:
+                    filename = parsed_url.path.split("/")[-1]
+                    if not filename or "." not in filename:
                         filename = f"imagen_descargada_{slugify(instance.titulo or 'sin_titulo')}.jpg"
-                    instance.archivo_imagen.save(filename, ContentFile(response.content), save=False)
+                    instance.archivo_imagen.save(
+                        filename, ContentFile(response.content), save=False
+                    )
             except Exception:
                 pass
 
@@ -212,19 +252,21 @@ class FotografiaForm(forms.ModelForm):
                 final_url = resp.url
                 # Extract coordinates from various Google Maps URL formats
                 # Format 1: @lat,lng,zoom (place URL)
-                m = re.search(r'@(-?\d+\.?\d*),(-?\d+\.?\d*)', final_url)
+                m = re.search(r"@(-?\d+\.?\d*),(-?\d+\.?\d*)", final_url)
                 if not m:
                     # Format 2: !3dlat!4dlng (old format)
-                    m = re.search(r'!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)', final_url)
+                    m = re.search(r"!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)", final_url)
                 if not m:
                     # Format 3: /search/lat,lng
-                    m = re.search(r'/search/(-?\d+\.?\d*),\+?(-?\d+\.?\d*)', final_url)
+                    m = re.search(r"/search/(-?\d+\.?\d*),\+?(-?\d+\.?\d*)", final_url)
                 if not m:
                     # Format 4: ?q=lat,lng
-                    m = re.search(r'[?&]q=(-?\d+\.?\d*),\+?(-?\d+\.?\d*)', final_url)
+                    m = re.search(r"[?&]q=(-?\d+\.?\d*),\+?(-?\d+\.?\d*)", final_url)
                 if not m:
                     # Format 5: /dir/lat,lng or /place/Name/lat,lng
-                    m = re.search(r'/(-?\d+\.?\d*),\+?(-?\d+\.?\d*)(?:/|$|\?)', final_url)
+                    m = re.search(
+                        r"/(-?\d+\.?\d*),\+?(-?\d+\.?\d*)(?:/|$|\?)", final_url
+                    )
                 if m:
                     instance.latitud = float(m.group(1))
                     instance.longitud = float(m.group(2))
@@ -233,19 +275,41 @@ class FotografiaForm(forms.ModelForm):
 
         categoria_select = self.cleaned_data.get("categoria_select")
         subcategoria_select = self.cleaned_data.get("subcategoria_select")
+        nueva_cat_nombre = self.cleaned_data.get("nueva_categoria_nombre")
+        nueva_sub_nombre = self.cleaned_data.get("nueva_subcategoria_nombre")
         nuevo_album_nombre = self.cleaned_data.get("nuevo_album_nombre")
 
+        # Create new main category if provided
+        if nueva_cat_nombre:
+            cat, created = Categoria.objects.get_or_create(
+                nombre=nueva_cat_nombre, categoria_padre=None, defaults={"activa": True}
+            )
+            categoria_select = cat
+
+        # Create new subcategory if provided
+        if nueva_sub_nombre:
+            parent = subcategoria_select if subcategoria_select else categoria_select
+            if parent:
+                sub, created = Categoria.objects.get_or_create(
+                    nombre=nueva_sub_nombre,
+                    categoria_padre=parent,
+                    defaults={"activa": True},
+                )
+                subcategoria_select = sub
+
         if nuevo_album_nombre:
-            categoria_destino = subcategoria_select if subcategoria_select else categoria_select
+            categoria_destino = (
+                subcategoria_select if subcategoria_select else categoria_select
+            )
             if categoria_destino:
-                defaults = {'creado_por': instance.registrado_por, 'activo': True}
+                defaults = {"creado_por": instance.registrado_por, "activo": True}
                 desc = self.cleaned_data.get("nuevo_album_descripcion")
                 if desc:
-                    defaults['descripcion'] = desc
+                    defaults["descripcion"] = desc
                 nuevo_album, created = Album.objects.get_or_create(
                     nombre=nuevo_album_nombre,
                     categoria=categoria_destino,
-                    defaults=defaults
+                    defaults=defaults,
                 )
                 instance.album = nuevo_album
 
@@ -254,7 +318,7 @@ class FotografiaForm(forms.ModelForm):
         existing_album = self.cleaned_data.get("album")
         if desc and existing_album:
             existing_album.descripcion = desc
-            existing_album.save(update_fields=['descripcion'])
+            existing_album.save(update_fields=["descripcion"])
 
         if commit:
             instance.save()
@@ -278,10 +342,15 @@ def _aplicar_marca_agua(instance):
         # Tamaño de fuente proporcional
         font_size = max(int(min(w, h) * 0.025), 14)
         try:
-            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", font_size)
+            font = ImageFont.truetype(
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", font_size
+            )
         except (IOError, OSError):
             try:
-                font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", font_size)
+                font = ImageFont.truetype(
+                    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+                    font_size,
+                )
             except (IOError, OSError):
                 font = ImageFont.load_default()
         # Posición: esquina inferior derecha con margen

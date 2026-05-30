@@ -4,27 +4,41 @@
 {% block title %}Categorías y Álbumes - Archivo CEHAP{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="fw-bold mb-1">Categorías y Álbumes</h2>
-        <p class="text-muted small mb-0">Explora las colecciones del archivo fotográfico</p>
-    </div>
+<div class="hero-header text-center mb-4">
+    <div class="hero-line"></div>
+    <h1 class="hero-title">Categorías y Álbumes<br><span class="hero-subtitle">Archivo Fotográfico CEHAP</span></h1>
 </div>
+
+<style>
+.hero-header { padding: 1rem 0 .5rem; }
+.hero-line { width: 48px; height: 3px; background: #2563eb; border-radius: 2px; margin: 0 auto 16px; }
+.hero-title { font-family: 'Caudex', 'Georgia', serif; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; color: #0f172a; line-height: 1.25; letter-spacing: -.01em; margin-bottom: 8px; }
+.hero-subtitle { font-weight: 400; color: #475569; font-size: 85%; }
+</style>
 
 <div class="accordion" id="accordionCategorias">
     {% for categoria in categorias %}
     <div class="accordion-item mb-3 border-0 shadow-sm" style="border-radius:12px;overflow:hidden">
-        <h2 class="accordion-header" id="heading-cat-{{ categoria.pk }}">
-            <button class="accordion-button {% if not forloop.first %}collapsed{% endif %} bg-white py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-cat-{{ categoria.pk }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
-                <div class="d-flex w-100 justify-content-between align-items-center me-3">
-                    <span class="fw-bold text-dark" style="font-size:1.05rem">
-                        <i class="bi bi-folder2-open me-2 text-primary"></i> {{ categoria.nombre }}
-                    </span>
-                    <span class="badge bg-light text-secondary border rounded-pill small fw-normal">
-                        {{ categoria.num_albumes|add:categoria.num_sub_albumes }} álbumes &middot; {{ categoria.num_fotos|add:categoria.num_sub_fotos }} fotos
-                    </span>
-                </div>
+        <h2 class="accordion-header d-flex align-items-center" id="heading-cat-{{ categoria.pk }}">
+            <button class="accordion-button flex-grow-1 {% if not forloop.first %}collapsed{% endif %} bg-white py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-cat-{{ categoria.pk }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+                    <div class="d-flex w-100 justify-content-between align-items-center me-3">
+                        <span class="fw-bold text-dark" style="font-size:1.05rem">
+                            <i class="bi bi-folder2-open me-2 text-primary"></i> {{ categoria.nombre }}
+                        </span>
+                        <span class="badge bg-light text-secondary border rounded-pill small fw-normal">
+                            {{ categoria.num_albumes|add:categoria.num_sub_albumes }} álbumes &middot; {{ categoria.num_fotos|add:categoria.num_sub_fotos }} fotos
+                        </span>
+                    </div>
             </button>
+            {% if user.is_authenticated %}
+            <div class="d-flex align-items-center gap-2 pe-3">
+                <a href="{% url 'categoria_editar' categoria.pk %}" class="text-muted" title="Editar" style="font-size:.8rem;"><i class="bi bi-pencil-square"></i></a>
+                <form method="post" action="{% url 'categoria_eliminar' categoria.pk %}" class="d-inline" onsubmit="return confirm('¿Eliminar {{ categoria.nombre }}?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link text-muted p-0 border-0" title="Eliminar" style="font-size:.8rem;line-height:1;"><i class="bi bi-trash"></i></button>
+                </form>
+            </div>
+            {% endif %}
         </h2>
         <div id="collapse-cat-{{ categoria.pk }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading-cat-{{ categoria.pk }}">
             <div class="accordion-body bg-white border-top">
@@ -38,9 +52,18 @@
                     <h6 class="text-secondary mb-3"><i class="bi bi-collection me-1"></i> Álbumes</h6>
                     <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
                         {% for album in categoria.albumes.all %}{% if album.activo %}
-                        <div class="col">
-                            <a href="{% url 'fotografia_lista' %}?album={{ album.pk }}" class="card h-100 border-0 shadow-sm text-decoration-none album-card-link" style="border-radius:10px;overflow:hidden;transition:transform .2s,box-shadow .2s">
-                                <div style="height:140px;background:#f1f5f9;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;overflow:hidden">
+                        <div class="col" style="position:relative;">
+                            {% if user.is_authenticated %}
+                            <div style="position:absolute;top:6px;right:6px;z-index:5;display:flex;gap:3px;">
+                                <a href="{% url 'album_editar' album.pk %}" class="bg-white bg-opacity-90 rounded d-flex align-items-center justify-content-center" style="width:22px;height:22px;color:#64748b;text-decoration:none;font-size:.65rem;box-shadow:0 1px 3px rgba(0,0,0,.1);" title="Editar álbum"><i class="bi bi-pencil-square"></i></a>
+                                <form method="post" action="{% url 'album_eliminar' album.pk %}" onsubmit="return confirm('¿Eliminar {{ album.nombre }}?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="bg-white bg-opacity-90 rounded d-flex align-items-center justify-content-center border-0" style="width:22px;height:22px;color:#ef4444;cursor:pointer;font-size:.65rem;box-shadow:0 1px 3px rgba(0,0,0,.1);" title="Eliminar"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                            {% endif %}
+                            <a href="{% url 'fotografia_lista' %}?album={{ album.pk }}" class="card h-100 border-0 shadow-sm text-decoration-none album-card-link" style="border-radius:10px;overflow:hidden;transition:transform .2s,box-shadow .2s;">
+                                <div style="height:140px;background:#f1f5f9;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;overflow:hidden;">
                                     {% with fotos=album.fotografia_set.all|dictsortreversed:"fecha_registro"|slice:":4" %}
                                     {% for f in fotos %}{% if f.archivo_imagen %}
                                     <img src="{{ f.archivo_imagen.url }}" loading="lazy" style="width:100%;height:100%;object-fit:cover">
@@ -72,19 +95,37 @@
                     <h6 class="text-secondary mb-3"><i class="bi bi-diagram-2 me-1"></i> Subcategorías</h6>
                     {% for sub in categoria.subcategorias.all %}{% if sub.activa %}
                     <div class="mb-3">
-                        <a class="text-decoration-none d-flex align-items-center gap-2 mb-2 collapsed" data-bs-toggle="collapse" href="#sub-{{ sub.pk }}" role="button">
-                            <i class="bi bi-folder text-muted"></i>
-                            <span class="fw-semibold text-dark small">{{ sub.nombre }}</span>
-                            <span class="badge bg-light text-secondary border small ms-2">{{ sub.albumes.count }}</span>
-                            <i class="bi bi-chevron-down ms-auto text-muted small toggle-icon"></i>
-                        </a>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <a class="text-decoration-none d-flex align-items-center gap-2 collapsed flex-grow-1" data-bs-toggle="collapse" href="#sub-{{ sub.pk }}" role="button">
+                                <i class="bi bi-folder text-muted"></i>
+                                <span class="fw-semibold text-dark small">{{ sub.nombre }}</span>
+                                <span class="badge bg-light text-secondary border small ms-2">{{ sub.albumes.count }}</span>
+                                <i class="bi bi-chevron-down ms-auto text-muted small toggle-icon"></i>
+                            </a>
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'categoria_editar' sub.pk %}" class="text-muted" title="Editar" style="z-index:5"><i class="bi bi-pencil-square" style="font-size:.75rem"></i></a>
+                            <form method="post" action="{% url 'categoria_eliminar' sub.pk %}" class="d-inline" onsubmit="return confirm('¿Eliminar {{ sub.nombre }} y sus álbumes y fotos?')" style="z-index:5">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link text-danger p-0" title="Eliminar"><i class="bi bi-trash" style="font-size:.75rem"></i></button>
+                            </form>
+                            {% endif %}
+                        </div>
                         {% if sub.descripcion %}<p class="text-muted small ms-4 mb-2">{{ sub.descripcion|truncatechars:100 }}</p>{% endif %}
                         <div class="collapse ms-3" id="sub-{{ sub.pk }}">
                             <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
                                 {% for album in sub.albumes.all %}{% if album.activo %}
-                                <div class="col">
-                                            <a href="{% url 'fotografia_lista' %}?album={{ album.pk }}" class="card h-100 border-0 shadow-sm text-decoration-none album-card-link" style="border-radius:10px;overflow:hidden;transition:transform .2s,box-shadow .2s">
-                                                <div style="height:120px;background:#f1f5f9;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;overflow:hidden">
+                                <div class="col" style="position:relative;">
+                                    {% if user.is_authenticated %}
+                                    <div style="position:absolute;top:4px;right:4px;z-index:5;display:flex;gap:3px;">
+                                        <a href="{% url 'album_editar' album.pk %}" class="bg-white bg-opacity-90 rounded d-flex align-items-center justify-content-center" style="width:20px;height:20px;color:#64748b;text-decoration:none;font-size:.6rem;box-shadow:0 1px 3px rgba(0,0,0,.08);" title="Editar"><i class="bi bi-pencil-square"></i></a>
+                                        <form method="post" action="{% url 'album_eliminar' album.pk %}" onsubmit="return confirm('¿Eliminar {{ album.nombre }}?')">
+                                            {% csrf_token %}
+                                            <button type="submit" class="bg-white bg-opacity-90 rounded d-flex align-items-center justify-content-center border-0" style="width:20px;height:20px;color:#ef4444;cursor:pointer;font-size:.6rem;box-shadow:0 1px 3px rgba(0,0,0,.08);" title="Eliminar"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
+                                    {% endif %}
+                                            <a href="{% url 'fotografia_lista' %}?album={{ album.pk }}" class="card h-100 border-0 shadow-sm text-decoration-none album-card-link" style="border-radius:10px;overflow:hidden;transition:transform .2s,box-shadow .2s;">
+                                                <div style="height:120px;background:#f1f5f9;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;overflow:hidden;">
                                                     {% with fotos=album.fotografia_set.all|dictsortreversed:"fecha_registro"|slice:":4" %}
                                                     {% for f in fotos %}{% if f.archivo_imagen %}
                                                     <img src="{{ f.archivo_imagen.url }}" loading="lazy" style="width:100%;height:100%;object-fit:cover">
@@ -119,10 +160,45 @@
 </div>
 
 <style>
-.album-card-link:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,.1) !important; }
+.album-card-link { background:#fff;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;display:block; }
+.album-card-link:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,.08); }
 .album-card-link:hover img { transform: scale(1.04); }
 .album-card-link img { transition: transform .35s ease; }
 .toggle-icon { transition: transform .2s; }
 .collapsed .toggle-icon { transform: rotate(-90deg); }
 </style>
+
+<script>
+(function() {
+    var hash = window.location.hash;
+    if (!hash) return;
+
+    function show(el) {
+        if (!el) return;
+        el.classList.add('show');
+        var btn = document.querySelector('[data-bs-target="#' + el.id + '"]') || document.querySelector('[href="#' + el.id + '"]');
+        if (btn) { btn.classList.remove('collapsed'); btn.setAttribute('aria-expanded', 'true'); }
+    }
+
+    function handleHash() {
+        // Format: #cat-X-sub-Y
+        var m = hash.match(/^#cat-(\d+)-sub-(\d+)$/);
+        if (m) {
+            var catId = m[1], subId = m[2];
+            var catEl = document.getElementById('collapse-cat-' + catId);
+            if (catEl) show(catEl);
+            var subEl = document.getElementById('sub-' + subId);
+            if (subEl) { show(subEl); setTimeout(function() { subEl.scrollIntoView({behavior:'smooth', block:'center'}); }, 400); }
+            return;
+        }
+        // Format: #cat-X
+        var cm = hash.match(/^#cat-(\d+)$/);
+        if (cm) {
+            var el = document.getElementById('collapse-cat-' + cm[1]);
+            if (el) { show(el); setTimeout(function() { el.scrollIntoView({behavior:'smooth', block:'center'}); }, 200); }
+        }
+    }
+    setTimeout(handleHash, 300);
+})();
+</script>
 {% endblock %}

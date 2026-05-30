@@ -2,29 +2,29 @@
 {% load static %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 <style>
-    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #0f0f0f; }
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
     body > .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
-    nav.navbar { margin-bottom: 0 !important; }
-    #map { width: 100%; height: calc(100vh - 56px); }
+    nav.navbar { margin-bottom: 0 !important; position: static !important; }
+    #map { width: 100%; height: calc(100vh - 68px); }
     .map-loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 999; background: rgba(255,255,255,.92); padding: 20px 32px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.12); font-size: 0.9rem; color: #555; display: flex; align-items: center; gap: 10px; }
     .map-loader .spinner { width: 20px; height: 20px; border: 2px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin .6s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .leaflet-popup-content-wrapper { border-radius: 12px; }
-    .info-card img { border-radius: 12px 12px 0 0; }
-    .gm-style-iw-d { overflow: hidden !important; max-height: none !important; padding: 0 !important; }
-    .info-card { width: 280px; font-family: 'Inter', system-ui, sans-serif; }
-    .info-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
-    .info-card .body { padding: 14px 16px; }
-    .info-card .body h6 { font-size: 0.95rem; font-weight: 700; color: #1a1a1a; margin: 0 0 4px; line-height: 1.3; }
-    .info-card .body .meta { font-size: 0.78rem; color: #666; margin-bottom: 6px; }
-    .info-card .body .desc { font-size: 0.8rem; color: #444; line-height: 1.45; margin-bottom: 10px; }
-    .info-card .body a { display: inline-block; font-size: 0.78rem; font-weight: 600; color: #2563eb; text-decoration: none; }
+    .leaflet-popup-content-wrapper { border-radius: 12px; overflow: hidden; padding: 0; }
+    .leaflet-popup-content { margin: 0; }
+    .info-card { width: 300px; font-family: 'Lato', system-ui, sans-serif; }
+    .info-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
+    .info-card .body { padding: 12px 14px; }
+    .info-card .body h6 { font-size: .9rem; font-weight: 700; color: #1e293b; margin: 0 0 4px; line-height: 1.3; }
+    .info-card .body .meta { font-size: .7rem; color: #64748b; margin-bottom: 6px; display:flex;gap:6px;flex-wrap:wrap; }
+    .info-card .body .meta span { background:#f1f5f9;padding:2px 8px;border-radius:4px; }
+    .info-card .body .desc { font-size: .75rem; color: #475569; line-height: 1.45; margin-bottom: 10px; }
+    .info-card .body a { font-size: .75rem; font-weight: 600; color: #2563eb; text-decoration: none; }
     .info-card .body a:hover { text-decoration: underline; }
-    .info-card .no-img { width: 100%; height: 100px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 2rem; }
-    .map-loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 999; background: rgba(255,255,255,.92); padding: 20px 32px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.12); font-size: 0.9rem; color: #555; display: flex; align-items: center; gap: 10px; }
-    .map-loader .spinner { width: 20px; height: 20px; border: 2px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin .6s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .info-card .no-img { height: 100px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 1.8rem; }
 </style>
 {% endblock %}
 
@@ -34,97 +34,70 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
-const MAPS_KEY = '{{ maps_api_key }}';
+(function() {
+    var mapEl = document.getElementById('map');
+    if (!mapEl) return;
 
-function initMap() {
-    const mapEl = document.getElementById('map');
-    const map = new google.maps.Map(mapEl, {
-        center: { lat: 4.5709, lng: -74.2973 },
-        zoom: 6,
-        mapTypeId: 'hybrid',
-        mapTypeControl: true,
-        fullscreenControl: true,
-        streetViewControl: false,
-        styles: [
-            { featureType: "poi", stylers: [{ visibility: "off" }] },
-            { featureType: "transit", stylers: [{ visibility: "off" }] },
-        ]
-    });
+    var map = L.map('map', { scrollWheelZoom: true }).setView([4.5709, -74.2973], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    var clusterGroup = L.markerClusterGroup({ maxClusterRadius: 50, spiderfyOnMaxZoom: true, showCoverageOnHover: false });
 
     fetch('/mapa/data/')
-        .then(r => r.json())
-        .then(fotos => {
+        .then(function(r) { return r.json(); })
+        .then(function(fotos) {
             document.getElementById('loader').style.display = 'none';
+            var bounds = [];
+            var usedCoords = {}; // Track coordinates to offset duplicates
 
-            const markers = [];
-            const infoWindows = [];
+            fotos.forEach(function(f) {
+                var key = f.lat.toFixed(6) + ',' + f.lng.toFixed(6);
+                var lat = f.lat, lng = f.lng;
+                if (usedCoords[key]) {
+                    // Offset duplicates by ~15m each
+                    var offset = usedCoords[key] * 0.00015;
+                    lat += offset;
+                    lng += offset;
+                    usedCoords[key]++;
+                } else {
+                    usedCoords[key] = 1;
+                }
+                var img = f.thumbnail
+                    ? '<img src="' + f.thumbnail + '" alt="' + f.titulo + '" loading="lazy">'
+                    : '<div class="no-img"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>';
+                var meta = (f.autor || f.fecha_subida)
+                    ? '<div class="meta">' + (f.autor ? '<span><i class="bi bi-person"></i> ' + f.autor + '</span>' : '') + (f.fecha_subida ? '<span><i class="bi bi-calendar3"></i> ' + f.fecha_subida + '</span>' : '') + '</div>'
+                    : '';
+                var desc = f.descripcion ? '<div class="desc">' + f.descripcion + (f.descripcion.length >= 150 ? '...' : '') + '</div>' : '';
 
-            fotos.forEach(f => {
-                const marker = new google.maps.Marker({
-                    position: { lat: f.lat, lng: f.lng },
-                    map: map,
-                    title: f.titulo,
-                    icon: {
-                        url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Ccircle cx='18' cy='18' r='14' fill='%232563eb' stroke='%23fff' stroke-width='3'/%3E%3Ccircle cx='18' cy='18' r='5' fill='%23fff'/%3E%3C/svg%3E",
-                        scaledSize: new google.maps.Size(36, 36),
-                        anchor: new google.maps.Point(18, 18),
-                    }
-                });
+                L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        className: 'map-marker-icon',
+                        html: '<svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#2563eb" stroke="#fff" stroke-width="2.5"/><circle cx="16" cy="16" r="4" fill="#fff"/></svg>',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16],
+                        popupAnchor: [0, -16],
+                    })
+                }).addTo(clusterGroup).bindPopup(L.popup({ maxWidth: 300 }).setContent(
+                    '<div class="info-card">' + img + '<div class="body"><h6>' + f.titulo + '</h6>' + meta + desc + '<a href="' + f.url + '">Ver ficha completa →</a></div></div>'
+                )).on('mouseover', function() { this.openPopup(); });
 
-                const infoContent = buildInfoCard(f);
-                const infoWindow = new google.maps.InfoWindow({
-                    content: infoContent,
-                    maxWidth: 300,
-                });
-
-                marker.addListener('click', () => {
-                    infoWindows.forEach(iw => iw.close());
-                    infoWindow.open(map, marker);
-                });
-
-                marker.addListener('mouseover', () => {
-                    infoWindows.forEach(iw => iw.close());
-                    infoWindow.open(map, marker);
-                });
-
-                markers.push(marker);
-                infoWindows.push(infoWindow);
+                bounds.push([lat, lng]);
             });
 
-            if (markers.length > 1) {
-                const bounds = new google.maps.LatLngBounds();
-                markers.forEach(m => bounds.extend(m.position));
-                map.fitBounds(bounds, 80);
-            } else if (markers.length === 1) {
-                map.setCenter(markers[0].position);
-                map.setZoom(16);
-            }
+            map.addLayer(clusterGroup);
+            if (bounds.length > 1) map.fitBounds(bounds, { padding: [30, 30] });
+            else if (bounds.length === 1) map.setView(bounds[0], 16);
         })
-        .catch(err => {
+        .catch(function() {
             document.getElementById('loader').innerHTML = 'Error al cargar datos. <a href=".">Reintentar</a>';
         });
-}
-
-function buildInfoCard(f) {
-    const img = f.thumbnail
-        ? `<img src="${f.thumbnail}" alt="${f.titulo}" loading="lazy">`
-        : `<div class="no-img"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>`;
-
-    const meta = [f.autor, f.fecha].filter(Boolean).join(' · ');
-    const desc = f.descripcion ? `<div class="desc">${f.descripcion}${f.descripcion.length >= 150 ? '...' : ''}</div>` : '';
-
-    return `
-        <div class="info-card">
-            ${img}
-            <div class="body">
-                <h6>${f.titulo}</h6>
-                ${meta ? `<div class="meta">${meta}</div>` : ''}
-                ${desc}
-                <a href="${f.url}">Ver ficha completa →</a>
-            </div>
-        </div>`;
-}
+})();
 </script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key={{ maps_api_key }}&callback=initMap"></script>
 {% endblock %}

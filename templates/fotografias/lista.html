@@ -1,89 +1,77 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="row align-items-center mb-4">
-    <div class="col-md-9">
-        <h4 class="mb-2 fw-bold text-dark lh-base">Galería de Imágenes Escuela del Hábitat - CEHAP<br>Facultad de Arquitectura - Universidad Nacional de Colombia - Sede Medellín</h4>
-        <p class="text-secondary mb-0">Fotografías e imágenes producto de estudios, investigaciones y trabajo de campo de la Escuela del Hábitat CEHAP.</p>
-    </div>
-    <div class="col-md-3 text-md-end mt-3 mt-md-0">
-        {% if user.is_authenticated %}
-        <a href="{% url 'fotografia_crear' %}" class="btn btn-success btn-modern shadow-sm">
-            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Subir Archivo
-        </a>
-        {% endif %}
-    </div>
+<div class="hero-header text-center mb-4">
+    <div class="hero-line"></div>
+    <h1 class="hero-title">Galería de Imágenes<br><span class="hero-subtitle">Escuela del Hábitat — CEHAP</span></h1>
+    <p class="hero-org">Facultad de Arquitectura · Universidad Nacional de Colombia · Sede Medellín</p>
+    {% if user.is_authenticated %}
+    <a href="{% url 'fotografia_crear' %}{% if request.GET.album %}?album={{ request.GET.album }}{% endif %}" class="btn-accent text-decoration-none d-inline-flex align-items-center gap-1 mt-3">Subir Archivo</a>
+    {% endif %}
 </div>
 
-<div class="card card-modern mb-4 border-0 shadow-sm bg-white">
-    <div class="card-body p-4">
-        <form method="get" class="row gx-3 gy-2 align-items-center">
-            <div class="col-md-9">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 text-secondary">
-                        <i class="bi bi-search"></i>
-                    </span>
-                    <input type="text" class="form-control form-control-modern border-start-0 ps-0 shadow-none" id="q" name="q" placeholder="Buscar por título, código o palabra clave..." value="{{ request.GET.q }}">
-                    {% if request.GET.album %}
-                    <input type="hidden" name="album" value="{{ request.GET.album }}">
-                    {% endif %}
-                </div>
-            </div>
-            <div class="col-md-3 d-flex gap-2">
-                <button type="submit" class="btn btn-dark w-100 btn-modern shadow-none">Filtrar</button>
-                <a href="{% url 'fotografia_lista' %}" class="btn btn-light border w-100 btn-modern shadow-none text-secondary">Limpiar</a>
-            </div>
-        </form>
-    </div>
+<div class="search-wrapper mb-4">
+    <form method="get">
+        <div class="search-bar">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" class="search-input" id="q" name="q" placeholder="Buscar por título, código o palabra clave..." value="{{ request.GET.q }}">
+            {% if request.GET.album %}<input type="hidden" name="album" value="{{ request.GET.album }}">{% endif %}
+            <button type="submit" class="search-btn" title="Buscar"><i class="bi bi-search"></i></button>
+            <a href="{% url 'fotografia_lista' %}" class="search-clear">Limpiar</a>
+        </div>
+    </form>
 </div>
+
+<style>
+.hero-header { padding: 1.5rem 0 .5rem; }
+.hero-line { width: 48px; height: 3px; background: #2563eb; border-radius: 2px; margin: 0 auto 16px; }
+.hero-title { font-family: 'Caudex', 'Georgia', serif; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; color: #0f172a; line-height: 1.25; letter-spacing: -.01em; margin-bottom: 8px; }
+.hero-subtitle { font-weight: 400; color: #475569; font-size: 85%; }
+.hero-org { font-size: .82rem; color: #94a3b8; font-weight: 500; margin-bottom: 0; }
+.search-wrapper { max-width: 640px; margin-left: auto; margin-right: auto; }
+.search-bar { display:flex;align-items:center;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:4px;box-shadow:0 2px 12px rgba(0,0,0,.04);transition:box-shadow .2s,border-color .2s; }
+.search-bar:focus-within { border-color:#2563eb;box-shadow:0 2px 20px rgba(37,99,235,.12),0 0 0 3px rgba(37,99,235,.08); }
+.search-icon { color:#94a3b8;font-size:1.1rem;margin-left:14px;flex-shrink:0; }
+.search-input { flex:1;border:none;outline:none;padding:12px 14px;font-size:.95rem;font-family:'Inter',sans-serif;color:#1e293b;background:transparent; }
+.search-input::placeholder { color:#94a3b8; }
+.search-btn { background:#2563eb;color:#fff;border:none;padding:10px 16px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:background .2s;margin:3px;white-space:nowrap; }
+.search-btn:hover { background:#1d4ed8; }
+.search-clear { color:#94a3b8;font-size:.85rem;text-decoration:none;padding:0 16px 0 4px;white-space:nowrap;transition:color .15s; }
+.search-clear:hover { color:#64748b; }
+</style>
 
 <!-- Vista de Galería Pública -->
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
     {% for foto in fotografias %}
     <div class="col">
-        <div class="card h-100 shadow-sm border-0 transition-hover">
+        <div class="photo-card">
             {% if foto.archivo_imagen %}
-            <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-decoration-none">
-                <img src="{{ foto.archivo_imagen.url }}" class="card-img-top" alt="{{ foto.titulo }}" style="height: 220px; object-fit: cover;">
-            </a>
+            <a href="{% url 'fotografia_detalle' foto.pk %}"><div class="photo-card-img"><img src="{{ foto.archivo_imagen.url }}" alt="{{ foto.titulo }}" loading="lazy"></div></a>
             {% else %}
-            <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-decoration-none">
-                <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 220px; border-top-left-radius: .375rem; border-top-right-radius: .375rem;">
-                    <div class="text-center">
-                        <i class="bi bi-image text-secondary opacity-25" style="font-size: 3rem;"></i>
-                    </div>
-                </div>
-            </a>
+            <a href="{% url 'fotografia_detalle' foto.pk %}"><div class="photo-card-img placeholder"><i class="bi bi-image"></i></div></a>
             {% endif %}
-            
-            <div class="card-body d-flex flex-column p-3">
-                <h6 class="card-title text-dark mb-1 lh-sm">
-                    <a href="{% url 'fotografia_detalle' foto.pk %}" class="text-decoration-none text-dark stretched-link">{{ foto.titulo|truncatechars:50 }}</a>
-                </h6>
-                <p class="text-secondary small mb-2">{% if foto.fecha_produccion %}{{ foto.fecha_produccion }}{% else %}#{{ foto.codigo }}{% endif %}</p>
-                <div class="mt-auto pt-2 border-top">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="badge bg-light text-secondary border text-start" style="white-space:normal">
-                            {% if foto.album and foto.album.categoria %}
-                                {% if foto.album.categoria.categoria_padre %}
-                                    {{ foto.album.categoria.categoria_padre.nombre }} &rsaquo; {{ foto.album.categoria.nombre }}
-                                {% else %}
-                                    {{ foto.album.categoria.nombre }}
-                                {% endif %}
-                                {% if foto.album.nombre %} &rsaquo; {{ foto.album.nombre }}{% endif %}
-                            {% else %}
-                                Sin colección
-                            {% endif %}
-                        </span>
-                        {% if user.is_authenticated %}
-                        <div class="d-flex gap-1 position-relative z-1">
-                            <a href="{% url 'fotografia_editar' foto.pk %}" class="btn btn-sm btn-link text-primary p-0" title="Editar ficha"><i class="bi bi-pencil-square"></i></a>
-                            <form method="post" action="{% url 'fotografia_eliminar' foto.pk %}" onsubmit="return confirm('¿Eliminar esta imagen?');" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Eliminar"><i class="bi bi-trash"></i></button>
-                            </form>
-                        </div>
-                        {% endif %}
+            <div class="photo-card-body">
+                <h6><a href="{% url 'fotografia_detalle' foto.pk %}">{{ foto.titulo|truncatechars:50 }}</a></h6>
+                <span class="photo-card-meta">
+                    {% if foto.fecha_produccion %}<span>{{ foto.fecha_produccion|slice:"-4:" }}</span>{% elif foto.fecha_subida_original %}<span>{{ foto.fecha_subida_original|slice:"-4:" }}</span>{% endif %}
+                    {% if foto.autor %}<span class="mini-pill" title="Autor">{{ foto.autor|truncatechars:18 }}</span>{% endif %}
+                    {% if foto.formato_archivo %}<span class="format-badge">{{ foto.formato_archivo }}</span>{% endif %}
+                </span>
+                <div class="photo-card-footer">
+                    <span class="photo-card-badge">
+                        {% if foto.album and foto.album.categoria %}
+                            {% if foto.album.categoria.categoria_padre %}
+                                <a href="{% url 'categoria_lista' %}#cat-{{ foto.album.categoria.categoria_padre.pk }}" onclick="event.stopPropagation()" title="Ver categoría">{{ foto.album.categoria.categoria_padre.nombre }}</a> &rsaquo;
+                                <a href="{% url 'categoria_lista' %}#cat-{{ foto.album.categoria.categoria_padre.pk }}-sub-{{ foto.album.categoria.pk }}" onclick="event.stopPropagation()" title="Ver subcategoría">{{ foto.album.categoria.nombre }}</a>
+                            {% else %}<a href="{% url 'categoria_lista' %}#cat-{{ foto.album.categoria.pk }}" onclick="event.stopPropagation()" title="Ver categoría">{{ foto.album.categoria.nombre }}</a>{% endif %}
+                            {% if foto.album.nombre %} &rsaquo; <a href="{% url 'fotografia_lista' %}?album={{ foto.album.pk }}" onclick="event.stopPropagation()" title="Ver álbum">{{ foto.album.nombre }}</a>{% endif %}
+                        {% else %}Sin colección{% endif %}
+                    </span>
+                    {% if user.is_authenticated %}
+                    <div class="photo-card-actions">
+                        <a href="{% url 'fotografia_editar' foto.pk %}" title="Editar"><i class="bi bi-pencil-square"></i></a>
+                        <form method="post" action="{% url 'fotografia_eliminar' foto.pk %}" onsubmit="return confirm('¿Eliminar?');"><button type="submit" title="Eliminar"><i class="bi bi-trash"></i></button></form>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -99,13 +87,27 @@
 </div>
 
 <style>
-.transition-hover {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-.transition-hover:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-}
+.photo-card { background:#fff; border-radius:14px; overflow:hidden; border:1px solid #e2e8f0; transition:all .25s ease; }
+.photo-card:hover { transform:translateY(-4px); box-shadow:0 12px 30px rgba(0,0,0,.08); }
+.photo-card-img { height:200px; overflow:hidden; background:#f1f5f9; }
+.photo-card-img img { width:100%;height:100%;object-fit:cover;transition:transform .4s ease; }
+.photo-card:hover .photo-card-img img { transform:scale(1.04); }
+.photo-card-img.placeholder { display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:2.5rem; }
+.photo-card-body { padding:14px 16px; }
+.photo-card-body h6 { font-size:.88rem;font-weight:600;margin:0 0 4px;line-height:1.3; }
+.photo-card-body h6 a { color:#1e293b;text-decoration:none; }
+.photo-card-body h6 a:hover { color:#2563eb; }
+.photo-card-meta { font-size:.75rem;color:#64748b;display:flex;align-items:center;gap:6px; }
+.format-badge { background:#eff6ff;color:#2563eb;font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.03em; }
+.mini-pill { background:#f1f5f9;color:#64748b;font-size:.62rem;padding:1px 6px;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px; }
+.photo-card-footer { display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9; }
+.photo-card-badge { font-size:.7rem;color:#64748b;background:#f8fafc;padding:3px 8px;border-radius:6px;max-width:75%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;position:relative;z-index:2; }
+.photo-card-badge a { color:#64748b;text-decoration:none;position:relative;z-index:3; }
+.photo-card-badge a:hover { color:#2563eb;text-decoration:underline; }
+.photo-card-actions { display:flex;gap:2px; }
+.photo-card-actions a,.photo-card-actions button { background:none;border:none;color:#94a3b8;font-size:.9rem;padding:4px 6px;cursor:pointer;border-radius:6px;transition:all .15s;text-decoration:none; }
+.photo-card-actions a:hover { color:#2563eb;background:#eff6ff; }
+.photo-card-actions button:hover { color:#ef4444;background:#fef2f2; }
 </style>
 
 {% if is_paginated %}
