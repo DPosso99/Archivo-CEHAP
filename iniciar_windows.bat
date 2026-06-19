@@ -61,7 +61,7 @@ echo [OK] Base de datos lista.
 echo.
 
 :: Load test data if database is empty (first run)
-python manage.py shell -c "from apps.colecciones.models import Categoria; exit(0) if Categoria.objects.exists() else exit(1)"
+python manage.py shell -c "from apps.fotografias.models import Fotografia; exit(0) if Fotografia.objects.exists() else exit(1)"
 if %errorlevel% neq 0 (
     if exist "seed_data.json" (
         echo Cargando datos de prueba...
