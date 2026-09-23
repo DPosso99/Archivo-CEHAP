@@ -7,14 +7,14 @@ from django.views.generic import (
     DeleteView,
     View,
 )
-from django.views.generic.edit import FormMixin
 import json
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q, Avg
+from django.db.models import Avg
 from django.http import HttpResponseRedirect
 from .models import Fotografia, Comentario, Calificacion
 from .forms import FotografiaForm
+from .busqueda import ejecutar_busqueda_fotografias
 
 
 class HomeView(TemplateView):
@@ -77,21 +77,27 @@ class FotografiaListView(ListView):
         if not self.request.user.is_authenticated:
             queryset = queryset.filter(estado="Activo")
 
-        # Filtro de búsqueda
+        # Filtro de búsqueda avanzado (multipalabra, insensible a acentos/tildes y plurales)
         q = self.request.GET.get("q")
-        if q:
-            queryset = queryset.filter(
-                Q(titulo__icontains=q)
-                | Q(codigo__icontains=q)
-                | Q(palabras_clave__icontains=q)
-                | Q(descripcion_imagen__icontains=q)
-            )
-
         album_id = self.request.GET.get("album")
-        if album_id:
-            queryset = queryset.filter(album_id=album_id)
+        if q or album_id:
+            queryset = ejecutar_busqueda_fotografias(queryset, q, album_id=album_id)
 
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        album_id = self.request.GET.get("album")
+        if album_id:
+            from apps.colecciones.models import Album
+            try:
+                context["album_actual"] = Album.objects.select_related("categoria").get(pk=album_id)
+            except Album.DoesNotExist:
+                context["album_actual"] = None
+        else:
+            context["album_actual"] = None
+        context["busqueda_activa"] = self.request.GET.get("q", "").strip()
+        return context
 
 
 class FotografiaDetailView(DetailView):
@@ -187,13 +193,16 @@ class FotografiaDetailView(DetailView):
 
         # Handle Rating
         if "estrellas" in request.POST:
-            estrellas = int(request.POST.get("estrellas"))
-            if 1 <= estrellas <= 5:
-                Calificacion.objects.update_or_create(
-                    fotografia=foto,
-                    ip_usuario=user_ip,
-                    defaults={"estrellas": estrellas},
-                )
+            try:
+                estrellas = int(request.POST.get("estrellas"))
+                if 1 <= estrellas <= 5:
+                    Calificacion.objects.update_or_create(
+                        fotografia=foto,
+                        ip_usuario=user_ip,
+                        defaults={"estrellas": estrellas},
+                    )
+            except (ValueError, TypeError):
+                pass
 
         # Handle Comment
         elif "comentario" in request.POST:

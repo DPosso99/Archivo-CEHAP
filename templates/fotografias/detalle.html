@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<style>#detailMap{width:100%;height:300px;border-radius:8px;z-index:0}</style>
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}" />
+<style>#detailMap{width:100%;height:320px;border-radius:10px;z-index:0;box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1px solid #e2e8f0;}</style>
 {% endblock %}
 
 {% block content %}
@@ -28,7 +29,10 @@
     </div>
     <div class="col-md-4 text-md-end mt-2 mt-md-0 d-flex justify-content-md-end gap-2 flex-wrap align-items-start">
         <a href="{% url 'fotografia_lista' %}" class="btn-ghost text-decoration-none">Volver</a>
-        {% if foto.archivo_imagen %}<a href="{{ foto.archivo_imagen.url }}" download class="btn-ghost text-decoration-none"><i class="bi bi-download me-1"></i>Descargar</a>{% endif %}
+        {% if foto.archivo_imagen %}<a href="{{ foto.imagen_web_url }}" download class="btn-ghost text-decoration-none" title="Descargar imagen para consulta"><i class="bi bi-download me-1"></i>Descargar</a>{% endif %}
+        {% if user.is_authenticated and foto.archivo_imagen %}
+        <a href="{{ foto.archivo_imagen.url }}" download class="btn-accent text-decoration-none" style="background:#059669;border-color:#059669;" title="Descargar archivo original maestro de alta resolución"><i class="bi bi-shield-check me-1"></i>Original Maestro</a>
+        {% endif %}
         {% if user.is_authenticated %}<a href="{% url 'fotografia_editar' foto.pk %}" class="btn-accent text-decoration-none">Editar</a>{% endif %}
     </div>
 </div>
@@ -40,7 +44,7 @@
             {% for f in album_fotos %}
             <div class="gallery-slide{% if f.pk == foto.pk %} active{% endif %}" data-index="{{ forloop.counter0 }}">
                 {% if f.archivo_imagen %}
-                <img src="{{ f.archivo_imagen.url }}" alt="{{ f.titulo }}" class="gallery-img" onclick="openLightbox({{ forloop.counter0 }})">
+                <img src="{{ f.imagen_web_url }}" alt="{{ f.titulo }}" class="gallery-img" onclick="openLightbox({{ forloop.counter0 }})">
                 {% else %}
                 <div class="gallery-placeholder"><span>Sin imagen</span></div>
                 {% endif %}
@@ -64,7 +68,7 @@
         <div class="fs-track" id="fsTrack">
             {% for f in album_fotos %}
             <div class="fs-frame{% if f.pk == foto.pk %} active{% endif %}" data-index="{{ forloop.counter0 }}" onclick="goToSlide({{ forloop.counter0 }})">
-                {% if f.archivo_imagen %}<img src="{{ f.archivo_imagen.url }}" alt="{{ f.titulo }}" loading="lazy">{% else %}<div class="fs-frame-ph"><i class="bi bi-image"></i></div>{% endif %}
+                {% if f.archivo_imagen %}<img src="{{ f.imagen_web_url }}" alt="{{ f.titulo }}" loading="lazy">{% else %}<div class="fs-frame-ph"><i class="bi bi-image"></i></div>{% endif %}
                 <span class="fs-num">{{ forloop.counter }}</span>
             </div>
             {% endfor %}
@@ -261,7 +265,7 @@ function capImageSize(img) {
 var galleryData = [
     {% for f in album_fotos %}
     {% if f.archivo_imagen %}
-    {src:"{{ f.archivo_imagen.url }}", title:"{{ f.titulo|escapejs }}", author:"{{ f.autor|default:""|escapejs }}", year:"{{ f.fecha_produccion|default:""|escapejs }}", url:"{% url 'fotografia_detalle' f.pk %}"},
+    {src:"{{ f.imagen_web_url }}", title:"{{ f.titulo|escapejs }}", author:"{{ f.autor|default:""|escapejs }}", year:"{{ f.fecha_produccion|default:""|escapejs }}", url:"{% url 'fotografia_detalle' f.pk %}"},
     {% endif %}
     {% endfor %}
 ];
@@ -513,24 +517,58 @@ var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggl
 tooltipTriggerList.forEach(function(el) { new bootstrap.Tooltip(el); });
 </script>
 {% if foto.latitud and foto.longitud %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
 <script>
 (function() {
     var lat = {{ foto.latitud|stringformat:'f' }};
     var lng = {{ foto.longitud|stringformat:'f' }};
-    var map = L.map('detailMap', { scrollWheelZoom: false, dragging: true, zoomControl: true }).setView([lat, lng], 16);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+    var cartoUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png' + ('{{ CARTO_API_KEY }}' ? '?key={{ CARTO_API_KEY }}' : '');
+    var cartoVoyager = L.tileLayer(cartoUrl, {
+        subdomains: 'abcd',
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    });
+    var esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri'
+    });
+    var medellinOffline = L.tileLayer('/static/vendor/tiles_medellin/{z}/{x}/{y}.png', {
+        minZoom: 11,
+        maxZoom: 14,
+        attribution: '&copy; CEHAP UNAL (Mosaico Local Offline)'
+    });
+
+    var map = L.map('detailMap', { 
+        scrollWheelZoom: false, 
+        dragging: true, 
+        zoomControl: true,
+        layers: [cartoVoyager]
+    }).setView([lat, lng], 16);
+
+    cartoVoyager.on('tileerror', function() {
+        if (!navigator.onLine && map.hasLayer(cartoVoyager)) {
+            map.removeLayer(cartoVoyager);
+            map.addLayer(medellinOffline);
+        }
+    });
+
+    var baseLayers = {
+        "Plano / Calles (Online)": cartoVoyager,
+        "Satélite (Online)": esriSatellite,
+        "Medellín Local (Offline)": medellinOffline
+    };
+    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
+
     L.marker([lat, lng], {
         icon: L.divIcon({
             className: 'map-marker-icon',
             html: '<svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#dc2626" stroke="#fff" stroke-width="2.5"/><circle cx="16" cy="16" r="4" fill="#fff"/></svg>',
             iconSize: [32, 32],
             iconAnchor: [16, 16],
+            popupAnchor: [0, -16]
         })
-    }).addTo(map).bindPopup('{{ foto.titulo|escapejs }}').openPopup();
+    }).addTo(map).bindPopup('<strong>{{ foto.titulo|escapejs }}</strong><br><small class="text-muted">Lat: ' + lat.toFixed(5) + ', Lng: ' + lng.toFixed(5) + '</small>').openPopup();
 })();
 </script>
 {% endif %}

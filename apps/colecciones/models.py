@@ -52,7 +52,9 @@ class Album(models.Model):
         ordering = ['-fecha_creacion']
 
     def __str__(self):
-        return f"{self.categoria.nombre} / {self.nombre}"
+        if self.categoria:
+            return f"{self.categoria.nombre} / {self.nombre}"
+        return self.nombre
 
     def get_portada(self):
         # Obtenemos la última fotografía activa de este álbum

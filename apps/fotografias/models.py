@@ -98,6 +98,12 @@ class Fotografia(RecursoDocumental):
     def __str__(self):
         return f"{self.codigo} - {self.titulo}"
 
+    @property
+    def imagen_web_url(self):
+        """Retorna la URL protegida con marca de agua para visualización web."""
+        from .marcas_agua import obtener_url_imagen_web
+        return obtener_url_imagen_web(self)
+
 
 class Comentario(models.Model):
     fotografia = models.ForeignKey(Fotografia, on_delete=models.CASCADE, related_name="comentarios")

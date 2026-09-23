@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Inicio - Galería CEHAP{% endblock %}
 
 {% block extra_css %}
@@ -6,9 +7,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caudex:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/markercluster/MarkerCluster.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/markercluster/MarkerCluster.Default.css' %}" />
 <style>
     #homeMap { width: 100%; height: 460px; border-radius: 12px; z-index: 0; }
     .home-map-section { margin-bottom: 2rem; }
@@ -123,7 +124,7 @@
             {% for foto in random_fotos %}
             <div class="swiper-slide">
                 <a href="{% url 'fotografia_detalle' foto.pk %}">
-                    {% if foto.archivo_imagen %}<img src="{{ foto.archivo_imagen.url }}" class="slide-img" alt="{{ foto.titulo }}" loading="lazy">{% else %}<div class="slide-placeholder"><i class="bi bi-image"></i></div>{% endif %}
+                    {% if foto.archivo_imagen %}<img src="{{ foto.imagen_web_url }}" class="slide-img" alt="{{ foto.titulo }}" loading="lazy">{% else %}<div class="slide-placeholder"><i class="bi bi-image"></i></div>{% endif %}
                 </a>
                 <div class="slide-body">
                     <a href="{% url 'fotografia_detalle' foto.pk %}"><h6 title="{{ foto.titulo }}">{{ foto.titulo }}</h6></a>
@@ -152,7 +153,7 @@
             {% for foto in latest_fotos %}
             <div class="swiper-slide">
                 <a href="{% url 'fotografia_detalle' foto.pk %}">
-                    {% if foto.archivo_imagen %}<img src="{{ foto.archivo_imagen.url }}" class="slide-img" alt="{{ foto.titulo }}" loading="lazy">{% else %}<div class="slide-placeholder"><i class="bi bi-image"></i></div>{% endif %}
+                    {% if foto.archivo_imagen %}<img src="{{ foto.imagen_web_url }}" class="slide-img" alt="{{ foto.titulo }}" loading="lazy">{% else %}<div class="slide-placeholder"><i class="bi bi-image"></i></div>{% endif %}
                 </a>
                 <div class="slide-body">
                     <a href="{% url 'fotografia_detalle' foto.pk %}"><h6 title="{{ foto.titulo }}">{{ foto.titulo }}</h6></a>
@@ -240,15 +241,36 @@
 
 {% block extra_js %}
 {% if mapa_fotos_json and mapa_fotos_json != '[]' %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'vendor/markercluster/leaflet.markercluster.js' %}"></script>
 <script>
 (function() {
     var fotos = {{ mapa_fotos_json|safe }};
     var mapEl = document.getElementById('homeMap');
     if (!mapEl || !fotos.length) return;
-    var map = L.map('homeMap', { scrollWheelZoom: true }).setView([4.5709, -74.2973], 6);
-     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+
+    var cartoUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png' + ('{{ CARTO_API_KEY }}' ? '?key={{ CARTO_API_KEY }}' : '');
+    var cartoVoyager = L.tileLayer(cartoUrl, {
+        subdomains: 'abcd',
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    });
+    var esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri'
+    });
+
+    var map = L.map('homeMap', { 
+        scrollWheelZoom: true,
+        layers: [cartoVoyager]
+    }).setView([4.5709, -74.2973], 6);
+
+    var baseLayers = {
+        "Mapa Cartográfico": cartoVoyager,
+        "Vista Satelital": esriSatellite
+    };
+    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
+
     var clusterGroup = L.markerClusterGroup({ maxClusterRadius: 50, spiderfyOnMaxZoom: true, showCoverageOnHover: false });
     var bounds = [];
     var usedCoords = {};

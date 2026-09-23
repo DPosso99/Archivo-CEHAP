@@ -13,11 +13,19 @@
     <form method="get">
         <div class="search-bar">
             <i class="bi bi-search search-icon"></i>
-            <input type="text" class="search-input" id="q" name="q" placeholder="Buscar por título, código o palabra clave..." value="{{ request.GET.q }}">
+            <input type="text" class="search-input" id="q" name="q" placeholder="Buscar por título, palabra clave, autor, álbum o código..." value="{{ request.GET.q }}">
             {% if request.GET.album %}<input type="hidden" name="album" value="{{ request.GET.album }}">{% endif %}
             <button type="submit" class="search-btn" title="Buscar"><i class="bi bi-search"></i></button>
             <a href="{% url 'fotografia_lista' %}" class="search-clear">Limpiar</a>
         </div>
+        {% if album_actual %}
+        <div class="d-flex align-items-center justify-content-between mt-2 px-2 text-muted" style="font-size: 0.85rem;">
+            <span><i class="bi bi-folder2-open me-1"></i>Buscando en álbum: <strong>{{ album_actual.nombre }}</strong></span>
+            <a href="{% url 'fotografia_lista' %}{% if request.GET.q %}?q={{ request.GET.q|urlencode }}{% endif %}" class="text-decoration-none text-primary fw-semibold">
+                <i class="bi bi-globe2 me-1"></i>Buscar en toda la galería
+            </a>
+        </div>
+        {% endif %}
     </form>
 </div>
 
@@ -45,7 +53,7 @@
     <div class="col">
         <div class="photo-card">
             {% if foto.archivo_imagen %}
-            <a href="{% url 'fotografia_detalle' foto.pk %}"><div class="photo-card-img"><img src="{{ foto.archivo_imagen.url }}" alt="{{ foto.titulo }}" loading="lazy"></div></a>
+            <a href="{% url 'fotografia_detalle' foto.pk %}"><div class="photo-card-img"><img src="{{ foto.imagen_web_url }}" alt="{{ foto.titulo }}" loading="lazy"></div></a>
             {% else %}
             <a href="{% url 'fotografia_detalle' foto.pk %}"><div class="photo-card-img placeholder"><i class="bi bi-image"></i></div></a>
             {% endif %}

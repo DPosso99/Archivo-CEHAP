@@ -2,9 +2,9 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/markercluster/MarkerCluster.css' %}" />
+<link rel="stylesheet" href="{% static 'vendor/markercluster/MarkerCluster.Default.css' %}" />
 <style>
     html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
     body > .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
@@ -34,18 +34,49 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'vendor/markercluster/leaflet.markercluster.js' %}"></script>
 <script>
 (function() {
     var mapEl = document.getElementById('map');
     if (!mapEl) return;
 
-    var map = L.map('map', { scrollWheelZoom: true }).setView([4.5709, -74.2973], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    var cartoUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png' + ('{{ CARTO_API_KEY }}' ? '?key={{ CARTO_API_KEY }}' : '');
+    var cartoVoyager = L.tileLayer(cartoUrl, {
+        subdomains: 'abcd',
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    });
+    var esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri'
+    });
+    var medellinOffline = L.tileLayer('/static/vendor/tiles_medellin/{z}/{x}/{y}.png', {
+        minZoom: 11,
+        maxZoom: 14,
+        attribution: '&copy; CEHAP UNAL (Mosaico Local Offline)'
+    });
+
+    var map = L.map('map', { 
+        scrollWheelZoom: true,
+        layers: [cartoVoyager]
+    }).setView([4.5709, -74.2973], 6);
+
+    // Detección de pérdida de internet: cambio automático al mapa local de Medellín
+    cartoVoyager.on('tileerror', function() {
+        if (!navigator.onLine && map.hasLayer(cartoVoyager)) {
+            map.removeLayer(cartoVoyager);
+            map.addLayer(medellinOffline);
+            map.setView([6.2518, -75.5636], 13);
+        }
+    });
+
+    var baseLayers = {
+        "Mapa Cartográfico (Online)": cartoVoyager,
+        "Vista Satelital (Online)": esriSatellite,
+        "Medellín Local (Offline)": medellinOffline
+    };
+    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
 
     var clusterGroup = L.markerClusterGroup({ maxClusterRadius: 50, spiderfyOnMaxZoom: true, showCoverageOnHover: false });
 

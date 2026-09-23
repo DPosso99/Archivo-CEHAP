@@ -1,6 +1,5 @@
 import re
 import requests
-from io import BytesIO
 from urllib.parse import urlparse
 from PIL import Image, ImageDraw, ImageFont
 from django import forms
@@ -71,8 +70,6 @@ class FotografiaForm(forms.ModelForm):
             "fecha_registro",
             "fecha_actualizacion",
             "url_fuente",
-            "latitud",
-            "longitud",
             "vistas",
         )
 
@@ -108,10 +105,22 @@ class FotografiaForm(forms.ModelForm):
             attrs={"placeholder": "Ej: Archivo Central, Estante 3"}
         )
         self.fields["imagen_propia"].label = "Imagen propia de la ubicación"
-        self.fields["mapa_url"].label = "URL de Google Maps"
+        self.fields["mapa_url"].label = "URL o Coordenadas de Google Maps"
         self.fields[
             "mapa_url"
-        ].help_text = "Pega el enlace de Google Maps y se extraerán las coordenadas automáticamente."
+        ].help_text = "Pega el enlace de Google Maps (o coordenadas 'lat, lng') y se extraerán automáticamente."
+        self.fields["latitud"].required = False
+        self.fields["latitud"].label = "Latitud (opcional)"
+        self.fields["latitud"].widget = forms.NumberInput(
+            attrs={"step": "any", "placeholder": "Ej: 6.2511495"}
+        )
+        self.fields["latitud"].help_text = "Se llena automáticamente al pegar el enlace de Maps, o puedes ingresarla a mano."
+        self.fields["longitud"].required = False
+        self.fields["longitud"].label = "Longitud (opcional)"
+        self.fields["longitud"].widget = forms.NumberInput(
+            attrs={"step": "any", "placeholder": "Ej: -75.5647382"}
+        )
+        self.fields["longitud"].help_text = "Se llena automáticamente al pegar el enlace de Maps, o puedes ingresarla a mano."
 
         # Show file size when editing
         if self.instance and self.instance.pk and self.instance.archivo_imagen:
@@ -196,9 +205,13 @@ class FotografiaForm(forms.ModelForm):
                 ),
                 Tab(
                     "Ubicación",
+                    "mapa_url",
+                    Row(
+                        Column("latitud", css_class="col-md-6"),
+                        Column("longitud", css_class="col-md-6"),
+                    ),
                     "ubicacion_web",
                     "ubicacion_archivo",
-                    "mapa_url",
                     "imagen_propia",
                     css_id="tab-ubicacion",
                 ),
@@ -209,6 +222,39 @@ class FotografiaForm(forms.ModelForm):
                 css_class="btn btn-primary mt-4 w-100 fw-semibold",
             ),
         )
+
+    def clean_archivo_imagen(self):
+        archivo = self.cleaned_data.get("archivo_imagen")
+        if not archivo:
+            return archivo
+
+        # Límite de tamaño: 25 MB
+        max_size_mb = 25
+        if hasattr(archivo, "size") and archivo.size > max_size_mb * 1024 * 1024:
+            raise forms.ValidationError(
+                f"El archivo supera el tamaño máximo permitido de {max_size_mb} MB "
+                f"({archivo.size / (1024 * 1024):.1f} MB detectados)."
+            )
+
+        # Validación de formatos fotográficos
+        allowed_exts = {".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff", ".bmp"}
+        ext = os.path.splitext(archivo.name)[1].lower()
+        if ext and ext not in allowed_exts:
+            raise forms.ValidationError(
+                f"Formato de archivo '{ext}' no permitido. "
+                "Formatos admitidos: .jpg, .jpeg, .png, .webp, .tif, .tiff, .bmp"
+            )
+
+        # Verificar integridad física de la imagen
+        try:
+            img = Image.open(archivo)
+            img.verify()
+            if hasattr(archivo, "seek"):
+                archivo.seek(0)
+        except Exception:
+            raise forms.ValidationError("El archivo seleccionado no es una imagen válida o está dañado.")
+
+        return archivo
 
     def clean(self):
         cleaned_data = super().clean()
@@ -242,36 +288,54 @@ class FotografiaForm(forms.ModelForm):
             except Exception:
                 pass
 
+        # Clean literal 'None' string in keywords
+        if instance.palabras_clave and instance.palabras_clave.strip() in ("None", "none"):
+            instance.palabras_clave = ""
+
+        # Set manual coordinates if provided
+        lat_manual = self.cleaned_data.get("latitud")
+        lng_manual = self.cleaned_data.get("longitud")
+        if lat_manual is not None and lng_manual is not None:
+            instance.latitud = lat_manual
+            instance.longitud = lng_manual
+
         # Resolve Google Maps URL → extract coordinates
         mapa_url = self.cleaned_data.get("mapa_url")
         if mapa_url:
             instance.mapa_url = mapa_url
-            try:
-                # Follow redirect to resolve short URL
-                resp = requests.get(mapa_url, timeout=10, allow_redirects=True)
-                final_url = resp.url
-                # Extract coordinates from various Google Maps URL formats
-                # Format 1: @lat,lng,zoom (place URL)
-                m = re.search(r"@(-?\d+\.?\d*),(-?\d+\.?\d*)", final_url)
-                if not m:
-                    # Format 2: !3dlat!4dlng (old format)
-                    m = re.search(r"!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)", final_url)
-                if not m:
-                    # Format 3: /search/lat,lng
-                    m = re.search(r"/search/(-?\d+\.?\d*),\+?(-?\d+\.?\d*)", final_url)
-                if not m:
-                    # Format 4: ?q=lat,lng
-                    m = re.search(r"[?&]q=(-?\d+\.?\d*),\+?(-?\d+\.?\d*)", final_url)
-                if not m:
-                    # Format 5: /dir/lat,lng or /place/Name/lat,lng
-                    m = re.search(
-                        r"/(-?\d+\.?\d*),\+?(-?\d+\.?\d*)(?:/|$|\?)", final_url
-                    )
-                if m:
-                    instance.latitud = float(m.group(1))
-                    instance.longitud = float(m.group(2))
-            except Exception:
-                pass
+            # First check if user pasted raw coordinates like "6.2511, -75.5647"
+            raw_m = re.match(r"^\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*$", mapa_url)
+            if raw_m:
+                instance.latitud = float(raw_m.group(1))
+                instance.longitud = float(raw_m.group(2))
+            else:
+                try:
+                    headers = {
+                        "User-Agent": (
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) "
+                            "Chrome/124.0.0.0 Safari/537.36"
+                        )
+                    }
+                    resp = requests.get(mapa_url, headers=headers, timeout=10, allow_redirects=True)
+                    final_url = resp.url
+                    # Extract coordinates from various Google Maps URL formats
+                    m = re.search(r"@(-?\d+\.?\d*),(-?\d+\.?\d*)", final_url)
+                    if not m:
+                        m = re.search(r"!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)", final_url)
+                    if not m:
+                        m = re.search(r"/search/(-?\d+\.?\d*),\+?(-?\d+\.?\d*)", final_url)
+                    if not m:
+                        m = re.search(r"[?&]q=(-?\d+\.?\d*),\+?(-?\d+\.?\d*)", final_url)
+                    if not m:
+                        m = re.search(
+                            r"/(-?\d+\.?\d*),\+?(-?\d+\.?\d*)(?:/|$|\?)", final_url
+                        )
+                    if m:
+                        instance.latitud = float(m.group(1))
+                        instance.longitud = float(m.group(2))
+                except Exception:
+                    pass
 
         categoria_select = self.cleaned_data.get("categoria_select")
         subcategoria_select = self.cleaned_data.get("subcategoria_select")
@@ -323,48 +387,18 @@ class FotografiaForm(forms.ModelForm):
         if commit:
             instance.save()
             self.save_m2m()
-            _aplicar_marca_agua(instance)
+            # Generar copia derivada con marca de agua institucional para la web
+            # manteniendo el original maestro 100% puro e inalterado en disco
+            from .marcas_agua import generar_derivado_web
+            generar_derivado_web(instance, forzar=True)
 
         return instance
 
 
 def _aplicar_marca_agua(instance):
-    """Añade marca de agua con el autor en la imagen guardada."""
-    if not instance.archivo_imagen or not instance.autor:
-        return
-    try:
-        img = Image.open(instance.archivo_imagen.path).convert("RGBA")
-        w, h = img.size
-        # Crear capa transparente para el texto
-        overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
-        draw = ImageDraw.Draw(overlay)
-        texto = f"© {instance.autor}"
-        # Tamaño de fuente proporcional
-        font_size = max(int(min(w, h) * 0.025), 14)
-        try:
-            font = ImageFont.truetype(
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", font_size
-            )
-        except (IOError, OSError):
-            try:
-                font = ImageFont.truetype(
-                    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-                    font_size,
-                )
-            except (IOError, OSError):
-                font = ImageFont.load_default()
-        # Posición: esquina inferior derecha con margen
-        bbox = draw.textbbox((0, 0), texto, font=font)
-        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        margin = int(min(w, h) * 0.02)
-        x, y = w - tw - margin, h - th - margin
-        # Sombra
-        draw.text((x + 1, y + 1), texto, font=font, fill=(0, 0, 0, 100))
-        # Texto principal semi-transparente
-        draw.text((x, y), texto, font=font, fill=(255, 255, 255, 80))
-        # Combinar y guardar
-        result = Image.alpha_composite(img, overlay)
-        result = result.convert("RGB")
-        result.save(instance.archivo_imagen.path, "JPEG", quality=90)
-    except Exception:
-        pass  # Si falla, la imagen se queda sin marca de agua
+    """
+    Función de compatibilidad: delega al módulo institucional de marcas de agua.
+    Garantiza la preservación patrimonial del archivo original maestro.
+    """
+    from .marcas_agua import generar_derivado_web
+    return generar_derivado_web(instance, forzar=True)

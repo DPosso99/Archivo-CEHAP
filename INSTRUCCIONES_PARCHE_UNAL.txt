@@ -1,0 +1,43 @@
+================================================================================
+INSTRUCCIONES PARA APLICAR EL PARCHE EN EL PC DE LA UNIVERSIDAD NACIONAL
+================================================================================
+
+Este archivo comprimido contiene las mejoras y correcciones del sistema:
+- Solución definitiva al error 403 del mapa (CartoDB Voyager + Esri Satelital).
+- Mosaico de mapas LOCAL y OFFLINE de Medellín y Valle de Aburrá (funciona sin internet).
+- Librerías Leaflet 100% locales (sin CDNs externas).
+- Concurrencia multiusuario SQLite WAL (evita bloqueos entre catalogadores simultáneos).
+- Preservación patrimonial: Las fotos originales maestras permanecen 100% INTACTAS.
+- Marcas de agua institucionales CEHAP generadas automáticamente para visualización web.
+- Botón de descarga de "Original Maestro" disponible para usuarios autenticados.
+- Motor de búsqueda inteligente: insensible a tildes, soporte multi-palabra y plurales.
+- Validación preventiva: tamaño máximo 25 MB y verificación de extensiones fotográficas.
+- Nuevo script 'exportar_respaldo_completo.bat' para llevar el proyecto a presentaciones.
+- CERO RIESGO: Este parche NO contiene base de datos ni borra ninguna fotografía existente.
+
+PASOS PARA APLICAR EL PARCHE EN EL PC DE LA UNAL:
+--------------------------------------------------------------------------------
+1. Copia el archivo 'Parche_CEHAP_UNAL.zip' (o su contenido descomprimido) en una memoria USB.
+2. En el computador de la Universidad, abre la carpeta donde está instalado el proyecto:
+   Ejemplo: 'C:\Users\...\Desktop\Plataforma_Unidad_Documentación\'
+3. Descomprime o pega los archivos del parche dentro de la carpeta del proyecto,
+   reemplazando los archivos existentes cuando Windows pregunte.
+   (Nota: Comprueba que tu archivo 'db.sqlite3' y la carpeta 'media' siguen en su lugar).
+4. Haz doble clic en el archivo:
+   >>> actualizar_universidad.bat <<<
+5. El script:
+   - Creará una copia de seguridad automática de tu base de datos en 'backups\'.
+   - Aplicará las actualizaciones necesarias de base de datos.
+   - Actualizará las librerías locales y el mosaico offline de Medellín.
+   - Protegerá las fotografías existentes generando sus marcas de agua institucionales.
+6. ¡Listo! Puedes seguir usando la plataforma normalmente iniciando con:
+   >>> iniciar_windows.bat <<<
+
+EXPORTAR A OTRO COMPUTADOR PARA PRESENTACIONES:
+--------------------------------------------------------------------------------
+Cuando necesites presentar el proyecto en otro PC o defender tu trabajo, simplemente
+haz doble clic en:
+   >>> exportar_respaldo_completo.bat <<<
+Esto copiará la base de datos completa y verificada, todas las fotos en media/ y
+el código fuente listo para correr en cualquier laptop con 'iniciar_windows.bat'.
+================================================================================

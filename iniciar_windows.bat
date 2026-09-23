@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 title Archivo CEHAP - Plataforma de Documentacion
 color 0A
 echo ============================================
@@ -53,7 +54,9 @@ echo.
 echo Preparando base de datos...
 python manage.py migrate --noinput
 if %errorlevel% neq 0 (
-    echo [ERROR] Fallaron las migraciones. Borra db.sqlite3 manualmente y vuelve a intentar.
+    echo [ERROR] Hubo un problema al aplicar las migraciones.
+    echo [AVISO DE SEGURIDAD] NUNCA borres db.sqlite3 para proteger las fotografias ya guardadas.
+    echo Revisa el mensaje anterior para identificar el error.
     pause
     exit /b 1
 )

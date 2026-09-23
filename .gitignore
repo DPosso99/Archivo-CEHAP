@@ -1,30 +1,35 @@
-# Environments
+# Environments & Secrets
 .env
-venv_wsl/
-env/
+.env.*
+!.env.example
 venv/
+env/
+venv_wsl/
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Django
 *.log
+.ruff_cache/
+
+# Django Database & Static/Media
+db.sqlite3
+db.sqlite3-shm
+db.sqlite3-wal
 media/
 staticfiles/
-db.sqlite3
 seed_data.json
 
-# OS generated files
+# Backups & Deployment archives
+backups/
+scripts_legacy/
+*.zip
+Parche_CEHAP_UNAL.zip
+
+# Temporary documentation / scratch
+CONTEXTO_Y_MEMORIA_PROYECTO.md
+
+# OS files
 .DS_Store
 Thumbs.db
-
-# Excel data files (temporary)
-*.xlsx
-*.xlsplan.sh
-run_dj*.sh
-!run_dj_final.sh
-docker-compose.yml
-run_wsl_setup.sh
-setup_db.sh

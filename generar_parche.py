@@ -1,0 +1,116 @@
+import os
+import zipfile
+import sys
+from datetime import datetime
+
+sys.stdout.reconfigure(encoding='utf-8')
+
+base_dir = r"c:\Users\Owner\Desktop\Plataforma_Unidad_Documentación"
+output_zip = os.path.join(base_dir, "Parche_CEHAP_UNAL.zip")
+
+EXCLUDE_DIRS = {
+    ".git",
+    "venv",
+    "media",
+    "__pycache__",
+    ".ruff_cache",
+    "backups",
+    "staticfiles",
+    "scripts_legacy",
+}
+
+EXCLUDE_FILES = {
+    "db.sqlite3",
+    "db.sqlite3-shm",
+    "db.sqlite3-wal",
+    ".env",
+    "Parche_CEHAP_UNAL.zip",
+}
+
+EXCLUDE_EXTENSIONS = {
+    ".pyc",
+    ".pyo",
+    ".log",
+    ".sh",
+}
+
+print("============================================================")
+print("  EMPAQUETADOR DE PARCHE SEGURO PARA LA UNIVERSIDAD NACIONAL")
+print("============================================================")
+print(f"Directorio origen: {base_dir}")
+print(f"Archivo de salida: {output_zip}\n")
+
+# Write instruction file
+readme_content = """================================================================================
+INSTRUCCIONES PARA APLICAR EL PARCHE EN EL PC DE LA UNIVERSIDAD NACIONAL
+================================================================================
+
+Este archivo comprimido contiene las mejoras y correcciones del sistema:
+- Solución definitiva al error 403 del mapa (CartoDB Voyager + Esri Satelital).
+- Mosaico de mapas LOCAL y OFFLINE de Medellín y Valle de Aburrá (funciona sin internet).
+- Librerías Leaflet 100% locales (sin CDNs externas).
+- Concurrencia multiusuario SQLite WAL (evita bloqueos entre catalogadores simultáneos).
+- Preservación patrimonial: Las fotos originales maestras permanecen 100% INTACTAS.
+- Marcas de agua institucionales CEHAP generadas automáticamente para visualización web.
+- Botón de descarga de "Original Maestro" disponible para usuarios autenticados.
+- Motor de búsqueda inteligente: insensible a tildes, soporte multi-palabra y plurales.
+- Validación preventiva: tamaño máximo 25 MB y verificación de extensiones fotográficas.
+- Nuevo script 'exportar_respaldo_completo.bat' para llevar el proyecto a presentaciones.
+- CERO RIESGO: Este parche NO contiene base de datos ni borra ninguna fotografía existente.
+
+PASOS PARA APLICAR EL PARCHE EN EL PC DE LA UNAL:
+--------------------------------------------------------------------------------
+1. Copia el archivo 'Parche_CEHAP_UNAL.zip' (o su contenido descomprimido) en una memoria USB.
+2. En el computador de la Universidad, abre la carpeta donde está instalado el proyecto:
+   Ejemplo: 'C:\\Users\\...\\Desktop\\Plataforma_Unidad_Documentación\\'
+3. Descomprime o pega los archivos del parche dentro de la carpeta del proyecto,
+   reemplazando los archivos existentes cuando Windows pregunte.
+   (Nota: Comprueba que tu archivo 'db.sqlite3' y la carpeta 'media' siguen en su lugar).
+4. Haz doble clic en el archivo:
+   >>> actualizar_universidad.bat <<<
+5. El script:
+   - Creará una copia de seguridad automática de tu base de datos en 'backups\\'.
+   - Aplicará las actualizaciones necesarias de base de datos.
+   - Actualizará las librerías locales y el mosaico offline de Medellín.
+   - Protegerá las fotografías existentes generando sus marcas de agua institucionales.
+6. ¡Listo! Puedes seguir usando la plataforma normalmente iniciando con:
+   >>> iniciar_windows.bat <<<
+
+EXPORTAR A OTRO COMPUTADOR PARA PRESENTACIONES:
+--------------------------------------------------------------------------------
+Cuando necesites presentar el proyecto en otro PC o defender tu trabajo, simplemente
+haz doble clic en:
+   >>> exportar_respaldo_completo.bat <<<
+Esto copiará la base de datos completa y verificada, todas las fotos en media/ y
+el código fuente listo para correr en cualquier laptop con 'iniciar_windows.bat'.
+================================================================================
+"""
+
+readme_path = os.path.join(base_dir, "INSTRUCCIONES_PARCHE_UNAL.txt")
+with open(readme_path, "w", encoding="utf-8") as f:
+    f.write(readme_content)
+
+total_files = 0
+with zipfile.ZipFile(output_zip, "w", zipfile.ZIP_DEFLATED) as zipf:
+    for root, dirs, files in os.walk(base_dir):
+        # Filter out directories
+        dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS and not d.startswith(".")]
+        
+        for file in files:
+            if file in EXCLUDE_FILES or file.startswith(".env."):
+                continue
+            ext = os.path.splitext(file)[1].lower()
+            if ext in EXCLUDE_EXTENSIONS:
+                continue
+            
+            abs_path = os.path.join(root, file)
+            rel_path = os.path.relpath(abs_path, base_dir)
+            
+            zipf.write(abs_path, rel_path)
+            total_files += 1
+
+size_mb = os.path.getsize(output_zip) / (1024 * 1024)
+print(f"[OK] Parche generado con exito: {output_zip}")
+print(f"     Total archivos empaquetados: {total_files}")
+print(f"     Tamano del archivo ZIP: {size_mb:.2f} MB")
+print("============================================================")

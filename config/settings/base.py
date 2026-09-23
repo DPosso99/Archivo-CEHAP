@@ -9,6 +9,10 @@ DEBUG = config("DEBUG", default=True, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
 
+# API Keys para mapas (cargadas desde .env de forma segura)
+CARTO_API_KEY = config("CARTO_API_KEY", default="")
+GOOGLE_MAPS_API_KEY = config("GOOGLE_MAPS_API_KEY", default="")
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -53,6 +57,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.core.context_processors.global_settings",
             ],
         },
     },
