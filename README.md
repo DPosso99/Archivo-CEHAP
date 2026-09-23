@@ -9,7 +9,7 @@ Sistema web para la catalogación, georreferenciación, preservación digital y 
 
 ---
 
-## 🏛️ Contexto del Proyecto
+## Contexto del Proyecto
 
 El archivo del CEHAP alberga décadas de investigación y registro visual sobre arquitectura popular, procesos de hábitat, transformaciones urbanas en Medellín y el territorio colombiano. 
 
@@ -17,24 +17,24 @@ Esta plataforma permite a investigadores, docentes y catalogadores registrar met
 
 ---
 
-## ✨ Características Principales
+## Características Principales
 
-* 🔍 **Motor de Búsqueda Inteligente:** Búsqueda insensible a acentos/tildes (`medellin` encuentra `Medellín`), soporte multi-palabra con operador `AND` y lematización básica de plurales y singulares.
-* 🗺️ **Georreferenciación y Mapas Híbridos:** 
+* **Motor de Búsqueda Inteligente:** Búsqueda insensible a acentos/tildes (`medellin` encuentra `Medellín`), soporte multi-palabra con operador `AND` y lematización básica de plurales y singulares.
+* **Georreferenciación y Mapas Híbridos:** 
   * Integración con **CartoDB Voyager** y **Esri Satelital**.
   * **Librerías Leaflet 100% locales** (cero dependencias de CDNs externas).
   * **Mosaico Local Offline de Medellín y Valle de Aburrá** precargado (niveles de zoom 11 a 14) con conmutación automática ante caídas de internet.
-* 🛡️ **Preservación Patrimonial y Marcas de Agua:**
+* **Preservación Patrimonial y Marcas de Agua:**
   * **Original Maestro Intacto:** Las fotografías originales subidas nunca se alteran destructivamente.
   * **Derivados Web Automáticos:** Generación de copias ligeras para la web con placa institucional glassmorphism (`ARCHIVO DOCUMENTAL CEHAP • UNAL`).
   * **Descarga Segura:** Usuarios anónimos descargan la versión con marca de agua; usuarios autenticados pueden descargar el archivo maestro de alta calidad.
-* ⚡ **Concurrencia Multiusuario en Red Local:** Configuración optimizada de SQLite en **modo WAL (Write-Ahead Logging)** con timeout extendido, permitiendo que varios catalogadores trabajen simultáneamente desde diferentes computadores de la oficina.
-* 🔒 **Validación Preventiva de Archivos:** Límite configurable de 25 MB por archivo e inspección de integridad de formatos fotográficos válidos (`.jpg`, `.png`, `.webp`, `.tif`, `.bmp`).
-* 📦 **Portabilidad y Respaldo Total en 1 Clic:** Herramienta de respaldo atómico (`sqlite3.backup()`) con verificación de integridad (`PRAGMA integrity_check`) para llevar el sistema completo a defensas académicas o exposiciones en memorias USB.
+* **Concurrencia Multiusuario en Red Local:** Configuración optimizada de SQLite en **modo WAL (Write-Ahead Logging)** con timeout extendido, permitiendo que varios catalogadores trabajen simultáneamente desde diferentes computadores de la oficina.
+* **Validación Preventiva de Archivos:** Límite configurable de 25 MB por archivo e inspección de integridad de formatos fotográficos válidos (`.jpg`, `.png`, `.webp`, `.tif`, `.bmp`).
+* **Portabilidad y Respaldo Total en 1 Clic:** Herramienta de respaldo atómico (`sqlite3.backup()`) con verificación de integridad (`PRAGMA integrity_check`) para llevar el sistema completo a defensas académicas o exposiciones en memorias USB.
 
 ---
 
-## 📁 Estructura del Repositorio
+## Estructura del Repositorio
 
 ```text
 ├── apps/
@@ -67,7 +67,7 @@ Esta plataforma permite a investigadores, docentes y catalogadores registrar met
 
 ---
 
-## 🚀 Instalación y Puesta en Marcha (Windows)
+## Instalación y Puesta en Marcha (Windows)
 
 ### Requisitos Previos
 * **Python 3.10 o superior** instalado desde [python.org](https://www.python.org/downloads/) (asegúrate de marcar la casilla *"Add Python to PATH"* durante la instalación).
@@ -138,7 +138,7 @@ Accede a la plataforma en tu navegador: [http://localhost:8000/](http://localhos
 
 ---
 
-## ⚙️ Variables de Entorno (`.env`)
+## Variables de Entorno (`.env`)
 
 Crea un archivo `.env` en la raíz del proyecto basándote en `.env.example`:
 
@@ -152,7 +152,7 @@ Crea un archivo `.env` en la raíz del proyecto basándote en `.env.example`:
 
 ---
 
-## 🛠️ Operaciones y Scripts de Utilidad
+## Operaciones y Scripts de Utilidad
 
 ### 1. Actualización Segura en Equipos Universitarios
 ```cmd
@@ -185,7 +185,7 @@ python manage.py test --settings=config.settings.local_windows
 
 ---
 
-## 👥 Créditos e Institución
+## Créditos e Institución
 
 * **Escuela del Hábitat — CEHAP**
 * **Facultad de Arquitectura**
