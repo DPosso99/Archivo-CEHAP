@@ -106,10 +106,13 @@ class FotografiaForm(forms.ModelForm):
             attrs={"placeholder": "Ej: Archivo Central, Estante 3"}
         )
         self.fields["imagen_propia"].label = "Imagen propia de la ubicación"
-        self.fields["mapa_url"].label = "URL o Coordenadas de Google Maps"
-        self.fields[
-            "mapa_url"
-        ].help_text = "Pega el enlace de Google Maps (o coordenadas 'lat, lng') y se extraerán automáticamente."
+        self.fields["mapa_url"] = forms.CharField(
+            max_length=1000,
+            required=False,
+            label="URL o Coordenadas de Google Maps",
+            help_text="Pega el enlace de Google Maps (o coordenadas 'lat, lng') y se extraerán automáticamente.",
+            widget=forms.TextInput(attrs={"placeholder": "Ej: 6.2511495, -75.5647382 o enlace de Google Maps"})
+        )
         self.fields["latitud"].required = False
         self.fields["latitud"].label = "Latitud (opcional)"
         self.fields["latitud"].widget = forms.NumberInput(
@@ -122,6 +125,11 @@ class FotografiaForm(forms.ModelForm):
             attrs={"step": "any", "placeholder": "Ej: -75.5647382"}
         )
         self.fields["longitud"].help_text = "Se llena automáticamente al pegar el enlace de Maps, o puedes ingresarla a mano."
+
+        msg_invalida = "El archivo seleccionado no es una imagen válida o está dañado."
+        for fn in ["archivo_imagen", "imagen_mapa", "imagen_propia"]:
+            if fn in self.fields:
+                self.fields[fn].error_messages["invalid_image"] = msg_invalida
 
         # Show file size when editing
         if self.instance and self.instance.pk and self.instance.archivo_imagen:
@@ -213,7 +221,10 @@ class FotografiaForm(forms.ModelForm):
                     ),
                     "ubicacion_web",
                     "ubicacion_archivo",
-                    "imagen_propia",
+                    Row(
+                        Column("imagen_mapa", css_class="col-md-6"),
+                        Column("imagen_propia", css_class="col-md-6"),
+                    ),
                     css_id="tab-ubicacion",
                 ),
             ),
@@ -226,14 +237,28 @@ class FotografiaForm(forms.ModelForm):
 
     def clean_archivo_imagen(self):
         archivo = self.cleaned_data.get("archivo_imagen")
+        return self._validar_archivo_imagen(archivo, "archivo de imagen principal")
+
+    def clean_imagen_propia(self):
+        archivo = self.cleaned_data.get("imagen_propia")
+        return self._validar_archivo_imagen(archivo, "imagen del lugar")
+
+    def clean_imagen_mapa(self):
+        archivo = self.cleaned_data.get("imagen_mapa")
+        return self._validar_archivo_imagen(archivo, "imagen del mapa")
+
+    def _validar_archivo_imagen(self, archivo, nombre_campo):
         if not archivo:
+            return archivo
+        # Si es un FieldFile existente en edición sin cambios, es válido
+        if hasattr(archivo, "file") and not hasattr(archivo, "chunks"):
             return archivo
 
         # Límite de tamaño: 25 MB
         max_size_mb = 25
         if hasattr(archivo, "size") and archivo.size > max_size_mb * 1024 * 1024:
             raise forms.ValidationError(
-                f"El archivo supera el tamaño máximo permitido de {max_size_mb} MB "
+                f"El archivo para {nombre_campo} supera el tamaño máximo permitido de {max_size_mb} MB "
                 f"({archivo.size / (1024 * 1024):.1f} MB detectados)."
             )
 
@@ -242,7 +267,7 @@ class FotografiaForm(forms.ModelForm):
         ext = os.path.splitext(archivo.name)[1].lower()
         if ext and ext not in allowed_exts:
             raise forms.ValidationError(
-                f"Formato de archivo '{ext}' no permitido. "
+                f"Formato de archivo '{ext}' no permitido para {nombre_campo}. "
                 "Formatos admitidos: .jpg, .jpeg, .png, .webp, .tif, .tiff, .bmp"
             )
 
@@ -253,21 +278,64 @@ class FotografiaForm(forms.ModelForm):
             if hasattr(archivo, "seek"):
                 archivo.seek(0)
         except Exception:
-            raise forms.ValidationError("El archivo seleccionado no es una imagen válida o está dañado.")
+            raise forms.ValidationError(f"El archivo para {nombre_campo} no es una imagen válida o está dañado.")
 
         return archivo
+
+    def clean_mapa_url(self):
+        val = (self.cleaned_data.get("mapa_url") or "").strip()
+        if not val:
+            return val
+        # Coordenadas numéricas directas: "6.2511, -75.5647"
+        m = re.match(r"^\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*$", val)
+        if m:
+            return f"https://www.google.com/maps?q={m.group(1)},{m.group(2)}"
+        if val.startswith("http://") or val.startswith("https://") or "maps.google" in val or "goo.gl" in val:
+            if not val.startswith("http"):
+                val = "https://" + val
+            return val
+        raise forms.ValidationError("Ingrese una URL de Google Maps válida o coordenadas en formato 'latitud, longitud'.")
 
     def clean(self):
         cleaned_data = super().clean()
         archivo_imagen = cleaned_data.get("archivo_imagen")
-        url_imagen = cleaned_data.get("url_imagen")
+        url_imagen = (cleaned_data.get("url_imagen") or "").strip()
         codigo = (cleaned_data.get("codigo") or "").strip()
 
-        if not archivo_imagen and not url_imagen:
+        # En edición o subida, verificar si se intentó o existe imagen
+        archivo_subido = bool(archivo_imagen) or ("archivo_imagen" in self.files)
+        tiene_imagen_existente = bool(self.instance and self.instance.pk and self.instance.archivo_imagen)
+
+        if not archivo_subido and not tiene_imagen_existente and not url_imagen:
             self.add_error(
                 "archivo_imagen",
                 "Debe subir un archivo de imagen o proporcionar una URL válida.",
             )
+
+        # Si se ingresó una URL y no se subió archivo directo, validar que la URL sea una imagen real y accesible
+        if url_imagen and not archivo_imagen:
+            try:
+                headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) CEHAP/1.0"}
+                resp = requests.get(url_imagen, headers=headers, stream=True, timeout=10)
+                if resp.status_code != 200:
+                    self.add_error(
+                        "url_imagen",
+                        f"No se pudo descargar la imagen desde la URL (servidor respondió HTTP {resp.status_code})."
+                    )
+                else:
+                    content = resp.content
+                    if len(content) > 25 * 1024 * 1024:
+                        self.add_error("url_imagen", "La imagen remota supera el tamaño máximo permitido de 25 MB.")
+                    else:
+                        import io
+                        img = Image.open(io.BytesIO(content))
+                        img.verify()
+                        cleaned_data["_url_imagen_content"] = content
+            except Exception:
+                self.add_error(
+                    "url_imagen",
+                    "No se pudo descargar o procesar la imagen desde la URL. Verifique que sea un enlace directo y accesible."
+                )
 
         # Si el usuario escribió un código manualmente, validar que sea único
         if codigo:
@@ -312,18 +380,22 @@ class FotografiaForm(forms.ModelForm):
         if url_imagen:
             instance.url_fuente = url_imagen
         if url_imagen and not instance.archivo_imagen:
-            try:
-                response = requests.get(url_imagen, stream=True, timeout=15)
-                if response.status_code == 200 and response.content:
-                    parsed_url = urlparse(url_imagen)
-                    filename = parsed_url.path.split("/")[-1]
-                    if not filename or "." not in filename:
-                        filename = f"imagen_descargada_{slugify(instance.titulo or 'sin_titulo')}.jpg"
-                    instance.archivo_imagen.save(
-                        filename, ContentFile(response.content), save=False
-                    )
-            except Exception:
-                pass
+            content = self.cleaned_data.get("_url_imagen_content")
+            if not content:
+                try:
+                    response = requests.get(url_imagen, stream=True, timeout=15)
+                    if response.status_code == 200 and response.content:
+                        content = response.content
+                except Exception:
+                    pass
+            if content:
+                parsed_url = urlparse(url_imagen)
+                filename = parsed_url.path.split("/")[-1]
+                if not filename or "." not in filename:
+                    filename = f"imagen_{slugify(instance.titulo or 'descargada')[:30]}.jpg"
+                instance.archivo_imagen.save(
+                    filename, ContentFile(content), save=False
+                )
 
         # Clean literal 'None' string in keywords
         if instance.palabras_clave and instance.palabras_clave.strip() in ("None", "none"):

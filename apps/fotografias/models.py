@@ -123,6 +123,38 @@ class Fotografia(RecursoDocumental):
 
         super().save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        # 1. Eliminar archivo derivado web con marca de agua si existe
+        import os
+        from .marcas_agua import obtener_ruta_derivado_web
+        try:
+            abs_web_path, _ = obtener_ruta_derivado_web(self)
+            if abs_web_path and os.path.exists(abs_web_path):
+                os.remove(abs_web_path)
+        except Exception:
+            pass
+
+        # 2. Eliminar archivo de imagen principal si existe
+        if self.archivo_imagen:
+            try:
+                self.archivo_imagen.delete(save=False)
+            except Exception:
+                pass
+
+        # 3. Eliminar imágenes secundarias si existen
+        if self.imagen_mapa:
+            try:
+                self.imagen_mapa.delete(save=False)
+            except Exception:
+                pass
+        if self.imagen_propia:
+            try:
+                self.imagen_propia.delete(save=False)
+            except Exception:
+                pass
+
+        super().delete(*args, **kwargs)
+
     @property
     def imagen_web_url(self):
         """Retorna la URL protegida con marca de agua para visualización web."""

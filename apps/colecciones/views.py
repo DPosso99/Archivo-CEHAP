@@ -10,6 +10,9 @@ class AlbumDeleteView(LoginRequiredMixin, DeleteView):
     model = Album
     success_url = reverse_lazy("categoria_lista")
 
+    def get(self, request, *args, **kwargs):
+        return redirect(self.success_url)
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         self.object.delete()
@@ -28,6 +31,9 @@ class AlbumUpdateView(LoginRequiredMixin, UpdateView):
 class CategoriaDeleteView(LoginRequiredMixin, DeleteView):
     model = Categoria
     success_url = reverse_lazy("categoria_lista")
+
+    def get(self, request, *args, **kwargs):
+        return redirect(self.success_url)
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()

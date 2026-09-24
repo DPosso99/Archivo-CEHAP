@@ -180,7 +180,7 @@ class FotografiaDetailView(DetailView):
         context["total_calificaciones"] = foto.calificaciones.count()
 
         # User IP
-        user_ip = self.request.META.get("REMOTE_ADDR")
+        user_ip = self.request.META.get("REMOTE_ADDR") or "127.0.0.1"
         user_rating = foto.calificaciones.filter(ip_usuario=user_ip).first()
         context["mi_calificacion"] = user_rating.estrellas if user_rating else 0
 
@@ -189,7 +189,7 @@ class FotografiaDetailView(DetailView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         foto = self.object
-        user_ip = request.META.get("REMOTE_ADDR")
+        user_ip = request.META.get("REMOTE_ADDR") or "127.0.0.1"
 
         # Handle Rating
         if "estrellas" in request.POST:
@@ -321,7 +321,6 @@ class FotografiaDeleteView(LoginRequiredMixin, DeleteView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        self.object.archivo_imagen.delete(save=False)
         self.object.delete()
         return HttpResponseRedirect(self.success_url)
 

@@ -168,9 +168,13 @@ def generar_derivado_web(fotografia, forzar=False):
                 draw.text((x2 + 1, y2 + 1), linea2, font=font, fill=shadow_color)
                 draw.text((x2, y2), linea2, font=font, fill=text_color)
 
-                final_img = Image.alpha_composite(img, overlay).convert("RGB")
+                # Asegurar fondo blanco para áreas transparentes (evita fondos negros en PNG/WebP)
+                bg = Image.new("RGBA", (w, h), (255, 255, 255, 255))
+                img_with_bg = Image.alpha_composite(bg, img)
+                final_img = Image.alpha_composite(img_with_bg, overlay).convert("RGB")
             else:
-                final_img = img.convert("RGB")
+                bg = Image.new("RGBA", (w, h), (255, 255, 255, 255))
+                final_img = Image.alpha_composite(bg, img).convert("RGB")
 
             # Guardado optimizado en disco del archivo derivado
             final_img.save(abs_web_path, "JPEG", quality=90, optimize=True)
