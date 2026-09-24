@@ -206,6 +206,21 @@ class MejorasAuditoriaTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("archivo_imagen", form.errors)
 
+    def test_validacion_archivo_imagen_valido_ejecuta_clean(self):
+        import io
+        from PIL import Image
+        from apps.fotografias.forms import FotografiaForm
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        buf = io.BytesIO()
+        Image.new("RGB", (100, 100), color=(255, 0, 0)).save(buf, format="JPEG")
+        valid_file = SimpleUploadedFile("foto_valida.jpg", buf.getvalue(), content_type="image/jpeg")
+
+        form = FotografiaForm(data={"titulo": "Foto Válida de Prueba"}, files={"archivo_imagen": valid_file})
+        self.assertTrue(form.is_valid(), f"Errores en formulario: {form.errors}")
+        cleaned_file = form.cleaned_data["archivo_imagen"]
+        self.assertEqual(cleaned_file.name, "foto_valida.jpg")
+
     def test_validacion_tamano_maximo(self):
         import io
         from PIL import Image
