@@ -9,6 +9,27 @@ logger = logging.getLogger(__name__)
 WEB_DIR_REL = os.path.join("fotos", "web")
 
 
+# Colección histórica inicial que ya incorpora su marca de agua patrimonial CEHAP
+ARCHIVOS_CON_MARCA_ORIGINAL = {
+    '36119elplayon.jpg',
+    'D1246.jpg',
+    'image_2.jpg',
+    'N0026_uY7ED57.jpg',
+    'normal_20221021_115050.jpg',
+    'normal_36121elplayon.jpg',
+    'normal_3784calidadespacial.jpg',
+    'normal_3816calidadespacial.jpg',
+    'normal_D201058.jpg',
+    'normal_D4144.jpg',
+    'normal_N0004.jpg',
+    'normal_N0005.jpg',
+    'normal_N0007.jpg',
+    'normal_N0011.jpg',
+    'normal_N0025.jpg',
+    'normal_N0027.jpg',
+}
+
+
 def obtener_ruta_derivado_web(fotografia):
     """
     Retorna la ruta absoluta del archivo derivado con marca de agua en disco
@@ -33,7 +54,7 @@ def obtener_ruta_derivado_web(fotografia):
 def generar_derivado_web(fotografia, forzar=False):
     """
     Genera una copia derivada optimizada para la web con marca de agua institucional
-    del CEHAP / Universidad Nacional de Colombia.
+    blanca sutil y no invasiva del CEHAP / Universidad Nacional de Colombia.
     
     PRESERVACIÓN PATRIMONIAL:
     El archivo maestro original (fotografia.archivo_imagen.path) se mantiene 100% INTACTO.
@@ -58,6 +79,7 @@ def generar_derivado_web(fotografia, forzar=False):
 
     try:
         os.makedirs(os.path.dirname(abs_web_path), exist_ok=True)
+        orig_filename = os.path.basename(orig_path)
 
         with Image.open(orig_path) as img:
             # Manejar orientación EXIF si está presente
@@ -78,81 +100,79 @@ def generar_derivado_web(fotografia, forzar=False):
                 img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
                 w, h = img.size
 
-            # Capa transparente para la marca de agua
-            overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-            draw = ImageDraw.Draw(overlay)
+            # Si el archivo patrimonial original ya tiene su marca integrada de origen,
+            # no se sobrepone una segunda marca redundante
+            if orig_filename not in ARCHIVOS_CON_MARCA_ORIGINAL:
+                overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+                draw = ImageDraw.Draw(overlay)
 
-            # Textos institucionales
-            autor_texto = (fotografia.autor or "").strip()
-            if not autor_texto or autor_texto.lower() in ("desconocido", "anónimo", "anonimo", "none"):
-                autor_texto = "Facultad de Arquitectura"
+                # Textos institucionales (estilo blanco sutil patrimonial)
+                autor_texto = (fotografia.autor or "").strip()
+                if not autor_texto or autor_texto.lower() in ("desconocido", "anónimo", "anonimo", "none"):
+                    autor_texto = ""
 
-            linea1 = "ARCHIVO DOCUMENTAL CEHAP • UNAL"
-            linea2 = f"© {autor_texto}"
+                anio_texto = ""
+                if fotografia.fecha_produccion:
+                    anio_texto = str(fotografia.fecha_produccion).strip()
+                elif fotografia.fecha_registro:
+                    anio_texto = str(fotografia.fecha_registro.year)
 
-            # Tipografías y tamaños proporcionales
-            font_size1 = max(int(min(w, h) * 0.020), 12)
-            font_size2 = max(int(min(w, h) * 0.024), 14)
+                linea1 = f"© {autor_texto}" if autor_texto else ""
+                if anio_texto:
+                    linea2 = f"©CEHAP, Universidad Nacional de Colombia, {anio_texto}"
+                else:
+                    linea2 = "©CEHAP, Universidad Nacional de Colombia"
 
-            font1 = None
-            font2 = None
-            font_candidates = [
-                "C:/Windows/Fonts/segoeui.ttf",
-                "C:/Windows/Fonts/arial.ttf",
-                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-            ]
-            for cand in font_candidates:
-                try:
-                    font1 = ImageFont.truetype(cand, font_size1)
-                    font2 = ImageFont.truetype(cand, font_size2)
-                    break
-                except (IOError, OSError):
-                    continue
+                # Tipografía proporcional limpia
+                font_size = max(int(min(w, h) * 0.022), 12)
+                font = None
+                font_candidates = [
+                    "C:/Windows/Fonts/segoeui.ttf",
+                    "C:/Windows/Fonts/arial.ttf",
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+                ]
+                for cand in font_candidates:
+                    try:
+                        font = ImageFont.truetype(cand, font_size)
+                        break
+                    except (IOError, OSError):
+                        continue
 
-            if not font1:
-                font1 = ImageFont.load_default()
-                font2 = ImageFont.load_default()
+                if not font:
+                    font = ImageFont.load_default()
 
-            # Medir dimensiones de texto
-            bb1 = draw.textbbox((0, 0), linea1, font=font1)
-            bb2 = draw.textbbox((0, 0), linea2, font=font2)
-            w1, h1 = bb1[2] - bb1[0], bb1[3] - bb1[1]
-            w2, h2 = bb2[2] - bb2[0], bb2[3] - bb2[1]
+                # Medir dimensiones de texto
+                bb1 = draw.textbbox((0, 0), linea1, font=font) if linea1 else (0, 0, 0, 0)
+                bb2 = draw.textbbox((0, 0), linea2, font=font)
+                w1, h1 = bb1[2] - bb1[0], bb1[3] - bb1[1]
+                w2, h2 = bb2[2] - bb2[0], bb2[3] - bb2[1]
 
-            # Dimensiones de la placa / badge
-            pad_x = int(min(w, h) * 0.025)
-            pad_y = int(min(w, h) * 0.015)
-            badge_w = max(w1, w2) + (pad_x * 2)
-            badge_h = h1 + h2 + (pad_y * 2) + int(min(w, h) * 0.008)
+                margin_r = int(min(w, h) * 0.025)
+                margin_b = int(min(w, h) * 0.02)
 
-            margin = int(min(w, h) * 0.02)
-            bx1 = w - badge_w - margin
-            by1 = h - badge_h - margin
-            bx2 = w - margin
-            by2 = h - margin
+                x2 = w - margin_r - w2
+                y2 = h - margin_b - h2
 
-            # Placa estilo glassmorphism (azul oscuro / pizarra translúcido con borde sutil)
-            radius = max(int(min(w, h) * 0.01), 6)
-            draw.rounded_rectangle(
-                [bx1, by1, bx2, by2],
-                radius=radius,
-                fill=(15, 23, 42, 185),        # Slate 900 con 72% opacidad
-                outline=(255, 255, 255, 80),   # Borde fino translúcido
-                width=1,
-            )
+                shadow_color = (0, 0, 0, 160)
+                text_color = (255, 255, 255, 235)
 
-            # Dibujar texto institucional en el badge
-            tx1 = bx1 + (badge_w - w1) // 2
-            ty1 = by1 + pad_y
-            draw.text((tx1, ty1), linea1, font=font1, fill=(226, 232, 240, 230))
+                if linea1:
+                    x1 = w - margin_r - w1
+                    y1 = y2 - h1 - max(int(font_size * 0.25), 3)
+                    # Sombra sutil de 1px
+                    draw.text((x1 + 1, y1 + 1), linea1, font=font, fill=shadow_color)
+                    draw.text((x1, y1), linea1, font=font, fill=text_color)
 
-            tx2 = bx1 + (badge_w - w2) // 2
-            ty2 = ty1 + h1 + int(min(w, h) * 0.008)
-            draw.text((tx2, ty2), linea2, font=font2, fill=(255, 255, 255, 255))
+                # Sombra sutil de 1px
+                draw.text((x2 + 1, y2 + 1), linea2, font=font, fill=shadow_color)
+                draw.text((x2, y2), linea2, font=font, fill=text_color)
 
-            # Fusión y guardado en disco del archivo derivado
-            final_img = Image.alpha_composite(img, overlay).convert("RGB")
+                final_img = Image.alpha_composite(img, overlay).convert("RGB")
+            else:
+                final_img = img.convert("RGB")
+
+            # Guardado optimizado en disco del archivo derivado
             final_img.save(abs_web_path, "JPEG", quality=90, optimize=True)
 
         return rel_web_url
