@@ -98,6 +98,31 @@ class Fotografia(RecursoDocumental):
     def __str__(self):
         return f"{self.codigo} - {self.titulo}"
 
+    def save(self, *args, **kwargs):
+        # Garantizar que codigo nunca quede vacío ni rompa la restricción UNIQUE
+        if not self.codigo or not str(self.codigo).strip():
+            base = ""
+            if self.archivo_imagen and hasattr(self.archivo_imagen, "name") and self.archivo_imagen.name:
+                import os
+                base = os.path.basename(self.archivo_imagen.name)
+            if not base:
+                from django.utils.text import slugify
+                import uuid
+                base = f"FOTO-{slugify(self.titulo or 'item')[:20]}-{uuid.uuid4().hex[:6]}"
+
+            import os
+            name_part, ext_part = os.path.splitext(base)
+            if not ext_part:
+                ext_part = ".jpg"
+            candidate = f"{name_part}{ext_part}"
+            counter = 1
+            while Fotografia.objects.filter(codigo=candidate).exclude(pk=self.pk).exists():
+                candidate = f"{name_part}_{counter}{ext_part}"
+                counter += 1
+            self.codigo = candidate
+
+        super().save(*args, **kwargs)
+
     @property
     def imagen_web_url(self):
         """Retorna la URL protegida con marca de agua para visualización web."""

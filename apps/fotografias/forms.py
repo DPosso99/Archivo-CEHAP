@@ -261,17 +261,53 @@ class FotografiaForm(forms.ModelForm):
         cleaned_data = super().clean()
         archivo_imagen = cleaned_data.get("archivo_imagen")
         url_imagen = cleaned_data.get("url_imagen")
+        codigo = (cleaned_data.get("codigo") or "").strip()
 
         if not archivo_imagen and not url_imagen:
             self.add_error(
                 "archivo_imagen",
                 "Debe subir un archivo de imagen o proporcionar una URL válida.",
             )
+
+        # Si el usuario escribió un código manualmente, validar que sea único
+        if codigo:
+            qs = Fotografia.objects.filter(codigo=codigo)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                self.add_error(
+                    "codigo",
+                    f"El código o nombre de archivo '{codigo}' ya existe en el sistema. Por favor especifique uno diferente.",
+                )
+
         return cleaned_data
 
     def save(self, commit=True):
         instance = super().save(commit=False)
         url_imagen = self.cleaned_data.get("url_imagen")
+
+        # Asignar código único si el usuario lo dejó en blanco
+        codigo = (self.cleaned_data.get("codigo") or "").strip()
+        if not codigo:
+            base_name = ""
+            if instance.archivo_imagen and hasattr(instance.archivo_imagen, "name") and instance.archivo_imagen.name:
+                base_name = os.path.basename(instance.archivo_imagen.name)
+            elif url_imagen:
+                base_name = os.path.basename(urlparse(url_imagen).path)
+            if not base_name:
+                base_name = f"FOTO-{slugify(instance.titulo or 'item')[:30]}"
+
+            name_part, ext_part = os.path.splitext(base_name)
+            if not ext_part:
+                ext_part = ".jpg"
+            candidate = f"{name_part}{ext_part}"
+            counter = 1
+            while Fotografia.objects.filter(codigo=candidate).exclude(pk=instance.pk).exists():
+                candidate = f"{name_part}_{counter}{ext_part}"
+                counter += 1
+            instance.codigo = candidate
+        else:
+            instance.codigo = codigo
 
         if url_imagen:
             instance.url_fuente = url_imagen

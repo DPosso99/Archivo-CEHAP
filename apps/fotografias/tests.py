@@ -221,6 +221,29 @@ class MejorasAuditoriaTest(TestCase):
         cleaned_file = form.cleaned_data["archivo_imagen"]
         self.assertEqual(cleaned_file.name, "foto_valida.jpg")
 
+    def test_auto_generacion_codigo_unico_cuando_vacio(self):
+        import io
+        from PIL import Image
+        from apps.fotografias.forms import FotografiaForm
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        buf1 = io.BytesIO()
+        Image.new("RGB", (20, 20)).save(buf1, format="JPEG")
+        f1 = SimpleUploadedFile("prueba_auto.jpg", buf1.getvalue(), content_type="image/jpeg")
+        form1 = FotografiaForm(data={"titulo": "Foto Auto 1", "codigo": ""}, files={"archivo_imagen": f1})
+        self.assertTrue(form1.is_valid())
+        inst1 = form1.save()
+        self.assertEqual(inst1.codigo, "prueba_auto.jpg")
+
+        buf2 = io.BytesIO()
+        Image.new("RGB", (20, 20)).save(buf2, format="JPEG")
+        f2 = SimpleUploadedFile("prueba_auto.jpg", buf2.getvalue(), content_type="image/jpeg")
+        form2 = FotografiaForm(data={"titulo": "Foto Auto 2", "codigo": ""}, files={"archivo_imagen": f2})
+        self.assertTrue(form2.is_valid())
+        inst2 = form2.save()
+        self.assertEqual(inst2.codigo, "prueba_auto_1.jpg")
+        self.assertNotEqual(inst1.codigo, inst2.codigo)
+
     def test_validacion_tamano_maximo(self):
         import io
         from PIL import Image
