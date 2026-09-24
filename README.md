@@ -177,13 +177,6 @@ python manage.py generar_marcas_agua --settings=config.settings.local_windows
 ```
 * Genera los derivados con marca de agua institucional para todas las fotografías existentes sin modificar los archivos originales. Añade `--forzar` para regenerar todos los derivados.
 
-### 4. Pruebas Automatizadas
-```powershell
-python manage.py test --settings=config.settings.local_windows
-```
-* Ejecuta el suite completo de 16 pruebas unitarias e integración (búsquedas, mapas, calificaciones, concurrencia WAL, validaciones de archivo y preservación patrimonial).
-
----
 
 ## Créditos e Institución
 
