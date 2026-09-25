@@ -800,9 +800,9 @@ tooltipTriggerList.forEach(function(el) { new bootstrap.Tooltip(el); });
     var lat = {{ foto.latitud|stringformat:'f' }};
     var lng = {{ foto.longitud|stringformat:'f' }};
 
-    var osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    var esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> colaboradores'
+        attribution: 'Tiles &copy; Esri &mdash; Fuentes: Esri, DeLorme, NAVTEQ, USGS, TomTom'
     });
     var esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
@@ -818,18 +818,18 @@ tooltipTriggerList.forEach(function(el) { new bootstrap.Tooltip(el); });
         scrollWheelZoom: false, 
         dragging: true, 
         zoomControl: true,
-        layers: [osmStandard]
+        layers: [esriStreet]
     }).setView([lat, lng], 16);
 
-    osmStandard.on('tileerror', function() {
-        if (!navigator.onLine && map.hasLayer(osmStandard)) {
-            map.removeLayer(osmStandard);
+    esriStreet.on('tileerror', function() {
+        if (!navigator.onLine && map.hasLayer(esriStreet)) {
+            map.removeLayer(esriStreet);
             map.addLayer(medellinOffline);
         }
     });
 
     var baseLayers = {
-        "Plano / Calles (OpenStreetMap)": osmStandard,
+        "Plano / Calles (Esri)": esriStreet,
         "Satélite (Esri)": esriSatellite,
         "Medellín Local (Offline)": medellinOffline
     };

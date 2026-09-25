@@ -3,7 +3,7 @@ INSTRUCCIONES PARA APLICAR EL PARCHE EN EL PC DE LA UNIVERSIDAD NACIONAL
 ================================================================================
 
 Este archivo comprimido contiene las mejoras y correcciones del sistema:
-- Mapas 100% libres y sin API Key: uso de OpenStreetMap estándar online, Esri Satelital y mosaico local offline.
+- Mapas 100% libres y sin API Key: uso de Esri World Street Map online, Esri Satelital y mosaico local offline (cero bloqueos 403).
 - Mosaico de mapas LOCAL y OFFLINE de Medellín y Valle de Aburrá (funciona sin internet).
 - Librerías Leaflet 100% locales (sin CDNs externas).
 - Concurrencia multiusuario SQLite WAL (evita bloqueos entre catalogadores simultáneos).

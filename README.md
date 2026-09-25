@@ -21,7 +21,7 @@ Esta plataforma permite a investigadores, docentes y catalogadores registrar met
 
 * **Motor de Búsqueda Integral y Relevancia:** Búsqueda exhaustiva en los 22 atributos de cada fotografía y sus entidades asociadas (título, autor, fechas de producción y subida, ubicación física de archivo, álbum, categoría, subcategoría, descripciones, palabras clave y usuario catalogador). Insensible a acentos/tildes (`medellin` encuentra `Medellín`), con normalización de singulares/plurales, manejo inteligente de preposiciones en español y cálculo dinámico de relevancia.
 * **Georreferenciación y Mapas Híbridos (100% Libres Sin API Key):** 
-  * Integración con **OpenStreetMap estándar** y **Esri Satelital** (sin requerir ninguna clave de API).
+  * Integración con **Esri World Street Map** y **Esri Satelital** (servidores globales de alta disponibilidad sin requerir ninguna clave de API ni bloquear peticiones de aplicaciones locales).
   * **Librerías Leaflet 100% locales** (cero dependencias de CDNs externas).
   * **Mosaico Local Offline de Medellín y Valle de Aburrá** precargado (niveles de zoom 11 a 14) con conmutación automática ante caídas de internet.
 * **Preservación Patrimonial y Marcas de Agua:**
@@ -149,7 +149,7 @@ Crea un archivo `.env` en la raíz del proyecto basándote en `.env.example`:
 | `ALLOWED_HOSTS` | Hosts permitidos para conexión | `localhost,127.0.0.1,*` |
 | `NVIDIA_API_KEY` | Clave opcional de NVIDIA AI para sugerencia de metadatos | *(Opcional)* |
 
-> Nota: Los mapas funcionan de manera nativa sin requerir ninguna clave de API mediante OpenStreetMap estándar y mosaicos locales.
+> Nota: Los mapas funcionan de manera nativa sin requerir ninguna clave de API mediante Esri World Street Map y mosaicos locales.
 
 ---
 

@@ -190,7 +190,7 @@ class MapaViewsTest(TestCase):
         response = self.client.get(reverse("mapa"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "vendor/leaflet/leaflet.js")
-        self.assertContains(response, "tile.openstreetmap.org")
+        self.assertContains(response, "server.arcgisonline.com")
 
     def test_mapa_data_endpoint(self):
         response = self.client.get(reverse("mapa_data"))
@@ -202,17 +202,17 @@ class MapaViewsTest(TestCase):
         self.assertAlmostEqual(data[0]["lat"], 6.251149, places=5)
         self.assertAlmostEqual(data[0]["lng"], -75.564738, places=5)
 
-    def test_detalle_map_renders_osm(self):
+    def test_detalle_map_renders_esri(self):
         response = self.client.get(reverse("fotografia_detalle", kwargs={"pk": self.f1.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "vendor/leaflet/leaflet.js")
-        self.assertContains(response, "tile.openstreetmap.org")
+        self.assertContains(response, "server.arcgisonline.com")
 
     def test_home_view_renders_correctly(self):
         response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "vendor/leaflet/leaflet.js")
-        self.assertContains(response, "tile.openstreetmap.org")
+        self.assertContains(response, "server.arcgisonline.com")
 
 
 class InteraccionesTest(TestCase):
