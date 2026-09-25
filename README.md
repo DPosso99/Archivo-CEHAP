@@ -19,9 +19,9 @@ Esta plataforma permite a investigadores, docentes y catalogadores registrar met
 
 ## Características Principales
 
-* **Motor de Búsqueda Inteligente:** Búsqueda insensible a acentos/tildes (`medellin` encuentra `Medellín`), soporte multi-palabra con operador `AND` y lematización básica de plurales y singulares.
-* **Georreferenciación y Mapas Híbridos:** 
-  * Integración con **CartoDB Voyager** y **Esri Satelital**.
+* **Motor de Búsqueda Integral y Relevancia:** Búsqueda exhaustiva en los 22 atributos de cada fotografía y sus entidades asociadas (título, autor, fechas de producción y subida, ubicación física de archivo, álbum, categoría, subcategoría, descripciones, palabras clave y usuario catalogador). Insensible a acentos/tildes (`medellin` encuentra `Medellín`), con normalización de singulares/plurales, manejo inteligente de preposiciones en español y cálculo dinámico de relevancia.
+* **Georreferenciación y Mapas Híbridos (100% Libres Sin API Key):** 
+  * Integración con **OpenStreetMap estándar** y **Esri Satelital** (sin requerir ninguna clave de API).
   * **Librerías Leaflet 100% locales** (cero dependencias de CDNs externas).
   * **Mosaico Local Offline de Medellín y Valle de Aburrá** precargado (niveles de zoom 11 a 14) con conmutación automática ante caídas de internet.
 * **Preservación Patrimonial y Marcas de Agua:**
@@ -147,8 +147,9 @@ Crea un archivo `.env` en la raíz del proyecto basándote en `.env.example`:
 | `SECRET_KEY` | Clave criptográfica de Django | `django-insecure-...` |
 | `DEBUG` | Modo depuración | `True` en local, `False` en producción |
 | `ALLOWED_HOSTS` | Hosts permitidos para conexión | `localhost,127.0.0.1,*` |
-| `CARTO_API_KEY` | Clave opcional de CartoDB Voyager | *(Opcional, elimina marcas de agua externas)* |
-| `GOOGLE_MAPS_API_KEY` | Clave de Google Maps Embed | *(Opcional)* |
+| `NVIDIA_API_KEY` | Clave opcional de NVIDIA AI para sugerencia de metadatos | *(Opcional)* |
+
+> Nota: Los mapas funcionan de manera nativa sin requerir ninguna clave de API mediante OpenStreetMap estándar y mosaicos locales.
 
 ---
 

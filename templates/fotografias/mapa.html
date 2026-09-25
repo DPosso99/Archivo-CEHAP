@@ -41,11 +41,9 @@
     var mapEl = document.getElementById('map');
     if (!mapEl) return;
 
-    var cartoUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png' + ('{{ CARTO_API_KEY }}' ? '?key={{ CARTO_API_KEY }}' : '');
-    var cartoVoyager = L.tileLayer(cartoUrl, {
-        subdomains: 'abcd',
+    var osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> colaboradores'
     });
     var esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
@@ -58,22 +56,22 @@
     });
 
     var map = L.map('map', { 
-        scrollWheelZoom: true,
-        layers: [cartoVoyager]
+        scrollWheelZoom: true, 
+        layers: [osmStandard]
     }).setView([4.5709, -74.2973], 6);
 
     // Detección de pérdida de internet: cambio automático al mapa local de Medellín
-    cartoVoyager.on('tileerror', function() {
-        if (!navigator.onLine && map.hasLayer(cartoVoyager)) {
-            map.removeLayer(cartoVoyager);
+    osmStandard.on('tileerror', function() {
+        if (!navigator.onLine && map.hasLayer(osmStandard)) {
+            map.removeLayer(osmStandard);
             map.addLayer(medellinOffline);
             map.setView([6.2518, -75.5636], 13);
         }
     });
 
     var baseLayers = {
-        "Mapa Cartográfico (Online)": cartoVoyager,
-        "Vista Satelital (Online)": esriSatellite,
+        "Mapa Callejero (OpenStreetMap)": osmStandard,
+        "Vista Satelital (Esri)": esriSatellite,
         "Medellín Local (Offline)": medellinOffline
     };
     L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);

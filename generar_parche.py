@@ -17,6 +17,7 @@ EXCLUDE_DIRS = {
     "backups",
     "staticfiles",
     "scripts_legacy",
+    "Parche_CEHAP_UNAL",
 }
 
 EXCLUDE_FILES = {
@@ -46,14 +47,14 @@ INSTRUCCIONES PARA APLICAR EL PARCHE EN EL PC DE LA UNIVERSIDAD NACIONAL
 ================================================================================
 
 Este archivo comprimido contiene las mejoras y correcciones del sistema:
-- Solución definitiva al error 403 del mapa (CartoDB Voyager + Esri Satelital).
+- Mapas 100% libres y sin API Key: uso de OpenStreetMap estándar online, Esri Satelital y mosaico local offline.
 - Mosaico de mapas LOCAL y OFFLINE de Medellín y Valle de Aburrá (funciona sin internet).
 - Librerías Leaflet 100% locales (sin CDNs externas).
 - Concurrencia multiusuario SQLite WAL (evita bloqueos entre catalogadores simultáneos).
 - Preservación patrimonial: Las fotos originales maestras permanecen 100% INTACTAS.
 - Marcas de agua institucionales CEHAP generadas automáticamente para visualización web.
 - Botón de descarga de "Original Maestro" disponible para usuarios autenticados.
-- Motor de búsqueda inteligente: insensible a tildes, soporte multi-palabra y plurales.
+- Motor de búsqueda integral multi-atributo: indexa todos los 22 atributos de las fotos (año/fechas, ubicación física, álbum, categoría, descripciones, autor, palabras clave) con ranking de relevancia y sin truncar resultados.
 - Validación preventiva: tamaño máximo 25 MB y verificación de extensiones fotográficas.
 - Nuevo script 'exportar_respaldo_completo.bat' para llevar el proyecto a presentaciones.
 - CERO RIESGO: Este parche NO contiene base de datos ni borra ninguna fotografía existente.

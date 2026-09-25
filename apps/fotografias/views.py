@@ -10,7 +10,7 @@ from django.views.generic import (
 import json
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Avg
+from django.db.models import Avg, Q
 from django.http import HttpResponseRedirect
 from .models import Fotografia, Comentario, Calificacion
 from .forms import FotografiaForm
@@ -39,8 +39,8 @@ class HomeView(TemplateView):
         # Mapa: fotos con coordenadas
         context["maps_api_key"] = getattr(settings, "GOOGLE_MAPS_API_KEY", "")
         mapa_fotos = Fotografia.objects.filter(
-            latitud__isnull=False, longitud__isnull=False, estado="Activo"
-        ).select_related("album")
+            latitud__isnull=False, longitud__isnull=False
+        ).exclude(estado="Archivado").select_related("album")
         foto_list = []
         for f in mapa_fotos:
             foto_list.append(
@@ -73,9 +73,11 @@ class FotografiaListView(ListView):
             "album", "album__categoria", "album__categoria__categoria_padre"
         ).all()
 
-        # Si el usuario no está autenticado, solo mostramos las fotos "Activas"
+        # Si el usuario no está autenticado, solo mostramos las fotos que no estén archivadas
         if not self.request.user.is_authenticated:
-            queryset = queryset.filter(estado="Activo")
+            queryset = queryset.filter(
+                Q(estado="Activo") | Q(estado__isnull=True) | Q(estado="") | Q(estado="Revisión")
+            ).exclude(estado="Archivado")
 
         # Filtro de búsqueda avanzado (multipalabra, insensible a acentos/tildes y plurales)
         q = self.request.GET.get("q")
@@ -109,9 +111,9 @@ class FotografiaDetailView(DetailView):
         # ORM Best Practice: select_related para traer foráneas en 1 sola consulta
         queryset = Fotografia.objects.select_related("album", "registrado_por")
 
-        # Ocultar ficha detalle si el usuario no es admin y está en revisión o archivada
+        # Ocultar ficha detalle si el usuario no es admin y está archivada
         if not self.request.user.is_authenticated:
-            queryset = queryset.filter(estado="Activo")
+            queryset = queryset.exclude(estado="Archivado")
 
         return queryset
 

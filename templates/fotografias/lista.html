@@ -13,7 +13,7 @@
     <form method="get">
         <div class="search-bar">
             <i class="bi bi-search search-icon"></i>
-            <input type="text" class="search-input" id="q" name="q" placeholder="Buscar por título, palabra clave, autor, álbum o código..." value="{{ request.GET.q }}">
+            <input type="text" class="search-input" id="q" name="q" placeholder="Buscar por título, autor, álbum, categoría, fecha, ubicación, descripción, código..." value="{{ request.GET.q }}">
             {% if request.GET.album %}<input type="hidden" name="album" value="{{ request.GET.album }}">{% endif %}
             <button type="submit" class="search-btn" title="Buscar"><i class="bi bi-search"></i></button>
             <a href="{% url 'fotografia_lista' %}" class="search-clear">Limpiar</a>

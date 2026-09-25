@@ -800,11 +800,9 @@ tooltipTriggerList.forEach(function(el) { new bootstrap.Tooltip(el); });
     var lat = {{ foto.latitud|stringformat:'f' }};
     var lng = {{ foto.longitud|stringformat:'f' }};
 
-    var cartoUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png' + ('{{ CARTO_API_KEY }}' ? '?key={{ CARTO_API_KEY }}' : '');
-    var cartoVoyager = L.tileLayer(cartoUrl, {
-        subdomains: 'abcd',
+    var osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> colaboradores'
     });
     var esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
@@ -820,19 +818,19 @@ tooltipTriggerList.forEach(function(el) { new bootstrap.Tooltip(el); });
         scrollWheelZoom: false, 
         dragging: true, 
         zoomControl: true,
-        layers: [cartoVoyager]
+        layers: [osmStandard]
     }).setView([lat, lng], 16);
 
-    cartoVoyager.on('tileerror', function() {
-        if (!navigator.onLine && map.hasLayer(cartoVoyager)) {
-            map.removeLayer(cartoVoyager);
+    osmStandard.on('tileerror', function() {
+        if (!navigator.onLine && map.hasLayer(osmStandard)) {
+            map.removeLayer(osmStandard);
             map.addLayer(medellinOffline);
         }
     });
 
     var baseLayers = {
-        "Plano / Calles (Online)": cartoVoyager,
-        "Satélite (Online)": esriSatellite,
+        "Plano / Calles (OpenStreetMap)": osmStandard,
+        "Satélite (Esri)": esriSatellite,
         "Medellín Local (Offline)": medellinOffline
     };
     L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);

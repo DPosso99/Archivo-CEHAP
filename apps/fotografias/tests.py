@@ -10,12 +10,22 @@ from apps.fotografias.busqueda import (
 
 class BusquedaAvanzadaTest(TestCase):
     def setUp(self):
-        self.cat_padre = Categoria.objects.create(nombre="Territorio y Ciudad", activa=True)
+        self.cat_padre = Categoria.objects.create(
+            nombre="Territorio y Ciudad",
+            descripcion="Estudios territoriales y hábitat urbano",
+            activa=True
+        )
         self.subcat = Categoria.objects.create(
-            nombre="Medellín Histórica", categoria_padre=self.cat_padre, activa=True
+            nombre="Medellín Histórica",
+            descripcion="Transformaciones urbanísticas de Medellín",
+            categoria_padre=self.cat_padre,
+            activa=True
         )
         self.album = Album.objects.create(
-            nombre="CRAI IV", categoria=self.subcat, activo=True
+            nombre="CRAI IV",
+            descripcion="Registro documental de arquitectura patrimonial",
+            categoria=self.subcat,
+            activo=True
         )
 
         self.f1 = Fotografia.objects.create(
@@ -23,6 +33,8 @@ class BusquedaAvanzadaTest(TestCase):
             codigo="FOTO-001",
             palabras_clave="VIVIENDA, PATRIMONIO, SANTAFE",
             autor="Senia Salazar",
+            fecha_produccion="1972",
+            ubicacion_archivo="Caja Archivo Central Estante 4",
             album=self.album,
             latitud=6.538582,
             longitud=-75.917618,
@@ -33,6 +45,8 @@ class BusquedaAvanzadaTest(TestCase):
             codigo="FOTO-002",
             palabras_clave="MOVILIDAD, CENTRO, CALLES",
             autor="dpalencia",
+            fecha_produccion="1995",
+            ubicacion_archivo="Carpeta Medellín B",
             album=self.album,
             latitud=6.251149,
             longitud=-75.564738,
@@ -43,6 +57,8 @@ class BusquedaAvanzadaTest(TestCase):
             codigo="FOTO-003",
             palabras_clave="PAISAJE, CIUDAD, BOGOTA",
             autor="Alfonso Cano",
+            fecha_produccion="1988",
+            ubicacion_archivo="Caja Capitalina",
             estado="Activo",
         )
         self.f4 = Fotografia.objects.create(
@@ -50,6 +66,8 @@ class BusquedaAvanzadaTest(TestCase):
             codigo="FOTO-004",
             palabras_clave="CONSTRUCCION, BARRIOS, COMUNIDAD",
             autor="Equipo CEHAP",
+            fecha_produccion="2004",
+            ubicacion_archivo="Archivo Comunitario Sala 2",
             estado="Activo",
         )
 
@@ -107,6 +125,51 @@ class BusquedaAvanzadaTest(TestCase):
         self.assertIn(self.f2, res_album)
 
 
+    def test_busqueda_fecha_produccion(self):
+        qs = Fotografia.objects.all()
+        res = ejecutar_busqueda_fotografias(qs, "1972")
+        self.assertIn(self.f1, res)
+        self.assertEqual(res.first(), self.f1)
+
+    def test_busqueda_ubicacion_archivo(self):
+        qs = Fotografia.objects.all()
+        res = ejecutar_busqueda_fotografias(qs, "Estante 4")
+        self.assertIn(self.f1, res)
+
+    def test_busqueda_descripcion_album_y_categoria(self):
+        qs = Fotografia.objects.all()
+        # Coincide por descripción del álbum
+        res_album_desc = ejecutar_busqueda_fotografias(qs, "arquitectura patrimonial")
+        self.assertIn(self.f1, res_album_desc)
+        self.assertIn(self.f2, res_album_desc)
+
+        # Coincide por descripción de categoría
+        res_cat_desc = ejecutar_busqueda_fotografias(qs, "Transformaciones urbanísticas")
+        self.assertIn(self.f1, res_cat_desc)
+        self.assertIn(self.f2, res_cat_desc)
+
+    def test_busqueda_categoria_padre(self):
+        qs = Fotografia.objects.all()
+        res = ejecutar_busqueda_fotografias(qs, "Territorio y Ciudad")
+        self.assertIn(self.f1, res)
+        self.assertIn(self.f2, res)
+
+    def test_busqueda_con_preposiciones_espanol(self):
+        qs = Fotografia.objects.all()
+        # Con stop words "de", "en", "el"
+        res = ejecutar_busqueda_fotografias(qs, "vivienda de santafe")
+        self.assertIn(self.f1, res)
+        res2 = ejecutar_busqueda_fotografias(qs, "fotos de medellin")
+        self.assertIn(self.f2, res2)
+
+    def test_ranking_relevancia(self):
+        qs = Fotografia.objects.all()
+        # "vivienda santafe" debe rankear f1 (ambos términos) por encima de f4 (solo vivienda)
+        res = list(ejecutar_busqueda_fotografias(qs, "vivienda santafe"))
+        self.assertIn(self.f1, res)
+        self.assertEqual(res[0], self.f1)
+
+
 class MapaViewsTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -127,7 +190,7 @@ class MapaViewsTest(TestCase):
         response = self.client.get(reverse("mapa"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "vendor/leaflet/leaflet.js")
-        self.assertContains(response, "cartocdn.com")
+        self.assertContains(response, "tile.openstreetmap.org")
 
     def test_mapa_data_endpoint(self):
         response = self.client.get(reverse("mapa_data"))
@@ -139,17 +202,17 @@ class MapaViewsTest(TestCase):
         self.assertAlmostEqual(data[0]["lat"], 6.251149, places=5)
         self.assertAlmostEqual(data[0]["lng"], -75.564738, places=5)
 
-    def test_detalle_map_renders_carto(self):
+    def test_detalle_map_renders_osm(self):
         response = self.client.get(reverse("fotografia_detalle", kwargs={"pk": self.f1.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "vendor/leaflet/leaflet.js")
-        self.assertContains(response, "cartocdn.com")
+        self.assertContains(response, "tile.openstreetmap.org")
 
     def test_home_view_renders_correctly(self):
         response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "vendor/leaflet/leaflet.js")
-        self.assertContains(response, "cartocdn.com")
+        self.assertContains(response, "tile.openstreetmap.org")
 
 
 class InteraccionesTest(TestCase):
