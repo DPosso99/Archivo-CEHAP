@@ -31,7 +31,7 @@
         <a href="{% url 'fotografia_lista' %}" class="btn-ghost text-decoration-none">Volver</a>
         {% if foto.archivo_imagen %}<a href="{{ foto.imagen_web_url }}" download class="btn-ghost text-decoration-none" title="Descargar imagen para consulta"><i class="bi bi-download me-1"></i>Descargar</a>{% endif %}
         {% if user.is_authenticated and foto.archivo_imagen %}
-        <a href="{{ foto.archivo_imagen.url }}" download class="btn-accent text-decoration-none" style="background:#059669;border-color:#059669;" title="Descargar archivo original maestro de alta resolución"><i class="bi bi-shield-check me-1"></i>Original Maestro</a>
+        <a href="{{ foto.archivo_imagen.url }}" download class="btn-accent text-decoration-none" style="background:#059669;border-color:#059669;" title="Descargar archivo original de alta resolución"><i class="bi bi-shield-check me-1"></i>Descargar foto original</a>
         {% endif %}
         {% if user.is_authenticated %}<a href="{% url 'fotografia_editar' foto.pk %}" class="btn-accent text-decoration-none">Editar</a>{% endif %}
     </div>
