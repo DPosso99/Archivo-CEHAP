@@ -192,20 +192,27 @@
         </div>
     </div>
 
-    <!-- Visor Principal Centrado (encapsulado para evitar desbordes) -->
-    <div class="lb-viewport" id="lbViewport">
-        <div class="lb-img-container" id="lbImgContainer">
-            <img id="lbImage" src="" alt="Fotografía CEHAP" draggable="false">
-        </div>
-    </div>
+    <!-- Zonas de Clic en Extremos Izquierdo y Derecho -->
+    <div id="lbPrevZone" class="lb-side-zone lb-prev-zone" onclick="lbPrev(event)" title="Foto anterior"></div>
+    <div id="lbNextZone" class="lb-side-zone lb-next-zone" onclick="lbNext(event)" title="Foto siguiente"></div>
 
-    <!-- Navegación Lateral -->
+    <!-- Botones de Navegación en los Extremos -->
     <button class="lb-side-nav lb-side-prev" id="lbSidePrev" onclick="lbPrev(event)" title="Foto anterior (←)" aria-label="Anterior">
         <i class="bi bi-chevron-left"></i>
     </button>
     <button class="lb-side-nav lb-side-next" id="lbSideNext" onclick="lbNext(event)" title="Foto siguiente (→)" aria-label="Siguiente">
         <i class="bi bi-chevron-right"></i>
     </button>
+
+    <!-- 1. MODO CARRUSEL 3D (Estilo Kodfun 3D Carousel - Activo a 100%) -->
+    <div id="lb3D"></div>
+
+    <!-- 2. MODO ZOOM DETALLADO 2D (Activo cuando Zoom > 100%) -->
+    <div id="lbFlat">
+        <div class="lb-flat-viewport" id="lbFlatViewport">
+            <img id="lbFlatImg" src="" alt="Fotografía CEHAP" draggable="false">
+        </div>
+    </div>
 
     <!-- Zona Inferior: Información y Barra de Herramientas -->
     <div class="lb-bottom-dock">
@@ -292,10 +299,12 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(8, 12, 22, 0.96);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: radial-gradient(circle at center, rgba(15, 23, 42, 0.95) 0%, rgba(2, 6, 18, 0.98) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     z-index: 99999;
+    perspective: 1400px;
+    -webkit-perspective: 1400px;
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
@@ -348,23 +357,24 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 50px;
-    height: 50px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    background: rgba(15, 23, 42, 0.65);
+    background: rgba(15, 23, 42, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.25);
     color: #fff;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 90;
     transition: all 0.2s ease;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
 }
 .lb-side-nav:hover {
-    background: rgba(37, 99, 235, 0.8);
+    background: rgba(37, 99, 235, 0.85);
     border-color: rgba(96, 165, 250, 0.6);
     transform: translateY(-50%) scale(1.1);
     color: #fff;
@@ -372,19 +382,87 @@
 .lb-side-prev { left: 24px; }
 .lb-side-next { right: 24px; }
 
-.lb-viewport {
+/* Clickable side zones */
+.lb-side-zone {
+    position: absolute;
+    top: 64px;
+    bottom: 110px;
+    width: 15%;
+    cursor: pointer;
+    z-index: 40;
+}
+.lb-prev-zone { left: 0; }
+.lb-next-zone { right: 0; }
+
+/* 3D Carousel Stage (Kodfun 3D Transform System) */
+#lb3D {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    transition: transform 0.75s cubic-bezier(0.25, 1, 0.35, 1);
+    will-change: transform;
+    pointer-events: auto;
+    z-index: 20;
+}
+
+.lb-3d-item {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: block;
+    width: auto;
+    height: auto;
+    max-height: 56vh;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -webkit-box-reflect: below 10px linear-gradient(transparent 65%, rgba(0,0,0,0.3));
+    transition: filter 0.5s ease, opacity 0.5s ease, box-shadow 0.4s ease;
+}
+
+.lb-3d-item.active {
+    filter: brightness(1) drop-shadow(0 0 24px rgba(59, 130, 246, 0.4));
+    opacity: 1;
+    z-index: 30;
+    cursor: zoom-in;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 0 2px rgba(96, 165, 250, 0.6);
+}
+
+.lb-3d-item:not(.active) {
+    filter: brightness(0.65) blur(0.5px);
+    opacity: 0.75;
+}
+
+.lb-3d-item:not(.active):hover {
+    filter: brightness(0.92);
+    opacity: 0.95;
+}
+
+/* Flat Zoom Viewport (Active when lbZoom > 100) */
+#lbFlat {
     position: absolute;
     top: 60px;
     bottom: 120px;
     left: 0;
     right: 0;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    cursor: default;
+    z-index: 25;
 }
-.lb-img-container {
+
+.lb-flat-viewport {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -392,16 +470,18 @@
     max-height: 100%;
     position: relative;
 }
-#lbImage {
+
+#lbFlatImg {
     max-width: 86vw;
-    max-height: 72vh;
+    max-height: 70vh;
     object-fit: contain;
-    border-radius: 6px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
     transform-origin: center center;
-    transition: transform 0.15s ease-out;
-    cursor: zoom-in;
+    transition: transform 0.12s ease-out;
+    cursor: grab;
     will-change: transform;
+    user-select: none;
 }
 
 .lb-bottom-dock {
@@ -508,6 +588,7 @@ var lbStartX = 0;
 var lbStartY = 0;
 var lbStartPanX = 0;
 var lbStartPanY = 0;
+var lb3DAngle = 0;
 
 var ZOOM_LEVELS = [100, 125, 150, 175, 200, 250, 300];
 
@@ -528,18 +609,72 @@ function openLightbox(idx) {
     var ppBtn = document.getElementById('lbPlayPause');
     if (ppBtn) ppBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
 
+    build3DCarousel();
     updateLightboxView();
+}
+
+function build3DCarousel() {
+    var el = document.getElementById('lb3D');
+    if (!el) return;
+    el.innerHTML = '';
+    var n = galleryData.length;
+    if (n === 0) return;
+
+    var degPer = n > 1 ? (360 / n) : 0;
+    var isMobile = window.innerWidth < 768;
+    var imgW = isMobile ? Math.min(window.innerWidth * 0.55, 270) : Math.min(window.innerWidth * 0.28, 380);
+    var radius = n > 1 ? Math.max(340, (imgW / 2) / Math.tan((degPer / 2) * Math.PI / 180) * 1.35) : 0;
+
+    for (var i = 0; i < n; i++) {
+        var d = galleryData[i];
+        var angle = degPer * i;
+        var img = document.createElement('img');
+        img.src = d.src;
+        img.alt = d.title || 'Foto';
+        img.className = 'lb-3d-item' + (i === lbIdx ? ' active' : '');
+        img.setAttribute('data-index', i);
+        img.style.maxWidth = imgW + 'px';
+        img.style.transform = 'translate(-50%, -50%) rotateY(' + angle + 'deg) translateZ(' + radius + 'px)';
+
+        img.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var itemIdx = parseInt(this.getAttribute('data-index'));
+            if (itemIdx === lbIdx) {
+                // Clic en la foto central: amplía al modo detalle con zoom
+                lbZoomIn();
+            } else {
+                // Clic en una foto lateral: rota suavemente hacia ella
+                lbIdx = itemIdx;
+                updateLightboxView();
+            }
+        });
+
+        el.appendChild(img);
+    }
+}
+
+function rotate3D() {
+    var n = galleryData.length;
+    if (n === 0) return;
+    var degPer = n > 1 ? (360 / n) : 0;
+    lb3DAngle = -degPer * lbIdx;
+    var el = document.getElementById('lb3D');
+    if (el) el.style.transform = 'rotateY(' + lb3DAngle + 'deg)';
+
+    // Actualizar estados visuales de los elementos en 3D
+    var items = document.querySelectorAll('.lb-3d-item');
+    items.forEach(function(item, idx) {
+        if (idx === lbIdx) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
 }
 
 function updateLightboxView() {
     var d = galleryData[lbIdx];
     if (!d) return;
-
-    var img = document.getElementById('lbImage');
-    if (img) {
-        img.src = d.src;
-        img.alt = d.title || 'Fotografía';
-    }
 
     var counter = document.getElementById('lbCounter');
     if (counter) counter.textContent = (lbIdx + 1) + ' / ' + galleryData.length;
@@ -561,35 +696,47 @@ function updateLightboxView() {
         capMeta.textContent = metaParts.join(' \u00B7 ');
     }
 
-    applyZoomAndPan();
+    // Sincronizar imagen del modo zoom plano
+    var flatImg = document.getElementById('lbFlatImg');
+    if (flatImg) {
+        flatImg.src = d.src;
+        flatImg.alt = d.title || 'Foto';
+    }
+
+    applyZoom();
 }
 
-function applyZoomAndPan() {
-    var img = document.getElementById('lbImage');
+function applyZoom() {
     var lbl = document.getElementById('lbZoomLabel');
-    if (!img) return;
+    if (lbl) lbl.textContent = lbZoom + '%';
+
+    var lb3dEl = document.getElementById('lb3D');
+    var flatEl = document.getElementById('lbFlat');
+    var flatImg = document.getElementById('lbFlatImg');
 
     if (lbZoom <= 100) {
         lbZoom = 100;
         lbPanX = 0;
         lbPanY = 0;
-        img.style.transform = 'translate(0px, 0px) scale(1)';
-        img.style.cursor = 'zoom-in';
+        if (lb3dEl) lb3dEl.style.display = 'flex';
+        if (flatEl) flatEl.style.display = 'none';
+        rotate3D();
     } else {
-        img.style.transform = 'translate(' + lbPanX + 'px, ' + lbPanY + 'px) scale(' + (lbZoom / 100) + ')';
-        img.style.cursor = lbIsDragging ? 'grabbing' : 'grab';
+        if (lb3dEl) lb3dEl.style.display = 'none';
+        if (flatEl) {
+            flatEl.style.display = 'flex';
+            if (flatImg) {
+                flatImg.style.transform = 'translate(' + lbPanX + 'px, ' + lbPanY + 'px) scale(' + (lbZoom / 100) + ')';
+                flatImg.style.cursor = lbIsDragging ? 'grabbing' : 'grab';
+            }
+        }
     }
-
-    if (lbl) lbl.textContent = lbZoom + '%';
 }
 
 function lbNext(e) {
     if (e && e.stopPropagation) e.stopPropagation();
     if (!galleryData || galleryData.length <= 1) return;
     lbIdx = (lbIdx + 1) % galleryData.length;
-    lbZoom = 100;
-    lbPanX = 0;
-    lbPanY = 0;
     updateLightboxView();
 }
 
@@ -597,16 +744,13 @@ function lbPrev(e) {
     if (e && e.stopPropagation) e.stopPropagation();
     if (!galleryData || galleryData.length <= 1) return;
     lbIdx = (lbIdx - 1 + galleryData.length) % galleryData.length;
-    lbZoom = 100;
-    lbPanX = 0;
-    lbPanY = 0;
     updateLightboxView();
 }
 
 function lbZoomIn() {
     var next = ZOOM_LEVELS.find(function(lvl) { return lvl > lbZoom; });
     lbZoom = next ? next : ZOOM_LEVELS[ZOOM_LEVELS.length - 1];
-    applyZoomAndPan();
+    applyZoom();
 }
 
 function lbZoomOut() {
@@ -622,14 +766,14 @@ function lbZoomOut() {
         lbPanX = 0;
         lbPanY = 0;
     }
-    applyZoomAndPan();
+    applyZoom();
 }
 
 function lbZoomReset() {
     lbZoom = 100;
     lbPanX = 0;
     lbPanY = 0;
-    applyZoomAndPan();
+    applyZoom();
 }
 
 function lbTogglePlay() {
@@ -637,7 +781,7 @@ function lbTogglePlay() {
     var btn = document.getElementById('lbPlayPause');
     if (lbPlaying) {
         if (btn) btn.innerHTML = '<i class="bi bi-pause-fill"></i>';
-        lbTimer = setInterval(function() { lbNext(); }, 6000);
+        lbTimer = setInterval(function() { lbNext(); }, 5000);
     } else {
         if (btn) btn.innerHTML = '<i class="bi bi-play-fill"></i>';
         clearInterval(lbTimer);
@@ -657,9 +801,9 @@ function lbClose() {
 
 // Drag to pan cuando zoom > 100
 (function setupLightboxDrag() {
-    var img = document.getElementById('lbImage');
-    var viewport = document.getElementById('lbViewport');
-    if (!img || !viewport) return;
+    var flatImg = document.getElementById('lbFlatImg');
+    var flatEl = document.getElementById('lbFlat');
+    if (!flatImg || !flatEl) return;
 
     function onPointerDown(e) {
         if (lbZoom <= 100) return;
@@ -668,7 +812,7 @@ function lbClose() {
         lbStartY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
         lbStartPanX = lbPanX;
         lbStartPanY = lbPanY;
-        img.style.cursor = 'grabbing';
+        flatImg.style.cursor = 'grabbing';
         e.preventDefault();
     }
 
@@ -680,49 +824,63 @@ function lbClose() {
         var dy = cy - lbStartY;
         lbPanX = lbStartPanX + dx;
         lbPanY = lbStartPanY + dy;
-        applyZoomAndPan();
+        applyZoom();
     }
 
     function onPointerUp() {
         if (!lbIsDragging) return;
         lbIsDragging = false;
-        applyZoomAndPan();
+        applyZoom();
     }
 
-    img.addEventListener('mousedown', onPointerDown);
-    img.addEventListener('touchstart', onPointerDown, { passive: false });
+    flatImg.addEventListener('mousedown', onPointerDown);
+    flatImg.addEventListener('touchstart', onPointerDown, { passive: false });
     window.addEventListener('mousemove', onPointerMove);
     window.addEventListener('touchmove', onPointerMove, { passive: false });
     window.addEventListener('mouseup', onPointerUp);
     window.addEventListener('touchend', onPointerUp);
 
-    // Doble clic: alternar entre 100% y 150%
-    img.addEventListener('dblclick', function(e) {
+    // Doble clic: en plano regresa al carrusel 3D
+    flatImg.addEventListener('dblclick', function(e) {
         e.stopPropagation();
-        if (lbZoom === 100) {
-            lbZoom = 150;
-        } else {
-            lbZoom = 100;
-            lbPanX = 0;
-            lbPanY = 0;
-        }
-        applyZoomAndPan();
+        lbZoomReset();
     });
 
     // Rueda del ratón para zoom
-    viewport.addEventListener('wheel', function(e) {
-        e.preventDefault();
-        if (e.deltaY < 0) {
-            lbZoomIn();
-        } else {
-            lbZoomOut();
-        }
-    }, { passive: false });
+    var lbModal = document.getElementById('lightbox');
+    if (lbModal) {
+        lbModal.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                lbZoomIn();
+            } else {
+                lbZoomOut();
+            }
+        }, { passive: false });
+    }
 
     // Cerrar al hacer clic en el fondo oscuro
-    viewport.addEventListener('click', function(e) {
-        if (e.target === viewport || e.target.id === 'lbImgContainer') {
+    flatEl.addEventListener('click', function(e) {
+        if (e.target === flatEl || e.target.classList.contains('lb-flat-viewport')) {
             lbClose();
+        }
+    });
+
+    var lb3dEl = document.getElementById('lb3D');
+    if (lb3dEl) {
+        lb3dEl.addEventListener('click', function(e) {
+            if (e.target === lb3dEl) {
+                lbClose();
+            }
+        });
+    }
+
+    // Recalcular dimensiones 3D si la ventana cambia de tamaño
+    window.addEventListener('resize', function() {
+        var m = document.getElementById('lightbox');
+        if (m && m.style.display !== 'none' && lbZoom === 100) {
+            build3DCarousel();
+            rotate3D();
         }
     });
 })();
