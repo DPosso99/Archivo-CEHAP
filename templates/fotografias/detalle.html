@@ -419,7 +419,6 @@
     display: block;
     width: auto;
     height: auto;
-    max-height: 56vh;
     object-fit: contain;
     border-radius: 12px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.12);
@@ -472,8 +471,8 @@
 }
 
 #lbFlatImg {
-    max-width: 86vw;
-    max-height: 70vh;
+    width: auto;
+    height: auto;
     object-fit: contain;
     border-radius: 8px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
@@ -589,8 +588,31 @@ var lbStartY = 0;
 var lbStartPanX = 0;
 var lbStartPanY = 0;
 var lb3DAngle = 0;
+var currentRadius = 0;
 
 var ZOOM_LEVELS = [100, 125, 150, 175, 200, 250, 300];
+
+// Asigna a cada foto su escala 1:1 original sin alejamiento ni acercamiento artificial
+function setupItemNaturalSize(imgEl) {
+    function applySize() {
+        if (!imgEl.naturalWidth || !imgEl.naturalHeight) return;
+        var nw = imgEl.naturalWidth;
+        var nh = imgEl.naturalHeight;
+        // El 100% de la fotografía es su tamaño natural, acotado al marco de pantalla si es gigante
+        var maxW = Math.min(window.innerWidth * 0.88, nw);
+        var maxH = Math.min(window.innerHeight * 0.72, nh);
+        imgEl.style.maxWidth = maxW + 'px';
+        imgEl.style.maxHeight = maxH + 'px';
+        imgEl.style.width = 'auto';
+        imgEl.style.height = 'auto';
+    }
+
+    if (imgEl.complete && imgEl.naturalWidth > 0) {
+        applySize();
+    } else {
+        imgEl.addEventListener('load', applySize);
+    }
+}
 
 function openLightbox(idx) {
     if (!galleryData || galleryData.length === 0) return;
@@ -622,8 +644,8 @@ function build3DCarousel() {
 
     var degPer = n > 1 ? (360 / n) : 0;
     var isMobile = window.innerWidth < 768;
-    var imgW = isMobile ? Math.min(window.innerWidth * 0.55, 270) : Math.min(window.innerWidth * 0.28, 380);
-    var radius = n > 1 ? Math.max(340, (imgW / 2) / Math.tan((degPer / 2) * Math.PI / 180) * 1.35) : 0;
+    var baseW = isMobile ? Math.min(window.innerWidth * 0.55, 300) : Math.min(window.innerWidth * 0.32, 440);
+    currentRadius = n > 1 ? Math.max(380, Math.round((baseW / 2) / Math.tan((degPer / 2) * Math.PI / 180) * 1.25)) : 0;
 
     for (var i = 0; i < n; i++) {
         var d = galleryData[i];
@@ -633,14 +655,18 @@ function build3DCarousel() {
         img.alt = d.title || 'Foto';
         img.className = 'lb-3d-item' + (i === lbIdx ? ' active' : '');
         img.setAttribute('data-index', i);
-        img.style.maxWidth = imgW + 'px';
-        img.style.transform = 'translate(-50%, -50%) rotateY(' + angle + 'deg) translateZ(' + radius + 'px)';
+
+        // Posicionar en espacio 3D
+        img.style.transform = 'translate(-50%, -50%) rotateY(' + angle + 'deg) translateZ(' + currentRadius + 'px)';
+
+        // Asignar tamaño original sin forzar ancho o alto arbitrario
+        setupItemNaturalSize(img);
 
         img.addEventListener('click', function(e) {
             e.stopPropagation();
             var itemIdx = parseInt(this.getAttribute('data-index'));
             if (itemIdx === lbIdx) {
-                // Clic en la foto central: amplía al modo detalle con zoom
+                // Clic en la foto central: activa el modo de detalle con zoom
                 lbZoomIn();
             } else {
                 // Clic en una foto lateral: rota suavemente hacia ella
@@ -659,7 +685,10 @@ function rotate3D() {
     var degPer = n > 1 ? (360 / n) : 0;
     lb3DAngle = -degPer * lbIdx;
     var el = document.getElementById('lb3D');
-    if (el) el.style.transform = 'rotateY(' + lb3DAngle + 'deg)';
+    if (el) {
+        // Al aplicar translateZ(-currentRadius), la foto frontal queda exactamente en Z = 0 (escala 1.0 = 100% original)
+        el.style.transform = 'translateZ(' + (-currentRadius) + 'px) rotateY(' + lb3DAngle + 'deg)';
+    }
 
     // Actualizar estados visuales de los elementos en 3D
     var items = document.querySelectorAll('.lb-3d-item');
@@ -701,6 +730,7 @@ function updateLightboxView() {
     if (flatImg) {
         flatImg.src = d.src;
         flatImg.alt = d.title || 'Foto';
+        setupItemNaturalSize(flatImg);
     }
 
     applyZoom();
@@ -726,6 +756,7 @@ function applyZoom() {
         if (flatEl) {
             flatEl.style.display = 'flex';
             if (flatImg) {
+                setupItemNaturalSize(flatImg);
                 flatImg.style.transform = 'translate(' + lbPanX + 'px, ' + lbPanY + 'px) scale(' + (lbZoom / 100) + ')';
                 flatImg.style.cursor = lbIsDragging ? 'grabbing' : 'grab';
             }
