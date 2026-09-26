@@ -8,7 +8,7 @@
 <style>
     html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
     body > .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
-    nav.navbar { margin-bottom: 0 !important; position: static !important; }
+    nav.navbar { margin-bottom: 0 !important; position: relative !important; z-index: 1050 !important; }
     #map { width: 100%; height: calc(100vh - 68px); }
     .map-loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 999; background: rgba(255,255,255,.92); padding: 20px 32px; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,.12); font-size: 0.9rem; color: #555; display: flex; align-items: center; gap: 10px; }
     .map-loader .spinner { width: 20px; height: 20px; border: 2px solid #e2e8f0; border-top-color: #466b3f; border-radius: 50%; animation: spin .6s linear infinite; }

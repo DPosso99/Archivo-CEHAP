@@ -347,6 +347,42 @@ class FotografiaForm(forms.ModelForm):
                     "codigo",
                     f"El código o nombre de archivo '{codigo}' ya existe en el sistema. Por favor especifique uno diferente.",
                 )
+        # Si se ingresó mapa_url o coordenadas crudas y no se digitó latitud/longitud manual
+        mapa_url = (cleaned_data.get("mapa_url") or "").strip()
+        if mapa_url and (cleaned_data.get("latitud") is None or cleaned_data.get("longitud") is None):
+            raw_m = re.match(r"^\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*$", mapa_url)
+            from decimal import Decimal, ROUND_HALF_UP
+            if raw_m:
+                try:
+                    cleaned_data["latitud"] = Decimal(raw_m.group(1).strip()).quantize(Decimal("0.0000001"), rounding=ROUND_HALF_UP)
+                    cleaned_data["longitud"] = Decimal(raw_m.group(2).strip()).quantize(Decimal("0.0000001"), rounding=ROUND_HALF_UP)
+                except Exception:
+                    pass
+            else:
+                try:
+                    headers = {
+                        "User-Agent": (
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) "
+                            "Chrome/124.0.0.0 Safari/537.36"
+                        )
+                    }
+                    resp = requests.get(mapa_url, headers=headers, timeout=10, allow_redirects=True)
+                    final_url = resp.url
+                    m = re.search(r"@(-?\d+\.?\d*),(-?\d+\.?\d*)", final_url)
+                    if not m:
+                        m = re.search(r"!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)", final_url)
+                    if not m:
+                        m = re.search(r"/search/(-?\d+\.?\d*),\+?(-?\d+\.?\d*)", final_url)
+                    if not m:
+                        m = re.search(r"[?&]q=(-?\d+\.?\d*),\+?(-?\d+\.?\d*)", final_url)
+                    if not m:
+                        m = re.search(r"/(-?\d+\.?\d*),\+?(-?\d+\.?\d*)(?:/|$|\?)", final_url)
+                    if m:
+                        cleaned_data["latitud"] = Decimal(m.group(1).strip()).quantize(Decimal("0.0000001"), rounding=ROUND_HALF_UP)
+                        cleaned_data["longitud"] = Decimal(m.group(2).strip()).quantize(Decimal("0.0000001"), rounding=ROUND_HALF_UP)
+                except Exception:
+                    pass
 
         return cleaned_data
 
@@ -414,9 +450,13 @@ class FotografiaForm(forms.ModelForm):
             instance.mapa_url = mapa_url
             # First check if user pasted raw coordinates like "6.2511, -75.5647"
             raw_m = re.match(r"^\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*$", mapa_url)
+            from decimal import Decimal, ROUND_HALF_UP
             if raw_m:
-                instance.latitud = float(raw_m.group(1))
-                instance.longitud = float(raw_m.group(2))
+                try:
+                    instance.latitud = Decimal(raw_m.group(1).strip()).quantize(Decimal("0.0000001"), rounding=ROUND_HALF_UP)
+                    instance.longitud = Decimal(raw_m.group(2).strip()).quantize(Decimal("0.0000001"), rounding=ROUND_HALF_UP)
+                except Exception:
+                    pass
             else:
                 try:
                     headers = {
@@ -441,8 +481,8 @@ class FotografiaForm(forms.ModelForm):
                             r"/(-?\d+\.?\d*),\+?(-?\d+\.?\d*)(?:/|$|\?)", final_url
                         )
                     if m:
-                        instance.latitud = float(m.group(1))
-                        instance.longitud = float(m.group(2))
+                        instance.latitud = Decimal(m.group(1).strip()).quantize(Decimal("0.0000001"), rounding=ROUND_HALF_UP)
+                        instance.longitud = Decimal(m.group(2).strip()).quantize(Decimal("0.0000001"), rounding=ROUND_HALF_UP)
                 except Exception:
                     pass
 
