@@ -27,13 +27,14 @@
             --text: #1e293b;
             --text-muted: #565a5c;
             --border: rgba(0,0,0,.06);
-            --accent: #a61c31;
-            --accent-hover: #76232f;
+            --accent: #466b3f;
+            --accent-hover: #385632;
+            --accent-bright: #94b43b;
         }
         body {
             font-family: 'Lato', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             color: var(--text);
-            background: radial-gradient(ellipse 80% 60% at 50% -10%, #e8f0fe 0%, #f8fafc 50%, #f1f5f9 100%);
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, #f2f7ed 0%, #f8fafc 50%, #f1f5f9 100%);
             background-attachment: fixed;
             min-height: 100vh;
             position: relative;
@@ -246,7 +247,7 @@
         .footer-logo { max-height: 42px; opacity: .85; }
 
         /* Interactive states */
-        .btn-ghost:hover { color: var(--unal-rojo-alterno) !important; background: #fdf2f4 !important; border-color: #f7d2d7 !important; }
+        .btn-ghost:hover { color: var(--accent) !important; background: #f0f7ec !important; border-color: #d2e4cb !important; }
         a:hover i.bi-trash, button:hover i.bi-trash { color: var(--unal-rojo-alterno) !important; }
         .status-active { background:#f0f7ec;color:#466b3f;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:500; }
         .status-revision { background:#fef9c3;color:#854d0e;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:500; }
