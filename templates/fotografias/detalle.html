@@ -42,7 +42,7 @@
     <div class="gallery-main">
         <div class="gallery-slides" id="gallerySlides">
             {% for f in album_fotos %}
-            <div class="gallery-slide{% if f.pk == foto.pk %} active{% endif %}" data-index="{{ forloop.counter0 }}">
+            <div class="gallery-slide{% if forloop.counter0 == current_index %} active{% endif %}" data-index="{{ forloop.counter0 }}">
                 {% if f.archivo_imagen %}
                 <img src="{{ f.imagen_web_url }}" alt="{{ f.titulo }}" class="gallery-img" onclick="openLightbox({{ forloop.counter0 }})">
                 {% else %}
@@ -59,7 +59,7 @@
         <button class="gallery-arrow gallery-prev" id="galleryPrev" aria-label="Anterior"><i class="bi bi-chevron-left"></i></button>
         <button class="gallery-arrow gallery-next" id="galleryNext" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></button>
 
-        <div class="gallery-counter" id="galleryCounter">{% for f in album_fotos %}{% if f.pk == foto.pk %}{{ forloop.counter }}{% endif %}{% endfor %} / {{ album_fotos|length }}</div>
+        <div class="gallery-counter" id="galleryCounter">{{ current_index|add:1 }} / {{ album_fotos|length }}</div>
     </div>
 
     {% if album_fotos %}
@@ -67,7 +67,7 @@
         <button class="fs-arrow fs-prev" onclick="fsScroll(-1)" aria-label="Anterior"><i class="bi bi-chevron-left"></i></button>
         <div class="fs-track" id="fsTrack">
             {% for f in album_fotos %}
-            <div class="fs-frame{% if f.pk == foto.pk %} active{% endif %}" data-index="{{ forloop.counter0 }}" onclick="goToSlide({{ forloop.counter0 }})">
+            <div class="fs-frame{% if forloop.counter0 == current_index %} active{% endif %}" data-index="{{ forloop.counter0 }}" onclick="goToSlide({{ forloop.counter0 }})">
                 {% if f.archivo_imagen %}<img src="{{ f.imagen_web_url }}" alt="{{ f.titulo }}" loading="lazy">{% else %}<div class="fs-frame-ph"><i class="bi bi-image"></i></div>{% endif %}
                 <span class="fs-num">{{ forloop.counter }}</span>
             </div>
@@ -564,19 +564,17 @@
 <script>
 var galleryData = [
     {% for f in album_fotos %}
-    {% if f.archivo_imagen %}
     {
-        src: "{{ f.imagen_web_url }}",
+        src: "{% if f.archivo_imagen %}{{ f.imagen_web_url }}{% endif %}",
         title: "{{ f.titulo|escapejs }}",
         author: "{{ f.autor|default:""|escapejs }}",
         year: "{{ f.fecha_produccion|default:""|escapejs }}",
         url: "{% url 'fotografia_detalle' f.pk %}"
     },
-    {% endif %}
     {% endfor %}
 ];
 
-var lbIdx = 0;
+var lbIdx = {{ current_index|default:0 }};
 var lbZoom = 100;
 var lbPanX = 0;
 var lbPanY = 0;
@@ -598,7 +596,6 @@ function setupItemNaturalSize(imgEl) {
         if (!imgEl.naturalWidth || !imgEl.naturalHeight) return;
         var nw = imgEl.naturalWidth;
         var nh = imgEl.naturalHeight;
-        // El 100% de la fotografía es su tamaño natural, acotado al marco de pantalla si es gigante
         var maxW = Math.min(window.innerWidth * 0.88, nw);
         var maxH = Math.min(window.innerHeight * 0.72, nh);
         imgEl.style.maxWidth = maxW + 'px';
@@ -616,7 +613,17 @@ function setupItemNaturalSize(imgEl) {
 
 function openLightbox(idx) {
     if (!galleryData || galleryData.length === 0) return;
-    lbIdx = (idx >= 0 && idx < galleryData.length) ? idx : 0;
+    if (typeof idx === 'number') {
+        lbIdx = idx;
+    } else if (typeof idx === 'string') {
+        lbIdx = parseInt(idx, 10);
+    } else {
+        lbIdx = (typeof currentSlide === 'number') ? currentSlide : {{ current_index|default:0 }};
+    }
+    if (isNaN(lbIdx) || lbIdx < 0 || lbIdx >= galleryData.length) {
+        lbIdx = (typeof currentSlide === 'number' && currentSlide >= 0 && currentSlide < galleryData.length) ? currentSlide : 0;
+    }
+
     lbZoom = 100;
     lbPanX = 0;
     lbPanY = 0;
@@ -632,6 +639,19 @@ function openLightbox(idx) {
     if (ppBtn) ppBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
 
     build3DCarousel();
+
+    var n = galleryData.length;
+    var degPer = n > 1 ? (360 / n) : 0;
+    lb3DAngle = -degPer * lbIdx;
+
+    var el = document.getElementById('lb3D');
+    if (el) {
+        el.style.transition = 'none';
+        el.style.transform = 'translateZ(' + (-currentRadius) + 'px) rotateY(' + lb3DAngle + 'deg)';
+        void el.offsetHeight;
+        el.style.transition = '';
+    }
+
     updateLightboxView();
 }
 
@@ -659,17 +679,20 @@ function build3DCarousel() {
         // Posicionar en espacio 3D
         img.style.transform = 'translate(-50%, -50%) rotateY(' + angle + 'deg) translateZ(' + currentRadius + 'px)';
 
-        // Asignar tamaño original sin forzar ancho o alto arbitrario
         setupItemNaturalSize(img);
 
         img.addEventListener('click', function(e) {
             e.stopPropagation();
-            var itemIdx = parseInt(this.getAttribute('data-index'));
+            var itemIdx = parseInt(this.getAttribute('data-index'), 10);
             if (itemIdx === lbIdx) {
-                // Clic en la foto central: activa el modo de detalle con zoom
                 lbZoomIn();
             } else {
-                // Clic en una foto lateral: rota suavemente hacia ella
+                var total = galleryData.length;
+                var deg = total > 1 ? (360 / total) : 0;
+                var step = (itemIdx - lbIdx);
+                if (step > total / 2) step -= total;
+                if (step < -total / 2) step += total;
+                lb3DAngle -= step * deg;
                 lbIdx = itemIdx;
                 updateLightboxView();
             }
@@ -682,21 +705,21 @@ function build3DCarousel() {
 function rotate3D() {
     var n = galleryData.length;
     if (n === 0) return;
-    var degPer = n > 1 ? (360 / n) : 0;
-    lb3DAngle = -degPer * lbIdx;
     var el = document.getElementById('lb3D');
     if (el) {
-        // Al aplicar translateZ(-currentRadius), la foto frontal queda exactamente en Z = 0 (escala 1.0 = 100% original)
         el.style.transform = 'translateZ(' + (-currentRadius) + 'px) rotateY(' + lb3DAngle + 'deg)';
     }
 
-    // Actualizar estados visuales de los elementos en 3D
     var items = document.querySelectorAll('.lb-3d-item');
     items.forEach(function(item, idx) {
         if (idx === lbIdx) {
             item.classList.add('active');
+            item.style.pointerEvents = 'auto';
         } else {
             item.classList.remove('active');
+            var diff = Math.abs((idx - lbIdx + n) % n);
+            if (diff > n / 2) diff = n - diff;
+            item.style.pointerEvents = diff <= 1 ? 'auto' : 'none';
         }
     });
 }
@@ -725,7 +748,6 @@ function updateLightboxView() {
         capMeta.textContent = metaParts.join(' \u00B7 ');
     }
 
-    // Sincronizar imagen del modo zoom plano
     var flatImg = document.getElementById('lbFlatImg');
     if (flatImg) {
         flatImg.src = d.src;
@@ -767,14 +789,20 @@ function applyZoom() {
 function lbNext(e) {
     if (e && e.stopPropagation) e.stopPropagation();
     if (!galleryData || galleryData.length <= 1) return;
-    lbIdx = (lbIdx + 1) % galleryData.length;
+    var n = galleryData.length;
+    var degPer = 360 / n;
+    lb3DAngle -= degPer;
+    lbIdx = (lbIdx + 1) % n;
     updateLightboxView();
 }
 
 function lbPrev(e) {
     if (e && e.stopPropagation) e.stopPropagation();
     if (!galleryData || galleryData.length <= 1) return;
-    lbIdx = (lbIdx - 1 + galleryData.length) % galleryData.length;
+    var n = galleryData.length;
+    var degPer = 360 / n;
+    lb3DAngle += degPer;
+    lbIdx = (lbIdx - 1 + n) % n;
     updateLightboxView();
 }
 
@@ -942,10 +970,12 @@ document.addEventListener('keydown', function(e) {
         lbTogglePlay();
     }
 });
-var currentSlide = {% for f in album_fotos %}{% if f.pk == foto.pk %}{{ forloop.counter0 }}{% endif %}{% endfor %};
+var currentSlide = {{ current_index|default:0 }};
 var totalSlides = {{ album_fotos|length }};
 var galleryUrls = [
-    {% for f in album_fotos %}{% if f.archivo_imagen %}"{% url 'fotografia_detalle' f.pk %}",{% endif %}{% endfor %}
+    {% for f in album_fotos %}
+    "{% url 'fotografia_detalle' f.pk %}",
+    {% endfor %}
 ];
 
 function goToSlide(idx) {
@@ -969,9 +999,12 @@ function fsScroll(dir) {
     if (nextBtn) nextBtn.addEventListener('click', function() { nextSlide(); });
     if (prevBtn) prevBtn.addEventListener('click', function() { prevSlide(); });
 
-    var thumbs = document.querySelectorAll('.gallery-thumb');
-    thumbs.forEach(function(t) {
-        t.addEventListener('click', function() { goToSlide(parseInt(this.dataset.index)); });
+    var frames = document.querySelectorAll('.fs-frame');
+    frames.forEach(function(f) {
+        f.addEventListener('click', function() {
+            var idx = parseInt(this.getAttribute('data-index'), 10);
+            if (!isNaN(idx)) goToSlide(idx);
+        });
     });
 })();
 </script>

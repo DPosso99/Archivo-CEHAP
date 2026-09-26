@@ -125,13 +125,22 @@ class FotografiaDetailView(DetailView):
         foto.vistas += 1
         foto.save(update_fields=["vistas"])
 
-        # Get all photos in the same album for the carousel (all estados, auth user sees everything)
+        # Get all photos in the same album for the carousel
         if foto.album:
-            context["album_fotos"] = Fotografia.objects.filter(
-                album=foto.album
-            ).order_by("fecha_registro")
+            album_qs = Fotografia.objects.filter(album=foto.album).order_by(
+                "fecha_registro", "pk"
+            )
+            if not self.request.user.is_authenticated:
+                album_qs = album_qs.exclude(estado="Archivado")
+            album_fotos = list(album_qs)
+            context["album_fotos"] = album_fotos
+            try:
+                context["current_index"] = [f.pk for f in album_fotos].index(foto.pk)
+            except ValueError:
+                context["current_index"] = 0
         else:
-            context["album_fotos"] = []
+            context["album_fotos"] = [foto]
+            context["current_index"] = 0
 
         # Get comments
         context["comentarios"] = foto.comentarios.all()
