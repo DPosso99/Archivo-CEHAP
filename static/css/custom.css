@@ -1,3 +1,20 @@
+:root {
+    /* Paleta Institucional Universidad Nacional de Colombia */
+    --unal-verde: #94b43b;          /* Pantone 376 C (Color Principal) */
+    --unal-rojo-alterno: #a61c31;   /* Pantone 187 C (Color Alterno Oficial) */
+    --unal-verde-oscuro: #466b3f;   /* Pantone 7743 C (Complementario 1) */
+    --unal-vinotinto: #76232f;      /* Pantone 188 C (Complementario 2) */
+    --unal-gris-oscuro: #565a5c;    /* Pantone 425 C (Complementario 3) */
+    --unal-gris-claro: #b1b2b0;     /* Pantone 421 C (Complementario 4) */
+
+    --bs-primary: var(--unal-rojo-alterno);
+    --bs-primary-rgb: 166, 28, 49;
+    --bs-danger: var(--unal-rojo-alterno);
+    --bs-danger-rgb: 166, 28, 49;
+    --bs-success: var(--unal-verde-oscuro);
+    --bs-success-rgb: 70, 107, 63;
+}
+
 /* Typography */
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -24,13 +41,13 @@ body {
     transition: all 0.2s;
 }
 .modern-navbar .nav-link:hover, .modern-navbar .nav-link.active {
-    color: #2563eb;
-    background-color: #eff6ff;
+    color: var(--unal-rojo-alterno);
+    background-color: #fdf2f4;
 }
 .hover-danger:hover {
-    color: #ef4444 !important;
-    background-color: #fef2f2 !important;
-    border-color: #fecaca !important;
+    color: var(--unal-rojo-alterno) !important;
+    background-color: #fdf2f4 !important;
+    border-color: #f7d2d7 !important;
 }
 
 /* Cards */
@@ -52,8 +69,8 @@ body {
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 .form-control-modern:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+    border-color: var(--unal-rojo-alterno);
+    box-shadow: 0 0 0 0.25rem rgba(166, 28, 49, 0.2);
 }
 
 /* Tables */
@@ -87,10 +104,10 @@ body {
     padding: 0.35em 0.65em;
     border-radius: 9999px;
 }
-.badge-subtle-success { background-color: #dcfce7; color: #166534; }
+.badge-subtle-success { background-color: #f0f7ec; color: #466b3f; }
 .badge-subtle-warning { background-color: #fef9c3; color: #854d0e; }
-.badge-subtle-secondary { background-color: #f1f5f9; color: #475569; }
-.badge-subtle-primary { background-color: #dbeafe; color: #1e40af; }
+.badge-subtle-secondary { background-color: #f1f5f9; color: #565a5c; }
+.badge-subtle-primary { background-color: #fdf2f4; color: #a61c31; }
 
 /* Buttons */
 .btn-modern {
@@ -103,7 +120,23 @@ body {
     gap: 0.5rem;
     transition: all 0.2s;
 }
-.btn-primary-modern { background-color: #2563eb; border-color: #2563eb; color: white; }
-.btn-primary-modern:hover { background-color: #1d4ed8; border-color: #1e40af; }
+.btn-primary-modern { background-color: var(--unal-rojo-alterno); border-color: var(--unal-rojo-alterno); color: white; }
+.btn-primary-modern:hover { background-color: var(--unal-vinotinto); border-color: var(--unal-vinotinto); color: white; }
+
+/* Global Bootstrap overrides for UNAL palette */
+.btn-primary {
+    background-color: var(--unal-rojo-alterno) !important;
+    border-color: var(--unal-rojo-alterno) !important;
+    color: #fff !important;
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    background-color: var(--unal-vinotinto) !important;
+    border-color: var(--unal-vinotinto) !important;
+    color: #fff !important;
+}
+
+.text-primary {
+    color: var(--unal-rojo-alterno) !important;
+}
 
 h1, h2, h3, h4, h5, h6 { color: #0f172a; font-weight: 700; letter-spacing: -0.025em; }

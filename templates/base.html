@@ -14,12 +14,21 @@
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <style>
         :root {
+            /* Paleta Institucional Universidad Nacional de Colombia */
+            --unal-verde: #94b43b;          /* Pantone 376 C (Color Principal) */
+            --unal-rojo-alterno: #a61c31;   /* Pantone 187 C (Color Alterno Oficial) */
+            --unal-verde-oscuro: #466b3f;   /* Pantone 7743 C (Complementario 1) */
+            --unal-vinotinto: #76232f;      /* Pantone 188 C (Complementario 2) */
+            --unal-gris-oscuro: #565a5c;    /* Pantone 425 C (Complementario 3) */
+            --unal-gris-claro: #b1b2b0;     /* Pantone 421 C (Complementario 4) */
+
             --bg: #fafafa;
             --surface: rgba(255,255,255,.78);
             --text: #1e293b;
-            --text-muted: #64748b;
+            --text-muted: #565a5c;
             --border: rgba(0,0,0,.06);
-            --accent: #2563eb;
+            --accent: #a61c31;
+            --accent-hover: #76232f;
         }
         body {
             font-family: 'Lato', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -194,7 +203,7 @@
             transition: all .2s;
         }
         .btn-accent:hover {
-            background: #1d4ed8;
+            background: var(--accent-hover);
             color: #fff;
         }
         .btn-accent-outline {
@@ -237,11 +246,11 @@
         .footer-logo { max-height: 42px; opacity: .85; }
 
         /* Interactive states */
-        .btn-ghost:hover { color: #ef4444 !important; background: #fef2f2 !important; border-color: #fecaca !important; }
-        a:hover i.bi-trash, button:hover i.bi-trash { color: #dc2626 !important; }
-        .status-active { background:#dcfce7;color:#166534;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:500; }
+        .btn-ghost:hover { color: var(--unal-rojo-alterno) !important; background: #fdf2f4 !important; border-color: #f7d2d7 !important; }
+        a:hover i.bi-trash, button:hover i.bi-trash { color: var(--unal-rojo-alterno) !important; }
+        .status-active { background:#f0f7ec;color:#466b3f;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:500; }
         .status-revision { background:#fef9c3;color:#854d0e;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:500; }
-        .status-archived { background:#f1f5f9;color:#475569;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:500; }
+        .status-archived { background:#f1f5f9;color:#565a5c;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:500; }
     </style>
     {% block extra_css %}{% endblock %}
 </head>

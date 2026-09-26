@@ -11,7 +11,7 @@
 
 <style>
 .hero-header { padding: 1rem 0 .5rem; }
-.hero-line { width: 48px; height: 3px; background: #2563eb; border-radius: 2px; margin: 0 auto 16px; }
+.hero-line { width: 48px; height: 3px; background: #a61c31; border-radius: 2px; margin: 0 auto 16px; }
 .hero-title { font-family: 'Caudex', 'Georgia', serif; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; color: #0f172a; line-height: 1.25; letter-spacing: -.01em; margin-bottom: 8px; }
 .hero-subtitle { font-weight: 400; color: #475569; font-size: 85%; }
 </style>
@@ -58,7 +58,7 @@
                                 <a href="{% url 'album_editar' album.pk %}" class="bg-white bg-opacity-90 rounded d-flex align-items-center justify-content-center" style="width:22px;height:22px;color:#64748b;text-decoration:none;font-size:.65rem;box-shadow:0 1px 3px rgba(0,0,0,.1);" title="Editar álbum"><i class="bi bi-pencil-square"></i></a>
                                 <form method="post" action="{% url 'album_eliminar' album.pk %}" onsubmit="return confirm('¿Eliminar {{ album.nombre }}?')">
                                     {% csrf_token %}
-                                    <button type="submit" class="bg-white bg-opacity-90 rounded d-flex align-items-center justify-content-center border-0" style="width:22px;height:22px;color:#ef4444;cursor:pointer;font-size:.65rem;box-shadow:0 1px 3px rgba(0,0,0,.1);" title="Eliminar"><i class="bi bi-trash"></i></button>
+                                    <button type="submit" class="bg-white bg-opacity-90 rounded d-flex align-items-center justify-content-center border-0" style="width:22px;height:22px;color:#a61c31;cursor:pointer;font-size:.65rem;box-shadow:0 1px 3px rgba(0,0,0,.1);" title="Eliminar"><i class="bi bi-trash"></i></button>
                                 </form>
                             </div>
                             {% endif %}
@@ -120,7 +120,7 @@
                                         <a href="{% url 'album_editar' album.pk %}" class="bg-white bg-opacity-90 rounded d-flex align-items-center justify-content-center" style="width:20px;height:20px;color:#64748b;text-decoration:none;font-size:.6rem;box-shadow:0 1px 3px rgba(0,0,0,.08);" title="Editar"><i class="bi bi-pencil-square"></i></a>
                                         <form method="post" action="{% url 'album_eliminar' album.pk %}" onsubmit="return confirm('¿Eliminar {{ album.nombre }}?')">
                                             {% csrf_token %}
-                                            <button type="submit" class="bg-white bg-opacity-90 rounded d-flex align-items-center justify-content-center border-0" style="width:20px;height:20px;color:#ef4444;cursor:pointer;font-size:.6rem;box-shadow:0 1px 3px rgba(0,0,0,.08);" title="Eliminar"><i class="bi bi-trash"></i></button>
+                                            <button type="submit" class="bg-white bg-opacity-90 rounded d-flex align-items-center justify-content-center border-0" style="width:20px;height:20px;color:#a61c31;cursor:pointer;font-size:.6rem;box-shadow:0 1px 3px rgba(0,0,0,.08);" title="Eliminar"><i class="bi bi-trash"></i></button>
                                         </form>
                                     </div>
                                     {% endif %}

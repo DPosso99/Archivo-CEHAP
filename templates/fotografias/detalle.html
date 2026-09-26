@@ -31,7 +31,7 @@
         <a href="{% url 'fotografia_lista' %}" class="btn-ghost text-decoration-none">Volver</a>
         {% if foto.archivo_imagen %}<a href="{{ foto.imagen_web_url }}" download class="btn-ghost text-decoration-none" title="Descargar imagen para consulta"><i class="bi bi-download me-1"></i>Descargar</a>{% endif %}
         {% if user.is_authenticated and foto.archivo_imagen %}
-        <a href="{{ foto.archivo_imagen.url }}" download class="btn-accent text-decoration-none" style="background:#059669;border-color:#059669;" title="Descargar archivo original de alta resolución"><i class="bi bi-shield-check me-1"></i>Descargar foto original</a>
+        <a href="{{ foto.archivo_imagen.url }}" download class="btn-accent text-decoration-none" style="background:#466b3f;border-color:#466b3f;" title="Descargar archivo original de alta resolución"><i class="bi bi-shield-check me-1"></i>Descargar foto original</a>
         {% endif %}
         {% if user.is_authenticated %}<a href="{% url 'fotografia_editar' foto.pk %}" class="btn-accent text-decoration-none">Editar</a>{% endif %}
     </div>
@@ -286,11 +286,11 @@
 .fs-track::-webkit-scrollbar{display:none}
 .fs-frame{flex-shrink:0;width:145px;height:95px;overflow:hidden;cursor:pointer;border:3px solid #333;transition:all .25s ease;position:relative;opacity:.45;background:#1a1a1a;margin:0 8px}
 .fs-frame:hover{opacity:.75;border-color:#666;transform:translateY(-2px)}
-.fs-frame.active{opacity:1;border-color:#60a5fa;box-shadow:0 0 0 2px rgba(96,165,250,.2),0 4px 20px rgba(0,0,0,.4)}
+.fs-frame.active{opacity:1;border-color:#94b43b;box-shadow:0 0 0 2px rgba(148,180,59,.35),0 4px 20px rgba(0,0,0,.4)}
 .fs-frame img{width:100%;height:100%;object-fit:cover;display:block}
 .fs-frame-ph{width:100%;height:100%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;color:#444;font-size:1.5rem}
 .fs-num{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.8);color:#fff;font-size:.6rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px}
-.fs-frame.active .fs-num{background:#2563eb}
+.fs-frame.active .fs-num{background:#a61c31;color:#fff}
 
 /* --- LIGHTBOX MODAL --- */
 .lb-modal {
@@ -1060,7 +1060,7 @@ tooltipTriggerList.forEach(function(el) { new bootstrap.Tooltip(el); });
     L.marker([lat, lng], {
         icon: L.divIcon({
             className: 'map-marker-icon',
-            html: '<svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#dc2626" stroke="#fff" stroke-width="2.5"/><circle cx="16" cy="16" r="4" fill="#fff"/></svg>',
+            html: '<svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#a61c31" stroke="#fff" stroke-width="2.5"/><circle cx="16" cy="16" r="4" fill="#fff"/></svg>',
             iconSize: [32, 32],
             iconAnchor: [16, 16],
             popupAnchor: [0, -16]
