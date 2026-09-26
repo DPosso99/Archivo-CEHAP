@@ -7,15 +7,15 @@
 <div class="row justify-content-center mt-5">
     <div class="col-md-6 col-lg-4">
         <div class="card shadow">
-            <div class="card-header bg-dark text-white text-center py-3">
+            <div class="card-header text-white text-center py-3" style="background:#466b3f;">
                 <h4 class="text-white mb-0">Iniciar Sesión</h4>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form method="post">
                     {% csrf_token %}
                     {{ form|crispy }}
                     <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+                        <button type="submit" class="btn btn-accent w-100 py-2 fs-6">Ingresar</button>
                     </div>
                 </form>
             </div>

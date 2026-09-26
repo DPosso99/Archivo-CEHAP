@@ -255,6 +255,41 @@ a.btn-primary:hover,
     color: #fff !important;
 }
 
+/* Inputs submit y botones principales genéricos */
+input[type="submit"]:not(.btn-danger):not(.btn-secondary):not(.btn-ghost) {
+    background-color: #466b3f !important;
+    border-color: #466b3f !important;
+    color: #ffffff !important;
+}
+
+/* Enfoque en formularios y campos seleccionados */
+.form-control:focus,
+.form-select:focus {
+    border-color: #466b3f !important;
+    box-shadow: 0 0 0 0.25rem rgba(70, 107, 63, 0.25) !important;
+}
+
+.form-check-input:checked {
+    background-color: #466b3f !important;
+    border-color: #466b3f !important;
+}
+
+.form-check-input:focus {
+    border-color: #466b3f !important;
+    box-shadow: 0 0 0 0.25rem rgba(70, 107, 63, 0.25) !important;
+}
+
+/* Acordeones de colecciones */
+.accordion-button:not(.collapsed) {
+    color: #385632 !important;
+    background-color: #f0f7ec !important;
+    box-shadow: inset 0 -1px 0 rgba(70, 107, 63, 0.15) !important;
+}
+.accordion-button:focus {
+    border-color: #94b43b !important;
+    box-shadow: 0 0 0 0.25rem rgba(70, 107, 63, 0.2) !important;
+}
+
 h1, h2, h3, h4, h5, h6 { color: #0f172a; font-weight: 700; letter-spacing: -0.025em; }
 
 .text-white h1, .text-white h2, .text-white h3, .text-white h4, .text-white h5, .text-white h6,

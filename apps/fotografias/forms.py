@@ -231,7 +231,7 @@ class FotografiaForm(forms.ModelForm):
             Submit(
                 "submit",
                 "Guardar Ficha",
-                css_class="btn btn-primary mt-4 w-100 fw-semibold",
+                css_class="btn btn-accent mt-4 w-100 fw-semibold py-2",
             ),
         )
 

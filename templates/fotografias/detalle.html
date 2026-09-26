@@ -103,7 +103,7 @@
                 <p class="mb-2"><strong>Palabras clave:</strong></p>
                 <div class="d-flex flex-wrap gap-2">
                     {% for kw in keywords %}
-                        <a href="{% url 'fotografia_lista' %}?q={{ kw|urlencode }}" class="badge bg-light text-primary border text-decoration-none py-2 px-3">{{ kw }}</a>
+                        <a href="{% url 'fotografia_lista' %}?q={{ kw|urlencode }}" class="badge bg-light border text-decoration-none py-2 px-3" style="color:var(--accent);border-color:#d2e4cb !important;">{{ kw }}</a>
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -146,7 +146,7 @@
                     {% csrf_token %}
                     <div class="mb-2"><input type="text" class="form-control border-0 shadow-sm" name="nombre_usuario" placeholder="Tu nombre (opcional)"></div>
                     <div class="mb-3"><textarea class="form-control border-0 shadow-sm" name="comentario" rows="3" placeholder="Escribe un comentario..." required></textarea></div>
-                    <div class="text-end"><button type="submit" class="btn btn-primary"><i class="bi bi-send me-1"></i>Publicar</button></div>
+                    <div class="text-end"><button type="submit" class="btn btn-accent"><i class="bi bi-send me-1"></i>Publicar</button></div>
                 </form>
             </div>
         </div>
@@ -156,7 +156,7 @@
         <div class="card mb-4 shadow-sm border-0">
             <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
                 <strong><i class="bi bi-star-fill text-warning me-2"></i>Calificación</strong>
-                <span class="badge bg-primary rounded-pill">{{ promedio_calificacion }} / 5.0 ({{ total_calificaciones }})</span>
+                <span class="badge rounded-pill" style="background:#466b3f;color:#fff;">{{ promedio_calificacion }} / 5.0 ({{ total_calificaciones }})</span>
             </div>
             <div class="card-body text-center">
                 <p class="small text-muted mb-2">Tu calificación:</p>

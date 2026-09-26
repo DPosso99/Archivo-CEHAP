@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=20260926_unal">
     <style>
         :root, :root[data-bs-theme="light"], body {
             /* Paleta Institucional Universidad Nacional de Colombia */
@@ -42,6 +42,133 @@
             --accent: #466b3f;
             --accent-hover: #385632;
             --accent-bright: #94b43b;
+        }
+
+        /* ========================================================
+           ERRADICACION TOTAL DEL AZUL BOOTSTRAP (#0d6efd)
+           Inyectado directamente para garantizar aplicación inmediata
+           ======================================================== */
+        .btn-primary,
+        button.btn-primary,
+        input[type="submit"].btn-primary,
+        a.btn-primary,
+        .btn-primary:focus,
+        .btn-primary:active,
+        .btn-primary:hover,
+        .show > .btn-primary.dropdown-toggle {
+            --bs-btn-color: #ffffff !important;
+            --bs-btn-bg: #466b3f !important;
+            --bs-btn-border-color: #466b3f !important;
+            --bs-btn-hover-color: #ffffff !important;
+            --bs-btn-hover-bg: #385632 !important;
+            --bs-btn-hover-border-color: #385632 !important;
+            --bs-btn-focus-shadow-rgb: 70, 107, 63 !important;
+            --bs-btn-active-color: #ffffff !important;
+            --bs-btn-active-bg: #385632 !important;
+            --bs-btn-active-border-color: #385632 !important;
+            --bs-btn-disabled-color: #ffffff !important;
+            --bs-btn-disabled-bg: #466b3f !important;
+            --bs-btn-disabled-border-color: #466b3f !important;
+            background-color: #466b3f !important;
+            border-color: #466b3f !important;
+            color: #ffffff !important;
+        }
+
+        .btn-primary:hover,
+        button.btn-primary:hover,
+        input[type="submit"].btn-primary:hover,
+        a.btn-primary:hover {
+            background-color: #385632 !important;
+            border-color: #385632 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-outline-primary {
+            --bs-btn-color: #466b3f !important;
+            --bs-btn-border-color: #466b3f !important;
+            --bs-btn-hover-color: #ffffff !important;
+            --bs-btn-hover-bg: #466b3f !important;
+            --bs-btn-hover-border-color: #466b3f !important;
+            --bs-btn-active-bg: #385632 !important;
+            --bs-btn-active-border-color: #385632 !important;
+            color: #466b3f !important;
+            border-color: #466b3f !important;
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:active,
+        .btn-outline-primary:focus {
+            background-color: #466b3f !important;
+            border-color: #466b3f !important;
+            color: #ffffff !important;
+        }
+
+        /* Inputs submit y botones principales genéricos */
+        input[type="submit"]:not(.btn-danger):not(.btn-secondary):not(.btn-ghost) {
+            background-color: #466b3f !important;
+            border-color: #466b3f !important;
+            color: #ffffff !important;
+        }
+
+        /* Enfoque en formularios y campos seleccionados */
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #466b3f !important;
+            box-shadow: 0 0 0 0.25rem rgba(70, 107, 63, 0.25) !important;
+        }
+
+        .form-check-input:checked {
+            background-color: #466b3f !important;
+            border-color: #466b3f !important;
+        }
+
+        .form-check-input:focus {
+            border-color: #466b3f !important;
+            box-shadow: 0 0 0 0.25rem rgba(70, 107, 63, 0.25) !important;
+        }
+
+        /* Acordeones de colecciones */
+        .accordion-button:not(.collapsed) {
+            color: #385632 !important;
+            background-color: #f0f7ec !important;
+            box-shadow: inset 0 -1px 0 rgba(70, 107, 63, 0.15) !important;
+        }
+        .accordion-button:focus {
+            border-color: #94b43b !important;
+            box-shadow: 0 0 0 0.25rem rgba(70, 107, 63, 0.2) !important;
+        }
+
+        /* Badges, texto y fondos primarios */
+        .bg-primary,
+        .badge.bg-primary,
+        .text-bg-primary {
+            background-color: #466b3f !important;
+            color: #ffffff !important;
+        }
+
+        .text-primary {
+            color: #466b3f !important;
+        }
+
+        .border-primary {
+            border-color: #466b3f !important;
+        }
+
+        /* Paginación */
+        .page-item.active .page-link {
+            background-color: #466b3f !important;
+            border-color: #466b3f !important;
+            color: #ffffff !important;
+        }
+        .page-link {
+            color: #466b3f !important;
+        }
+        .page-link:hover {
+            color: #385632 !important;
+            background-color: #f0f7ec !important;
+        }
+        .page-link:focus {
+            box-shadow: 0 0 0 0.25rem rgba(70, 107, 63, 0.25) !important;
         }
         body {
             font-family: 'Lato', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;

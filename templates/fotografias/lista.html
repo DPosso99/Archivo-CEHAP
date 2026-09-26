@@ -21,7 +21,7 @@
         {% if album_actual %}
         <div class="d-flex align-items-center justify-content-between mt-2 px-2 text-muted" style="font-size: 0.85rem;">
             <span><i class="bi bi-folder2-open me-1"></i>Buscando en álbum: <strong>{{ album_actual.nombre }}</strong></span>
-            <a href="{% url 'fotografia_lista' %}{% if request.GET.q %}?q={{ request.GET.q|urlencode }}{% endif %}" class="text-decoration-none text-primary fw-semibold">
+            <a href="{% url 'fotografia_lista' %}{% if request.GET.q %}?q={{ request.GET.q|urlencode }}{% endif %}" class="text-decoration-none fw-semibold" style="color:var(--accent);">
                 <i class="bi bi-globe2 me-1"></i>Buscar en toda la galería
             </a>
         </div>
