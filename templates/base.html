@@ -13,7 +13,7 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <style>
-        :root {
+        :root, :root[data-bs-theme="light"], body {
             /* Paleta Institucional Universidad Nacional de Colombia */
             --unal-verde: #94b43b;          /* Pantone 376 C (Color Principal) */
             --unal-rojo-alterno: #a61c31;   /* Pantone 187 C (Color Alterno Oficial) */
@@ -21,6 +21,18 @@
             --unal-vinotinto: #76232f;      /* Pantone 188 C (Complementario 2) */
             --unal-gris-oscuro: #565a5c;    /* Pantone 425 C (Complementario 3) */
             --unal-gris-claro: #b1b2b0;     /* Pantone 421 C (Complementario 4) */
+
+            /* Erradicar el azul #0d6efd de Bootstrap */
+            --bs-primary: #466b3f !important;
+            --bs-primary-rgb: 70, 107, 63 !important;
+            --bs-primary-text-emphasis: #385632 !important;
+            --bs-primary-bg-subtle: #f0f7ec !important;
+            --bs-primary-border-subtle: #cde4c4 !important;
+            --bs-link-color: #466b3f !important;
+            --bs-link-color-rgb: 70, 107, 63 !important;
+            --bs-link-hover-color: #385632 !important;
+            --bs-link-hover-color-rgb: 56, 86, 50 !important;
+            --bs-focus-ring-color: rgba(70, 107, 63, 0.25) !important;
 
             --bg: #fafafa;
             --surface: rgba(255,255,255,.78);

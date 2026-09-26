@@ -1,21 +1,43 @@
-:root {
+/* ========================================================
+   SISTEMA DE DISEÑO INSTITUCIONAL UNAL (CEHAP)
+   Centralización de colores institucionales y eliminación
+   completa del azul #0d6efd de Bootstrap.
+   ======================================================== */
+
+:root, :root[data-bs-theme="light"], body {
     /* Paleta Institucional Universidad Nacional de Colombia */
     --unal-verde: #94b43b;          /* Pantone 376 C (Color Principal) */
-    --unal-rojo-alterno: #a61c31;   /* Pantone 187 C (Color Alterno Oficial) */
     --unal-verde-oscuro: #466b3f;   /* Pantone 7743 C (Complementario 1) */
+    --unal-verde-hover: #385632;
+    --unal-rojo-alterno: #a61c31;   /* Pantone 187 C (Color Alterno Oficial - Marcadores de Mapa) */
     --unal-vinotinto: #76232f;      /* Pantone 188 C (Complementario 2) */
     --unal-gris-oscuro: #565a5c;    /* Pantone 425 C (Complementario 3) */
     --unal-gris-claro: #b1b2b0;     /* Pantone 421 C (Complementario 4) */
 
-    --bs-primary: var(--unal-verde-oscuro);
-    --bs-primary-rgb: 70, 107, 63;
-    --bs-danger: var(--unal-rojo-alterno);
-    --bs-danger-rgb: 166, 28, 49;
-    --bs-success: var(--unal-verde-oscuro);
-    --bs-success-rgb: 70, 107, 63;
+    /* Sobrescritura global de variables Bootstrap para erradicar el azul #0d6efd */
+    --bs-primary: #466b3f !important;
+    --bs-primary-rgb: 70, 107, 63 !important;
+    --bs-primary-text-emphasis: #385632 !important;
+    --bs-primary-bg-subtle: #f0f7ec !important;
+    --bs-primary-border-subtle: #cde4c4 !important;
+    
+    --bs-link-color: #466b3f !important;
+    --bs-link-color-rgb: 70, 107, 63 !important;
+    --bs-link-hover-color: #385632 !important;
+    --bs-link-hover-color-rgb: 56, 86, 50 !important;
+    
+    --bs-focus-ring-color: rgba(70, 107, 63, 0.25) !important;
+    --bs-success: #466b3f !important;
+    --bs-success-rgb: 70, 107, 63 !important;
+    --bs-danger: #a61c31 !important;
+    --bs-danger-rgb: 166, 28, 49 !important;
+
+    --accent: #466b3f;
+    --accent-hover: #385632;
+    --accent-bright: #94b43b;
 }
 
-/* Typography */
+/* Tipografía */
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: #334155;
@@ -68,9 +90,19 @@ body {
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
-.form-control-modern:focus {
-    border-color: var(--unal-verde-oscuro);
-    box-shadow: 0 0 0 0.25rem rgba(70, 107, 63, 0.2);
+.form-control-modern:focus,
+.form-control:focus, 
+.form-select:focus {
+    border-color: #466b3f !important;
+    box-shadow: 0 0 0 0.25rem rgba(70, 107, 63, 0.25) !important;
+}
+.form-check-input:checked {
+    background-color: #466b3f !important;
+    border-color: #466b3f !important;
+}
+.form-check-input:focus {
+    border-color: #466b3f !important;
+    box-shadow: 0 0 0 0.25rem rgba(70, 107, 63, 0.25) !important;
 }
 
 /* Tables */
@@ -109,7 +141,7 @@ body {
 .badge-subtle-secondary { background-color: #f1f5f9; color: #565a5c; }
 .badge-subtle-primary { background-color: #f0f7ec; color: #466b3f; }
 
-/* Buttons */
+/* Botones Modernos */
 .btn-modern {
     border-radius: 0.5rem;
     font-weight: 500;
@@ -120,23 +152,113 @@ body {
     gap: 0.5rem;
     transition: all 0.2s;
 }
-.btn-primary-modern { background-color: var(--unal-verde-oscuro); border-color: var(--unal-verde-oscuro); color: white; }
-.btn-primary-modern:hover { background-color: #385632; border-color: #385632; color: white; }
+.btn-primary-modern { 
+    background-color: #466b3f; 
+    border-color: #466b3f; 
+    color: white; 
+}
+.btn-primary-modern:hover { 
+    background-color: #385632; 
+    border-color: #385632; 
+    color: white; 
+}
 
-/* Global Bootstrap overrides for UNAL palette */
-.btn-primary {
-    background-color: var(--unal-verde-oscuro) !important;
-    border-color: var(--unal-verde-oscuro) !important;
+/* ========================================================
+   SOBRESCRITURA TOTAL DE CLASES BOOTSTRAP (#0d6efd -> VERDE)
+   ======================================================== */
+
+.btn-primary,
+button.btn-primary,
+input[type="submit"].btn-primary,
+a.btn-primary {
+    --bs-btn-color: #fff !important;
+    --bs-btn-bg: #466b3f !important;
+    --bs-btn-border-color: #466b3f !important;
+    --bs-btn-hover-color: #fff !important;
+    --bs-btn-hover-bg: #385632 !important;
+    --bs-btn-hover-border-color: #385632 !important;
+    --bs-btn-focus-shadow-rgb: 70, 107, 63 !important;
+    --bs-btn-active-color: #fff !important;
+    --bs-btn-active-bg: #385632 !important;
+    --bs-btn-active-border-color: #385632 !important;
+    --bs-btn-disabled-color: #fff !important;
+    --bs-btn-disabled-bg: #466b3f !important;
+    --bs-btn-disabled-border-color: #466b3f !important;
+    background-color: #466b3f !important;
+    border-color: #466b3f !important;
     color: #fff !important;
 }
-.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+
+.btn-primary:hover,
+button.btn-primary:hover,
+input[type="submit"].btn-primary:hover,
+a.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
     background-color: #385632 !important;
     border-color: #385632 !important;
     color: #fff !important;
 }
 
+.btn-outline-primary {
+    --bs-btn-color: #466b3f !important;
+    --bs-btn-border-color: #466b3f !important;
+    --bs-btn-hover-bg: #466b3f !important;
+    --bs-btn-hover-border-color: #466b3f !important;
+    --bs-btn-active-bg: #385632 !important;
+    --bs-btn-active-border-color: #385632 !important;
+    color: #466b3f !important;
+    border-color: #466b3f !important;
+}
+.btn-outline-primary:hover {
+    background-color: #466b3f !important;
+    border-color: #466b3f !important;
+    color: #fff !important;
+}
+
+.bg-primary,
+.badge.bg-primary {
+    background-color: #466b3f !important;
+    color: #fff !important;
+}
+
 .text-primary {
-    color: var(--unal-verde-oscuro) !important;
+    color: #466b3f !important;
+}
+
+.border-primary {
+    border-color: #466b3f !important;
+}
+
+.page-item.active .page-link {
+    background-color: #466b3f !important;
+    border-color: #466b3f !important;
+    color: #fff !important;
+}
+
+.page-link {
+    color: #466b3f !important;
+}
+
+.page-link:hover {
+    color: #385632 !important;
+}
+
+.dropdown-item:active, 
+.dropdown-item.active {
+    background-color: #466b3f !important;
+    color: #fff !important;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #466b3f !important;
+    color: #fff !important;
 }
 
 h1, h2, h3, h4, h5, h6 { color: #0f172a; font-weight: 700; letter-spacing: -0.025em; }
+
+.text-white h1, .text-white h2, .text-white h3, .text-white h4, .text-white h5, .text-white h6,
+.bg-dark h1, .bg-dark h2, .bg-dark h3, .bg-dark h4, .bg-dark h5, .bg-dark h6,
+h1.text-white, h2.text-white, h3.text-white, h4.text-white, h5.text-white, h6.text-white {
+    color: #ffffff !important;
+}
