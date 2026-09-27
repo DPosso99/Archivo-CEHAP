@@ -11,7 +11,7 @@ output_zip = os.path.join(base_dir, "Parche_CEHAP_UNAL.zip")
 EXCLUDE_DIRS = {
     ".git",
     "venv",
-    "media",
+    "fotos",
     "__pycache__",
     ".ruff_cache",
     "backups",
@@ -47,6 +47,10 @@ INSTRUCCIONES PARA APLICAR EL PARCHE EN EL PC DE LA UNIVERSIDAD NACIONAL
 ================================================================================
 
 Este archivo comprimido contiene las mejoras y correcciones del sistema:
+- Carruseles 3D Coverflow a ancho completo en la pagina de inicio con transicion suave y avance dinamico.
+- Escudo oficial verde institucional rediseñado UNAL 2016 integrado en topbar y footer.
+- Enlace "Inicio" configurado para redirigir siempre a la portada principal (http://localhost:8000/).
+- Paleta institucional unificada: verde institucional (#466b3f y #385632) en botones, formularios y acentos.
 - Mapas 100% libres y sin API Key: uso de Esri World Street Map online, Esri Satelital y mosaico local offline (cero bloqueos 403).
 - Mosaico de mapas LOCAL y OFFLINE de Medellín y Valle de Aburrá (funciona sin internet).
 - Librerías Leaflet 100% locales (sin CDNs externas).
@@ -57,7 +61,7 @@ Este archivo comprimido contiene las mejoras y correcciones del sistema:
 - Motor de búsqueda integral multi-atributo: indexa todos los 22 atributos de las fotos (año/fechas, ubicación física, álbum, categoría, descripciones, autor, palabras clave) con ranking de relevancia y sin truncar resultados.
 - Validación preventiva: tamaño máximo 25 MB y verificación de extensiones fotográficas.
 - Nuevo script 'exportar_respaldo_completo.bat' para llevar el proyecto a presentaciones.
-- CERO RIESGO: Este parche NO contiene base de datos ni borra ninguna fotografía existente.
+- CERO RIESGO: Este parche NO sobrescribe tu base de datos ni borra ninguna fotografía existente.
 
 PASOS PARA APLICAR EL PARCHE EN EL PC DE LA UNAL:
 --------------------------------------------------------------------------------
@@ -98,7 +102,7 @@ with zipfile.ZipFile(output_zip, "w", zipfile.ZIP_DEFLATED) as zipf:
         dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS and not d.startswith(".")]
         
         for file in files:
-            if file in EXCLUDE_FILES or file.startswith(".env."):
+            if file in EXCLUDE_FILES or file.startswith(".env.") or ":Zone.Identifier" in file:
                 continue
             ext = os.path.splitext(file)[1].lower()
             if ext in EXCLUDE_EXTENSIONS:
