@@ -26,14 +26,14 @@ class HomeView(TemplateView):
         context = super().get_context_data(**kwargs)
         base_qs = Fotografia.objects.filter(estado="Activo").select_related("album")
 
-        context["random_fotos"] = base_qs.order_by("?")[:4]
-        context["latest_fotos"] = base_qs.order_by("-fecha_registro")[:4]
-        context["most_viewed"] = base_qs.order_by("-vistas")[:4]
+        context["random_fotos"] = base_qs.order_by("?")[:10]
+        context["latest_fotos"] = base_qs.order_by("-fecha_registro")[:10]
+        context["most_viewed"] = base_qs.order_by("-vistas")[:10]
 
         context["top_rated"] = (
             base_qs.annotate(avg_rating=Avg("calificaciones__estrellas"))
             .filter(avg_rating__isnull=False)
-            .order_by("-avg_rating")[:4]
+            .order_by("-avg_rating")[:10]
         )
 
         # Mapa: fotos con coordenadas
