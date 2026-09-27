@@ -58,6 +58,9 @@
         position: relative;
         overflow: visible !important;
     }
+    .swiper-coverflow .swiper-wrapper {
+        transition-timing-function: cubic-bezier(0.25, 1, 0.4, 1) !important;
+    }
     .swiper-coverflow .swiper-slide {
         width: 330px;
         border-radius: 16px;
@@ -455,19 +458,19 @@ document.addEventListener('DOMContentLoaded', function() {
             slidesPerView: 'auto',
             initialSlide: canLoop ? 0 : Math.floor(count / 2),
             loop: canLoop,
-            speed: 1300,
+            speed: 950,
             autoplay: {
-                delay: 6000,
+                delay: 4500,
                 disableOnInteraction: false,
                 pauseOnMouseEnter: true,
             },
             coverflowEffect: {
-                rotate: 25,
-                stretch: -15,
-                depth: 220,
+                rotate: 20,
+                stretch: -10,
+                depth: 190,
                 modifier: 1,
                 slideShadows: true,
-                scale: 0.88,
+                scale: 0.9,
             },
             pagination: {
                 el: el.querySelector('.swiper-pagination'),
@@ -481,32 +484,32 @@ document.addEventListener('DOMContentLoaded', function() {
             breakpoints: {
                 320: {
                     coverflowEffect: {
-                        rotate: 15,
+                        rotate: 12,
                         stretch: 0,
-                        depth: 100,
+                        depth: 90,
+                        modifier: 1,
+                        slideShadows: true,
+                        scale: 0.92,
+                    }
+                },
+                768: {
+                    coverflowEffect: {
+                        rotate: 18,
+                        stretch: -8,
+                        depth: 160,
                         modifier: 1,
                         slideShadows: true,
                         scale: 0.9,
                     }
                 },
-                768: {
-                    coverflowEffect: {
-                        rotate: 22,
-                        stretch: -10,
-                        depth: 180,
-                        modifier: 1,
-                        slideShadows: true,
-                        scale: 0.88,
-                    }
-                },
                 1200: {
                     coverflowEffect: {
-                        rotate: 25,
-                        stretch: -15,
-                        depth: 220,
+                        rotate: 20,
+                        stretch: -10,
+                        depth: 190,
                         modifier: 1,
                         slideShadows: true,
-                        scale: 0.88,
+                        scale: 0.9,
                     }
                 }
             }
