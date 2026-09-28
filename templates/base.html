@@ -384,11 +384,15 @@
         .footer-left, .footer-right { flex: 1; min-width: 240px; }
         .footer-right { text-align: right; }
         .footer-org { font-size: .85rem; color: #1e293b; margin: 0; line-height: 1.3; }
-        .footer-uni { font-size: .75rem; color: #94a3b8; margin: 0; line-height: 1.3; }
-        .footer-role { font-size: .75rem; color: #64748b; margin: 0 0 2px; line-height: 1.4; }
-        .footer-role strong { color: #334155; }
-        .footer-brand { display: flex; align-items: center; gap: 12px; }
-        .footer-logo { height: 40px; width: auto; max-height: 40px; opacity: .9; }
+        .footer-semillero { font-size: .8rem; color: #466b3f; margin: 2px 0 1px; line-height: 1.3; }
+        .footer-uni { font-size: .75rem; color: #64748b; margin: 0; line-height: 1.3; }
+        .footer-role { font-size: .75rem; color: #64748b; margin: 0 0 4px; line-height: 1.4; }
+        .footer-role strong { color: #1e293b; font-size: .8rem; }
+        .footer-brand { display: flex; align-items: center; gap: 14px; }
+        .footer-logo { height: 44px; width: auto; max-height: 44px; opacity: .95; }
+        @media (max-width: 768px) {
+            .footer-right { text-align: left; }
+        }
 
         /* Interactive states */
         .btn-ghost:hover { color: var(--accent) !important; background: #f0f7ec !important; border-color: #d2e4cb !important; }
@@ -472,16 +476,17 @@
             <div class="footer-content">
                 <div class="footer-left">
                     <div class="footer-brand">
-                        <img src="/media/svg/Universidad_Nacional_de_Colombia_Coat_of_Arms_Redesign_Green_(2016).svg" alt="Universidad Nacional de Colombia" class="footer-logo" height="40">
+                        <img src="/media/svg/Universidad_Nacional_de_Colombia_Coat_of_Arms_Redesign_Green_(2016).svg" alt="Universidad Nacional de Colombia" class="footer-logo" height="44">
                         <div>
-                            <p class="footer-org"><strong>Escuela del Hábitat — CEHAP</strong></p>
-                            <p class="footer-uni">Facultad de Arquitectura · Universidad Nacional de Colombia · Sede Medellín</p>
+                            <p class="footer-org"><strong>Escuela del Hábitat – Cehap – Facultad de Arquitectura</strong></p>
+                            <p class="footer-semillero"><strong>Semillero Chagra</strong></p>
+                            <p class="footer-uni">Universidad Nacional de Colombia Sede Medellín 2026</p>
                         </div>
                     </div>
                 </div>
                 <div class="footer-right">
-                    <p class="footer-role">Profesor encargado<br><strong>Juan Carlos Ceballos Guerra</strong></p>
-                    <p class="footer-role">Plataforma desarrollada por<br><strong>Est. David Julián Taimal</strong></p>
+                    <p class="footer-role">Profesor encargado:<br><strong>Juan Carlos Ceballos Guerra – Profesor Asociado</strong></p>
+                    <p class="footer-role">Desarrollado por:<br><strong>David Julián Taimal Poso – Ingeniero de Sistemas</strong></p>
                 </div>
             </div>
         </div>
