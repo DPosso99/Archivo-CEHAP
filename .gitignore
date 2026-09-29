@@ -30,6 +30,8 @@ Parche_CEHAP_UNAL.zip
 # Temporary documentation / scratch
 CONTEXTO_Y_MEMORIA_PROYECTO.md
 
+# Agent skills and tooling
+.agents/
 # OS files
 .DS_Store
 Thumbs.db
